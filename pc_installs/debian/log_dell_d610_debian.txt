@@ -1,0 +1,18 @@
+install debian 7.3 kde
+
+edit /etc/apt/sources.list 
+- remove CD
+- add "deb http://ftp.de.debian.org/debian squeeze main contrib"
+- add "deb http://linux.dropbox.com/debian squeeze main"
+
+
+. /etc/bash_completion
+
+install "vim-gtk" "firmware-b43-installer" "wicd" "minicom" "git" "flashplugin-nonfree" "adblock-plus" "dropbox"
+
+Add panel at screen up center
+Remove indexer
+
+#> dropbox start -i
+
+
