@@ -5,14 +5,29 @@ edit /etc/apt/sources.list
 - add "deb http://ftp.de.debian.org/debian squeeze main contrib"
 - add "deb http://linux.dropbox.com/debian squeeze main"
 
+adduser maint sudo
+adduser maint dialout
 
 . /etc/bash_completion
 
-install "vim-gtk" "firmware-b43-installer" "wicd" "minicom" "git" "flashplugin-nonfree" "adblock-plus" "dropbox"
+.bashrc:
+if [ -f ~/.bashrc_igor ]; then
+    .  ~/.bashrc_igor
+fi
+
+#> cd
+#> ln -s evernote/pc_installs/debian/.bashrc_igor .
+
+
+install "vim-gtk" "firmware-b43-installer" "wicd" "minicom" "git" "flashplugin-nonfree" "adblock-plus" "dropbox" "tree"
+install  gitk
+
 
 Add panel at screen up center
 Remove indexer
 
 #> dropbox start -i
+
+install copy.com XXX I did run it as root. Possible this is an error TODO - validate it
 
 
