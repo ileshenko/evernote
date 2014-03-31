@@ -8,6 +8,8 @@ edit /etc/apt/sources.list
 adduser maint sudo
 adduser maint dialout
 
+TODO - add user igorl and switch to it
+
 . /etc/bash_completion
 
 .bashrc:
