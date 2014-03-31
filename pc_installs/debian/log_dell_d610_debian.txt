@@ -5,10 +5,13 @@ edit /etc/apt/sources.list
 - add "deb http://ftp.de.debian.org/debian squeeze main contrib"
 - add "deb http://linux.dropbox.com/debian squeeze main"
 
-adduser maint sudo
-adduser maint dialout
+adduser maint
+adduser igorl
+adduser igorl sudo
+adduser igorl dialout
 
-TODO - add user igorl and switch to it
+logout and login as igorl
+
 
 . /etc/bash_completion
 
@@ -22,14 +25,20 @@ fi
 
 
 install "vim-gtk" "firmware-b43-installer" "wicd" "minicom" "git" "flashplugin-nonfree" "adblock-plus" "dropbox" "tree"
-install  gitk
+install  gitk xxdiff
 
 
 Add panel at screen up center
-Remove indexer
+Remove indexer (system settings-> desctop search)
 
 #> dropbox start -i
 
 install copy.com XXX I did run it as root. Possible this is an error TODO - validate it
 
+Disable KDE Wallet (System Settings -> Account Details -> KDE)
 
+Install Chrome:
+-Download
+- sudo su
+# dpkg -i google-chrome-stable_current_i386.deb
+# sudo apt-get -f install // this fixes errors
