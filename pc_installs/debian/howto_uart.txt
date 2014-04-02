@@ -1,0 +1,3 @@
+sudo socat tcp-l:12346,reuseaddr,fork file:/dev/ttyUSB0,waitlock=/var/run/ttyUSB0.lock
+socat pty,link=$HOME/dev/vmodem0,waitslave tcp:127.0.0.1:12346
+
