@@ -1,0 +1,2 @@
+
+cp -v .bashrc /c/Documents\ and\ Settings/Igor/
