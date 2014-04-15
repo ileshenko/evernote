@@ -26,7 +26,8 @@ fi
 
 
 install "vim-gtk" "firmware-b43-installer" "wicd" "minicom" "git" "flashplugin-nonfree" "adblock-plus" "dropbox" "tree"
-install  gitk xxdiff socat
+install  gitk xxdiff socat build-essential
+
 
 
 Add panel at screen up center
