@@ -23,10 +23,11 @@ fi
 
 #> cd
 #> ln -s evernote/pc_installs/debian/.bashrc_igor .
+#> ln -s evernote/pc_installs/debian/.gitconfig .
 
 
 install "vim-gtk" "firmware-b43-installer" "wicd" "minicom" "git" "flashplugin-nonfree" "adblock-plus" "dropbox" "tree"
-install  gitk xxdiff socat build-essential
+install  gitk xxdiff socat build-essential  htop
 
 
 
