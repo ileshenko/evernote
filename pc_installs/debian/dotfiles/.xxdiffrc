@@ -1,0 +1,4 @@
+DirDiffRecursive: True
+ExitOnSame: False
+Show.VerticalLine: True
+Geometry: Maximize

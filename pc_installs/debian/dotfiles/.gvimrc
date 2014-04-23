@@ -1,0 +1,221 @@
+" Vim
+" An example for a vimrc file.
+"
+" To use it, copy it to
+"     for Unix and OS/2:  ~/.vimrc
+"             for Amiga:  s:.vimrc
+"  for MS-DOS and Win32:  $VIM\_vimrc
+
+"set nocompatible	" Use Vim defaults (much better!)
+"set bs=2		" allow backspacing over everything in insert mode
+"set ai			" always set autoindenting on
+"set ts=8		" set tab size tp 8 -GABI
+"set sw=4		" set shift width to 4
+"set nobackup		" keep a backup file
+"set viminfo='20,\"50	" read/write a .viminfo file, don't store more
+			" than 50 lines of registers
+
+"set ruler  "show cursor line and column in the status line
+"set nowrap
+set mousehide
+"set is
+"set showcmd
+set guioptions-=T
+set novb
+"set ic smartcase
+"set previewheight=5
+"set softtabstop=4
+"set foldmethod=indent
+
+" allow switch between buffers without save
+"set hidden
+
+" set the X11 font to use
+"set guifont=Screen17,\ 7x12,courier\\,11\\,
+"set guifont=-misc-fixed-medium-normal--10-130-75-75-c-70-iso8859-1 
+"set guifont=-B&H-LucidaTypewriter-Medium-R-Normal-Sans-10-120-75-75-M-70-ISO8859-9
+"set guifont=-b&h-"lucida console"-medium-r-"semi condensed"--12-120-75-75-m-80-koi8-ru
+"set guifont=-misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-1
+if &diff
+  "set guifont=-Adobe-Courier-Medium-R-Normal--12-120-75-75-M-70-koi8-ub
+  set guifont=LucidaConsole\ 8
+  "set guifont=Courier\ 9
+  "set guifont=LucidaTypewriter\ 10
+  "set guifont=Fixed\ 9
+  "colorscheme default
+  set guioptions+=b
+  "set equalalways
+  "map <Tab> ]c
+  "map <S-Tab> [c
+  "map dr :diffget<CR>
+  "map du :diffupdate<CR>
+  set columns=156
+  set lines=55
+  colorscheme peachpuff
+endif
+
+nmap <S-Insert> <MiddleMouse>
+map! <S-Insert> <MiddleMouse>
+nmap <C-S> :w<CR>
+map! <C-S> <ESC>:w<CR>a
+nmap <C-Up> <C-Y>
+"map! <C-Up> <ESC><C-Y>a
+nmap <C-Down> <C-E>
+"map! <C-Down> <ESC><C-E>a
+nmap <C-Tab> :bn<CR>
+map! <C-Tab> <ESC>:bn<CR>a
+nmap <C-S-Tab> :bp<CR>
+map! <C-S-Tab> <ESC>:bp<CR>a
+"nmap <S-Home> v0
+"map! <S-Home> <ESC>v0
+"nmap <S-End> v$
+"map! <S-End> <ESC>lv$
+"nmap <S-Up> V
+"map! <S-Up> <ESC>V
+"vmap <S-Up> k
+"nmap <S-Down> V
+"map! <S-Down> <ESC>V
+"vmap <S-Down> j
+"nmap <S-Right> vl
+"map! <S-Right> <ESC>lvl
+"vmap <S-Right> l
+"nmap <S-Left> vh
+"map! <S-Left> <ESC>vh
+"vmap <S-Left> h
+"map! <C-l> <ESC>lni
+"map! <C-k> <ESC>hNi
+"vmap <M-y> "+y
+"map <C-i> gf
+"map! <C-i> <ESC>gf
+
+"when in Normal mode, just press space followed by what
+"it is you want to insert
+":nmap <space> i_<esc>r
+
+" In text files, always limit the width of text to 78 characters
+autocmd BufRead *.txt set tw=80
+
+" For Win32 GUI: remove 't' flag from 'guioptions': no tearoff menu entries
+" let &guioptions = substitute(&guioptions, "t", "", "g")
+
+" Don't use Ex mode, use Q for formatting
+map Q gq
+
+" Switch syntax highlighting on, when the terminal has colors
+" Also switch on highlighting the last used search pattern.
+if &t_Co > 2 || has("gui_running")
+  syntax on
+  set hlsearch
+endif
+
+augroup cprog
+  " Remove all cprog autocommands
+  au!
+
+  " When starting to edit a file:
+  "   For *.c and *.h files set formatting of comments and set C-indenting on.
+  "   For other files switch it off.
+  "   Don't change the order, it's important that the line with * comes first.
+  autocmd BufRead *       set formatoptions=tcql nocindent comments&
+  autocmd BufRead *.c,*.h set formatoptions=croql cindent comments=sr:/*,mb:*,el:*/,://
+augroup END
+
+augroup gzip
+  " Remove all gzip autocommands
+  au!
+
+  " Enable editing of gzipped files
+  "	  read:	set binary mode before reading the file
+  "		uncompress text in buffer after reading
+  "	 write:	compress file after writing
+  "	append:	uncompress file, append, compress file
+  autocmd BufReadPre,FileReadPre	*.gz set bin
+  autocmd BufReadPost,FileReadPost	*.gz let ch_save = &ch|set ch=2
+  autocmd BufReadPost,FileReadPost	*.gz '[,']!gunzip
+  autocmd BufReadPost,FileReadPost	*.gz set nobin
+  autocmd BufReadPost,FileReadPost	*.gz let &ch = ch_save|unlet ch_save
+  autocmd BufReadPost,FileReadPost	*.gz execute ":doautocmd BufReadPost " . expand("%:r")
+
+  autocmd BufWritePost,FileWritePost	*.gz !mv <afile> <afile>:r
+  autocmd BufWritePost,FileWritePost	*.gz !gzip <afile>:r
+
+  autocmd FileAppendPre			*.gz !gunzip <afile>
+  autocmd FileAppendPre			*.gz !mv <afile>:r <afile>
+  autocmd FileAppendPost		*.gz !mv <afile> <afile>:r
+  autocmd FileAppendPost		*.gz !gzip <afile>:r
+augroup END
+
+if !&diff
+    runtime ftplugin/man.vim
+    "set cscopequickfix=s-,c-,d-,i-,t-,e-
+    "set guifont=fixed\ 9
+    "set guifont=LucidaConsole\ 11
+    "set guifont=Courier\ New\ 13
+    set guifont=Bitstream\ Vera\ Sans\ Mono\ 13
+    "set guifont=LucidaSansTypewriter\ 9
+    set columns=80
+"    colorscheme morning
+    " exe "wincmd l"
+    " exe "normal gg"
+endif
+"colorscheme darkslategray
+
+noremap <C-F1> :execute ':!cvsxdiff' TokenUnderCursor(1) '&' <cr><cr>
+"noremap <F1> :execute ':!cvsdiff' TokenUnderCursor(1) '&' <cr><cr>
+"noremap <F1> :call BranchDiff()<Enter>
+noremap <M-F1> :execute ':!gvim' TokenUnderCursor(1) '&' <cr><cr>
+
+"function BranchDiff()
+"  let vl = getline(line("."))
+"  let vp = "\\\([^ ]*\\\) \\\([^ ]*\\\) <- \\\([^ ]*\\\).*"
+"  let vs = "cvsdiff --root -r airgo_sdk-1_4_100armeb -r airgo_sdk-1_4_144armeb \\1"
+"  let vcmd = substitute(vl, vp, vs, "")
+"  if g:debug != 0
+"    echo vcmd
+"  endif
+"  let ll = " ".system(vcmd." &")
+"  call CvsDiff()
+"endfunction
+
+function! IsTokenChar(is_fname, char)
+	if a:char == "_"
+		return 1
+	endif
+	if a:char >= "0" && a:char <= "9"
+		return 1
+	endif
+	if a:char >= "A" && a:char <= "Z"
+		return 1
+	endif
+	if a:char >= "a" && a:char <= "z"
+		return 1
+	endif
+	if a:is_fname && (a:char == "/" || a:char == "." || a:char == "-")
+		return 1
+	endif
+	return 0
+endfunction
+
+function! TokenUnderCursor(is_fname)
+	echo ""
+	let line = getline(".")
+	let pos = col(".") - 1
+
+	let begpos = pos -1
+	while IsTokenChar(a:is_fname, strpart(line, begpos, 1)) == 1
+		let begpos = begpos - 1
+	endwhile
+	
+	let endpos = pos + 1
+	while IsTokenChar(a:is_fname, strpart(line, endpos, 1)) == 1
+		let endpos = endpos + 1
+	endwhile
+
+	return strpart(line, begpos+1, endpos-begpos-1)
+endfunction
+
+if has("autocmd")
+    autocmd FileType c exe "set cin"
+    "C indent
+endif
+

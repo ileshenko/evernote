@@ -1,0 +1,9 @@
+# Nice feature for Igor :)
+# history search by up/down
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+# show alternatives instead of "beep"
+set show-all-if-ambiguous on
+# cycle through alternatives with Meta-S
+"\M-d": menu-complete

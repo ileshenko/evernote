@@ -1,0 +1,422 @@
+########## General Section ##########
+
+define reconf
+  source ~/.gdbinit
+end
+document reconf
+  Re-read the ~/.gdbinit file.
+end
+    
+define xjs
+  # Replace JENNI with the HW name located in hardware.csv according to your 
+  # JSerial Number 
+  target rdi e=JENNI
+end
+
+# set search path for dynamic libraries
+define dynlib
+  set solib-absolute-prefix /dev/null
+  set solib-search-path $arg0/pkg/build/lib:$arg0/pkg/ulibc/lib:$arg0/pkg/lib:$arg0/pkg/freeswan/lib:$arg0/pkg/openssl/crypto:$arg0/pkg/voip/asterisk/channels:$arg0/pkg/voip/asterisk/apps:$arg0/pkg/voip/asterisk/res:$arg0/pkg/voip/asterisk/codecs:$arg0/pkg/voip/asterisk/formats:$arg0/pkg/voip/asterisk/pbx:/usr/local/openrg/i386-jungo-linux-gnu/i386-jungo-linux-gnu/lib:$arg0/pkg/openssh
+end
+
+define dynlib_auto
+  shell echo "dynlib `jpwdroot`/build" > .dynlib
+  source .dynlib
+  shell rm .dynlib
+end
+
+# Remote connection using Network Interface
+define trn
+  dynlib_auto
+  target remote 192.168.1.1:9999
+  handle SIGSTOP nostop
+end
+document trn 
+  Connect to a gdbserver running on an OpenRG box using a network connection.
+  The command tells gdb to look for .so files in the current RG tree.
+  gdbserver should be run on the target as following:
+  'gdbserver :9999 <additional parameters>'
+end
+
+# Remote connection using Serial Interface
+define trs
+  dynlib_auto
+  target remote /dev/ttyab
+  handle SIGSTOP nostop
+end
+document trs
+  Connect to a gdbserver running on an OpenRG box using a serial connection.
+  The command tells gdb to look for .so files in the current RG tree.
+end
+
+define trs_uml
+  dynlib_auto
+  target remote /dev/ttyab
+  handle SIGSTOP nostop
+end
+document trs_uml
+  Same as 'trs' but it works on OpenRG-UML using dev/ttyab
+end
+
+define jhelp
+  echo add_so_symbols -- Manually add symbols of a shared object.
+  echo trn -- Connect to a gdbserver running on an OpenRG box using a network connection.
+  echo trs -- Connect to a gdbserver running on an OpenRG box using a serial connection.
+  echo \n
+end
+
+define p_task_info
+  p ((struct task_struct *)$arg0)->next_task
+  p ((struct task_struct *)$arg0)->pid
+  p ((struct task_struct *)$arg0)->comm
+end
+document p_task_info
+  Print information of a given linux kernel task.
+end
+
+define p_task_current
+  p &init_task_union.task
+  p_task_info &init_task_union.task
+end
+document p_task_current
+  Print the current linux kernel task pointer (current).
+end
+
+# Calculates address of section in object and adds a corresponding variable to 
+# the file 'gdb_section_addrs.tmp' 
+# Usage: find_object_section_addr <object_file_name> <section_name> 
+#          <object_base_addr>
+define _find_object_section_addr
+  shell objdump -h $arg0 | grep $arg1 | awk "{ print \"set \$$arg1_section_addr = 0x\" \$4 \" + $arg2 \"; }" >> gdb_section_addrs.tmp
+end 
+
+# Adds symbols of a shared object
+# Usage: add_so_symbols <object_file_name> <object_base_addr> 
+define add_so_symbols
+  # Clean temporary file
+  shell echo "" > gdb_section_addrs.tmp
+
+  # Use objdump to find addresses of important sections
+  _find_object_section_addr $arg0 data $arg1
+  _find_object_section_addr $arg0 rodata $arg1
+  _find_object_section_addr $arg0 text $arg1
+  _find_object_section_addr $arg0 sbss $arg1
+
+  # Include temporary file to have the $xxx_section_addr variables set to the 
+  # right addresses
+  source gdb_section_addrs.tmp
+
+  # Add symbol file to gdb
+  add-symbol-file $arg0 $text_section_addr -s .rodata $rodata_section_addr -s .data $data_section_addr -s .sbss $sbss_section_addr
+
+  # Remove temporary file
+  shell rm gdb_section_addrs.tmp
+end
+document add_so_symbols
+  Manually add symbols of a shared object.
+  Usage: add_so_symbols <so_file_name> <so_base_addr>
+  <object_base_addr> of the shared object can be obtained by doing:
+  'cat /proc/<pid>/maps' in the target shell, where <pid> is the process ID of
+  the debugged process.
+end
+
+########## IXP225 SECTION ##########
+
+define xs  
+  cd os/linux
+  file vmlinux
+  jeeni
+  #SET r1 to the CRAMFS position!
+  p/x $r1 = 0x63d87
+end
+
+# burning complete image cramdisk+kernel
+define xburn
+  cd os
+  file flash_burn_ixp
+  jeeni
+  c
+end
+
+# jeeni initialization
+define jeeni  
+  xjs
+  p/x *0x10000008=0x2ab
+  p/x *0x1000000c=0x180c04
+  load 
+  set $pc=0x12000
+end
+
+define ixp_attach
+target rdi e=JENNI
+#(now the debugger will wait for a short press)
+p *0x10000008=0x2ab
+#(copy start of FLASH boot loader to this address)
+p $r1 = 0x4000
+#(bytes of sram FLASH boot loader)
+p $r2 = 0x400
+p $r4 = 0x10000000 
+#(flash boot loader copied to SRAM)
+p $r0 = 0x2f800010
+p $pc = 0x28
+end
+
+
+########## CONEXANT SECTION ##########
+
+define jeenicnx
+  # Set the CX82100 RUN_MAP bit
+  set {int}0x2d0000=0x18
+  # Enable the SDRAM
+  set {int}0x350010=0x01
+  # Choose cx82310_clock / cx821xx_clock
+  cx82310_clock
+  #cx821xx_clock
+  # Turn off vector_catch
+  set rdiromatzero 1
+  load
+end
+
+define cxs
+  cd os/linux
+  file vmlinux
+  xjs
+  jeenicnx
+  set $pc=0x800000
+  p $r1=0x70e1c
+  p $r3=0x16ff7a
+  b SYSMEM_Allocate_BlockMemory
+  b SYSMEM_QueryMemory
+  b SYSMEM_Release_BlockMemory
+end
+
+define cx821xx_clock
+  # Setup PLL registers to set FCLK (bus speed) to 35 Mhz
+  set {int}0x350068=0x02d874df
+  set {int}0x35006c=0x0196a51a
+  #FCLK BCLVK output
+  set {int}0x003500B0=0xc0
+end
+
+define cx82310_clock
+  set {int}0x350068=0x3
+  set {int}0x35006c=0x2
+end
+
+########## SAMSUNG SECTION ##########
+
+define xsn_init_common
+  p/x *0x3ff301c = 0x00000000
+  p/x *0x3ff3020 = 0x00000000
+  p/x *0x3ff3024 = 0x08000340
+  p/x *0x3ff3028 = 0x10020340
+  p/x *0x3ff302c = 0x00000000
+  p/x *0x3ff3030 = 0x00000000
+  p/x *0x3ff3034 = 0xce27e360
+end
+
+# System map for the S5N8947 evaluation board
+define xsn_init
+  p/x *0x3ff0000 = 0xa3ff0006
+  p/x *0x3ff3010 = 0x0000f009
+  p/x *0x3ff3014 = 0x2208036f
+  p/x *0x3ff3018 = 0x240883ff
+  xsn_init_common
+end
+
+# Linux-Samsung evaluation board with snboot
+define xls1
+  cd os/linux
+  file snboot
+  xjs
+  load
+  p/x $cpsr = 0xd3
+  c
+  file vmlinux
+  xjs
+  load
+end
+
+# Linux-Samsung evaluation board with Jeeni-initialization
+define xls2
+  cd os/linux
+  file vmlinux
+  xjs
+  p/x $cpsr = 0xd3
+  xsn_init
+  load
+end
+
+# to use the snboot preloader, change the xls2 to xls1 here
+define xls
+  xls2
+end
+
+# linux with cramfs on RAM
+define xss
+  xls
+  load cramdisk
+  p $pc=0
+  p $r1=0x780000
+  p $r3=300000
+  b start_kernel
+  c
+end
+
+##########  KINPO SAMSUNG BOARD (KNSN8947) SECTION ##########
+
+# System map for the Kinpo KNSN8947 board
+define xknsn_init
+  p/x *0x3ff0000 = 0xa3ff0006
+  p/x *0x3ff3010 = 0x0000f009
+  p/x *0x3ff3014 = 0x240883ff
+  p/x *0x3ff3018 = 0x0
+  xsn_init_common
+end
+
+define xknsn_init_16
+  p/x *0x3ff0000 = 0xa3ff0006
+  p/x *0x3ff3010 = 0x0000a009 
+  p/x *0x3ff3014 = 0x240883ff
+  p/x *0x3ff3018 = 0x0
+  xsn_init_common
+end
+
+# Linux for the Kinpo KNSN8947 board
+# To use the cramdisk on flash, comment out the `load cramdisk` line
+# and set the proper value for the $r1 and $r3 registers - take it from
+# boot-from-flash output (the lines that start with "CRAMFS offset is at"
+# and "CRAMFS size is" respectively).
+define xsks
+  cd linux
+  file vmlinux
+  xjs
+  xknsn_init
+  load
+  #load cramdisk
+  p $pc=0
+  p $r1=0x70d68
+  p $r3=0x16fa34
+  #b start_kernel
+  #c
+end
+
+# Kinpo-Samsung flash burner
+define xbks
+  cd os
+  file flash_burn
+  xjs
+  xknsn_init
+  load
+  #b program_flash
+  c
+  c
+end
+
+# Kinpo-Samsung 16Bit flash burner
+define xsks_16
+    file vmlinux
+    xjs
+    xknsn_init_16
+    load
+    #load cramdisk
+    p $pc=0
+    p $r1=0x68740
+    p $r3=0x1779ac
+    b start_kernel
+    c
+end
+
+define xbks_16
+    cd os
+    file flash_burn
+    xjs
+    xknsn_init_16
+    load
+    #b program_flash
+    c
+    detach
+    q
+end
+
+########## GEMTEK CONEXANT BOARD SECTION ##########
+define add_sym
+  add-symbol-file vendor/conexant/cx821xx/cnxt_softsar/cnxt_softsar.o 0xaf8050 0xafd740 0xafe1e0
+  add-symbol-file vendor/conexant/cx821xx/cnxt_adsl/cnxt_adsl.o 0xd80050 0xdd1040 0xdd15f4
+  add-symbol-file vendor/conexant/cx821xx/cnxt_atm/cnxt_atm.o 0xbf8050 0xbfa308 0xbfa564
+end
+
+######### ADIT BOARD SECTION ###########
+define adit_add_voip_task_symbols
+  add_so_symbols pkg/lib/libopenrg.so 0x4000d000
+  add_so_symbols pkg/ulibc/lib/libpthread-0.9.20.so 0x40145000
+  add_so_symbols pkg/ulibc/libc/libuClibc-0.9.20.so 0x4016a000
+end
+
+define adit_vt_debug
+  file pkg/voip/voip_task
+  adit_add_voip_task_symbols
+  target_remote
+end
+
+########## INFINEON INCA-IP BOARD SECTION ##########
+# Sets the addresses in which the shared objects are loaded for the voip_task 
+# process
+define inca_add_voip_task_so_symbols
+  # The addresses used here can be determined by doing 
+  # 'cat /proc/<voip_task_pid>/maps' on the target
+  add_so_symbols pkg/lib/libopenrg.so 0x2ab05000
+  add_so_symbols pkg/ulibc/lib/libpthread-0.9.20.so 0x2abfa000
+  add_so_symbols pkg/ulibc/libc/libuClibc-0.9.20.so 0x2ac50000
+end
+
+# Starts debugging voip_task
+define inca_vt_debug
+  file pkg/voip/voip_task
+  inca_add_voip_task_so_symbols
+  # The target_remote command should be defined in your ~/.gdbinit as following:
+  #
+  # define target_remote
+  #   target remote <your_target_ip>:<gdbserver_port>  
+  # end
+  target_remote 
+end
+
+########## ALLTEK BOARD SECTION ##########
+# Sets the addresses in which the shared objects are loaded for the voip_task 
+# process
+define alltek_add_voip_task_so_symbols
+  # The addresses used here can be determined by doing 
+  # 'cat /proc/<voip_task_pid>/maps' on the target
+  add_so_symbols pkg/lib/libopenrg.so 0x2ab05000
+  add_so_symbols pkg/ulibc/lib/libpthread-0.9.20.so 0x2abfd000
+  add_so_symbols pkg/ulibc/libc/libuClibc-0.9.20.so 0x2ac94000
+end
+
+# Starts debugging voip_task
+define alltek_vt_debug
+  file pkg/voip/voip_task
+  alltek_add_voip_task_so_symbols
+  # The target_remote command should be defined in your ~/.gdbinit as following:
+  #
+  # define target_remote
+  #   target remote <your_target_ip>:<gdbserver_port>  
+  # end
+  target_remote 
+end
+
+############## OpenRG UML section #############
+
+# Attach to OpenRG UML process for kernel debbuging
+define uml
+  shell echo "file `test -L build && echo build/`os/linux/openrg.uml" > .umljgdb
+  source .umljgdb
+  shell rm .umljgdb
+  handle SIGUSR1 nostop
+  shell ps awlx | \
+      awk '/ T\+? .*openrg.uml/ && !/grep/ { print "attach " $4; }' > umlpid
+  source umlpid
+#  shell rm umlpid
+end
+
+# vim:filetype=gdb
