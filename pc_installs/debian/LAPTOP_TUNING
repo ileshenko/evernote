@@ -1,0 +1,43 @@
+scp -r igorl@igorl:bin
+scp -r igorl@igorl:onsite
+
+
+
+bring up my .vimrc, .gvimrc, .bashrc, .inputrc
+install wicd
+install meld
+
+// autocomplition error (https://bugs.launchpad.net/ubuntu/+source/bash-completion/+bug/716008)
+sed -i "s/_filedir/_filedir_acroread/" /etc/bash_completion.d/acroread.sh
+
+apt-get install libc-dev
+
+
+install gnome-disk-utility (found using apt-cache search udisks)
+after this use palimpsest for external disk management
+
+
+cp whole directory with permissions
+or 
+  cp -rapt
+or
+  tar cf - /home | (cd /media/qqq ; tar xvf -)
+
+
+rt gvim /etc/resolv.conf
+g /etc/network/interfaces
+
+OR
+cd /etc
+rt mv resolv.conf resolv.conf_
+rt ln -s resolvconf/run/resolv.conf resolv.conf
+
+
+rt /etc/init.d/tftpd-hpa start
+rt /usr/sbin/in.tftpd --listen --user tftp --address 0.0.0.0:69 --secure /tftpboot
+rt /usr/sbin/in.tftpd --listen --user tftp --address 0.0.0.0:69 -c --secure /tftpboot
+
+# forget old usb2ethernet devices
+g /etc/udev/rules.d/70-persistent-net.rules
+
+https://ssl.jungo.com
