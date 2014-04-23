@@ -2,9 +2,11 @@ git clone https://github.com/ileshenko/evernote.git evernote_git
 cd
 ln -s ~/evernote_git/pc_installs/debian/home_bin/ ~/bin
 
-ln -sf ~/evernote_git/pc_installs/debian/dotfiles/bashrc_igor ~/.bashrc_igor
-ln -sf ~/evernote_git/pc_installs/debian/dotfiles/gitconfig ~/.gitconfig
-
+ln -s ~/evernote_git/pc_installs/debian/dotfiles/bashrc_igor ~/.bashrc_igor
+ln -s ~/evernote_git/pc_installs/debian/dotfiles/gitconfig ~/.gitconfig
+ln -s ~/evernote_git/pc_installs/debian/dotfiles/inputrc ~/.inputrc
+ln -s ~/evernote_git/pc_installs/debian/dotfiles/vimrc ~/.vimrc
+ln -s ~/evernote_git/pc_installs/debian/dotfiles/gvimrc ~/.gvimrc
 
 
 .bashrc:
