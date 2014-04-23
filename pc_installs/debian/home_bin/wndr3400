@@ -1,0 +1,16 @@
+#!/bin/bash
+
+DEVICE=/dev/ttyS0
+
+#rt jpwr reset;
+lpt_pwr reset
+
+sleep 2;
+for ((i=1; i<100; i++));
+  do rt bash -c "echo -n -e '\03' > $DEVICE";
+  usleep 1000;
+done
+sleep 3
+rt bash -c "echo 'boot -elf 192.168.1.10:image.elf' > $DEVICE"
+
+

@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# jpkg-l - show what's in an ejpkg
+#
+
+if [ $# -ne 1 ]; then
+    echo "Usage: jpkg-l <ejpkg>"
+    exit 1
+fi
+
+pkg=$1
+pkgname=`basename $pkg`
+
+if [ ! -r $pkg ]; then
+    echo "Failed to read package $pkg"
+    exit 1
+fi
+
+if [ "`basename $0`" == "jpkg-l" ]; then
+    op="t"
+else
+   op="x"
+fi
+
+# mkpasswd is actually jpkgcreate copied to ~/bin
+#passwd=`mkpasswd --mkpass $pkgname`
+passwd=`jpkgcreate --mkpass $pkgname`
+
+JPKG=`which jpkg`
+
+$JPKG -$op $pkg -p $passwd
+
+exit 0
+

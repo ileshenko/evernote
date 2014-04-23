@@ -1,0 +1,376 @@
+#!/bin/bash -e
+
+function usage()
+{
+cat >&2 << EOF
+Add a new entity to OpenRG
+Usage: `basename $0` -n <entity_name> -d <description> -c <config_name> [-p <path>] [options]
+    Options:
+        -C	Add CLI commands
+EOF
+    exit -1
+}
+
+# $1 = exit status
+function print_output()
+{
+    echo
+    if [ $done -eq 1 ]; then
+	echo "Finished adding the $ename entity."
+	echo -n "T"
+    else
+	echo "There was an error while adding the $ename entity."
+	echo -n "Only t"
+    fi
+    echo "he following files were modified:"
+    for i in $new_files; do
+	echo "$i"
+    done
+}
+
+add_cli=0;
+# Parse parameters
+
+epath="pkg"
+while [ ! -z "$1" ] ; do
+   case "$1" in
+       -n) ename=$2; shift 1 ;;
+       -d) desc=$2; shift 1 ;;
+       -c) config=$2; shift 1 ;;
+       -p) epath=$2; shift 1 ;;
+       -C) add_cli=1;;
+       *) usage ;;
+   esac
+   shift 1
+done
+
+
+
+# Verify all mandatory parameters exist
+[ -z "$ename" -o -z "$desc" -o -z "$config" ] && usage
+
+# Find RG's root directory
+done=0
+root=`jpwdroot`
+pushd $root > /dev/null
+
+# Print output and return to original directory on exit
+trap "print_output $? ; popd > /dev/null; exit" INT TERM EXIT
+
+# Fix casing
+ename=`echo $ename |  tr '[:upper:]' '[:lower:]'`
+
+# Check that user didn't add prefix ENT_ to entity name yet
+if [ "ent_" == "${ename:0:4}" ]; then
+    ename=${ename:4}
+fi
+euname=`echo $ename |  tr '[:lower:]' '[:upper:]'`
+config=`echo $config |  tr '[:lower:]' '[:upper:]'`
+
+# Prepare directory structure
+# mkdir -p "pkg/$ename/main"
+mkdir -p "$epath/$ename/main"
+
+# 1. Add config
+echo -n "Adding new config: $config... "
+file="pkg/build/config_opt.c"
+line=`awk '/\{ NULL, NULL }/{a=NR}; END{print a-1}' $file`
+sed -i -e "$line a\\" -e "    { \"$config\", NULL, OPT_HC },\n" $file
+new_files="$new_files $file"
+echo "Done!"
+
+# 2. Add entity
+echo -n "Adding new entity: ENT_$euname... "
+# 2.1
+file="pkg/main/entity.h"
+new_number=`awk '{ x[NR] = $0 } END { for ( i=1 ; i<=NR ; i++ ) { if (x[i] ~ /ENT_COUNT / ) print x[i-1] }}' $file | awk '{print $3+1}'`
+line=`awk '/\ENT_COUNT / {print NR-1}' $file`
+sed -i -e "$line a\\" -e "    ENT_$euname = $new_number," $file
+new_files="$new_files $file"
+# 2.2
+file="pkg/main/entity.c"
+line=`awk '/rg_entity_t \*rg_reconf_entities;/ {print NR-3}' $file`
+sed -i -e "$line a\\" -e "    ADD_STR(ENT_$euname)" $file
+new_files="$new_files $file"
+echo "Done!"
+
+# 3. Add Log entity
+echo -n "Adding new log entity: LOG_ENTITY_$euname... "
+# 3.1
+file="pkg/include/log_entity_id.h"
+line=`awk '/\LOG_ENTITY_OTHER/ {print NR-1}' $file`
+old_number=`awk '/\LOG_ENTITY_OTHER/ {print $3+0}' $file`
+new_number=$(($old_number+10))
+sed -i -e "s/$old_number/$new_number/" $file
+sed -i -e "$line a\\" -e "    LOG_ENTITY_$euname = $old_number," $file
+new_files="$new_files $file"
+
+# 3.2
+file="pkg/mgt/lib/log_entity.c"
+line=`awk '/\{ LOG_ENTITY_NONE, NULL }/ {print NR-1}' $file`
+sed -i -e "$line a\\" -e "    { LOG_ENTITY_$euname, \"$ename\",\n\tT_PTR(Tlog_entity_$ename), LOG_USER, LOG_BUFFER_VARLOG }," $file
+new_files="$new_files $file"
+
+# 3.3
+file="pkg/mgt/lib/log_entity_lang.csv"
+echo "Tlog_entity_$ename,P5,,,$desc,,,,,,,,,,," >> $file
+new_files="$new_files $file"
+
+# 3.4
+file="pkg/$ename/envir.subdirs.mak"
+echo "JMK_LOG_ENTITY=LOG_ENTITY_$euname" > $file
+new_files="$new_files $file"
+echo "Done!"
+
+# 4. Add to main task
+echo -n "Adding entity to main task... "
+# 4.1
+file="pkg/main/mt_init.c"
+line=`awk '/void \*rg_cmd = &openrg_commands;/ {print NR-2}' $file`
+sed -i -e "$line a\\" -e "#ifdef $config\n#include <$ename/main/main.h>\n#endif\n" $file
+line=`awk '/void mt_uninit\(void\)/ {print NR-5}' $file`
+sed -i -e "$line a\\" -e "#ifdef $config\n    ${ename}_init();\n#endif\n" $file
+line=`awk '/void mt_uninit\(void\)/ {print NR+3}' $file`
+sed -i -e "$line a\\" -e "#ifdef $config\n    ${ename}_uninit();\n#endif\n" $file
+new_files="$new_files $file"
+# 4.2
+file="pkg/main/Makefile"
+line=`awk '/gen_rg_def.c/ {print NR-1}' $file`
+sed -i -e "$line a\\" -e "ifdef $config\n  JMK_L_OBJS_\$(MT_TARGET)+=\$(JMKE_BUILDDIR)/$epath/$ename/$ename.o\nendif\n" $file
+new_files="$new_files $file"
+echo "Done!"
+
+# 5. Makefiles
+echo -n "Adding entity directory to Makefile... "
+file="$epath/Makefile"
+line=`awk '/# main _must_ compile/ {print NR-1}' $file`
+sed -i -e "$line a\\" -e "JMK_SUBDIRS+=\$(if \$($config),$ename)" $file
+new_files="$new_files $file"
+echo "Done!"
+
+# 6. Create entity code
+subdirs=main
+objects="main/${ename}_main.o"
+if [ $add_cli -eq 1 ] ; then
+    subdirs="$subdirs cli"
+    objects="$objects cli/${ename}_cli.o"
+fi
+echo -n "Creating entity... "
+file="$epath/$ename/Makefile"
+cat > $file << EOF
+ifndef JMKE_ENV_INCLUDED
+  JMK_ROOT=../../
+  include \$(JMK_ROOT)/jmk/env_root.mak
+endif
+
+JMK_SUBDIRS+=$subdirs
+
+JMK_O_TARGET=$ename.o
+JMK_O_OBJS_\$(JMK_O_TARGET)+=$objects
+
+\$(call JMKE_INCLUDE_RULES)
+EOF
+new_files="$new_files $file"
+
+file="$epath/$ename/main/Makefile"
+cat > $file << EOF
+ifndef JMKE_ENV_INCLUDED
+  JMK_ROOT=../../../
+  include \$(JMK_ROOT)/jmk/env_root.mak
+endif
+
+JMK_EXPORT_HEADERS_DIR=$ename/main
+JMK_EXPORT_HEADERS+=main.h
+
+JMK_O_TARGET=${ename}_main.o
+JMK_O_OBJS_\$(JMK_O_TARGET)+=main.o mt_$ename.o
+
+\$(call JMKE_INCLUDE_RULES)
+EOF
+new_files="$new_files $file"
+
+file="$epath/$ename/main/main.c"
+cat > $file << EOF
+/* LICENSE_CODE JUNGO */
+
+#include "main.h"
+#include "mt_$ename.h"
+#include <main/mt_main.h>
+EOF
+[ $add_cli -eq 1 ] && echo -e "#include \"../cli/cli.h\"" >> $file
+cat >> $file << EOF
+
+void ${ename}_init(void)
+{
+    mt_system_up_register(mt_${ename}_open);
+EOF
+[ $add_cli -eq 1 ] && echo -e "\n    cli_${ename}_init();" >> $file
+cat >> $file << EOF
+}
+
+void ${ename}_uninit(void)
+{
+EOF
+[ $add_cli -eq 1 ] && echo -e "    cli_${ename}_uninit();\n" >> $file
+cat >> $file << EOF
+    mt_system_up_unregister(mt_${ename}_open);
+}
+EOF
+new_files="$new_files $file"
+
+file="$epath/$ename/main/main.h"
+cat > $file << EOF
+/* LICENSE_CODE JUNGO */
+
+#ifndef _${euname}_MAIN_H_
+#define _${euname}_MAIN_H_
+
+void ${ename}_init(void);
+void ${ename}_uninit(void);
+
+#endif
+EOF
+new_files="$new_files $file"
+
+file="$epath/$ename/main/mt_$ename.c"
+cat > $file << EOF
+/* LICENSE_CODE JUNGO */
+
+#include "mt_${ename}.h"
+#include <main/mt_main.h>
+
+static void mt_${ename}_reconf(rg_entity_t *e)
+{
+}
+
+static reconf_type_t mt_${ename}_changed(rg_entity_t *e)
+{
+    return NO_RECONF;
+}
+
+static void mt_${ename}_close(rg_entity_t *e)
+{
+    mt_entity_remove(e);
+    free(e);
+}
+
+static mt_ops_t mt_${ename}_ops = {
+    mt_${ename}_reconf,
+    mt_${ename}_changed,
+    mt_${ename}_close,
+};
+
+rg_entity_t *mt_${ename}_open(void)
+{
+    rg_entity_t *e = zalloc_e(sizeof(rg_entity_t));
+
+    mt_entity_add(e, &mt_${ename}_ops, ENT_${euname});
+
+    return e;
+}
+EOF
+new_files="$new_files $file"
+
+file="$epath/$ename/main/mt_$ename.h"
+cat > $file << EOF
+/* LICENSE_CODE JUNGO */
+
+#ifndef _MT_${euname}_H_
+#define _MT_${euname}_H_
+
+#include <main/dev.h>
+
+rg_entity_t *mt_${ename}_open(void);
+
+#endif
+EOF
+new_files="$new_files $file"
+
+#Create CLI code
+mkdir -p "$epath/$ename/cli"
+file="$epath/$ename/cli/Makefile"
+cat > $file << EOF
+ifndef JMKE_ENV_INCLUDED
+  JMK_ROOT=../../../
+  include \$(JMK_ROOT)/jmk/env_root.mak
+endif
+
+JMK_INTERNAL_HEADERS+=cli.h
+
+JMK_O_TARGET=${ename}_cli.o
+JMK_O_OBJS_\$(JMK_O_TARGET)+=cli.o
+
+\$(call JMKE_INCLUDE_RULES)
+EOF
+new_files="$new_files $file"
+
+file="$epath/$ename/cli/cli.c"
+cat > $file << EOF
+/* LICENSE_CODE JUNGO */
+
+#include <cli/cli.h>
+#include <cli/cmd.h>
+#include <main/mt_main.h>
+
+static int cli_${ename}_stub(estream_t *estream, int value)
+{
+    if (value < 0 || value > 100)
+    {
+	estream_printf(estream, "Illegal value: %d\r\n", value);
+	return 1;
+    }
+
+    /* XXX Do something */
+
+    return 0;
+}
+
+static category_t ${ename}_cmd_category =
+{
+    .prefix = "${ename}",
+    .desc = "${desc} commands",
+};
+
+static cmd_item_t ${ename}_cmd_commands[] = {
+    {
+	.name = "stub",
+	.desc = "Stub CLI command.",
+	.desc_long = "Usage:\r\n"
+	    "\tstub <0-100>\r\n",
+	.function = cli_${ename}_stub,
+	.param_types = { CMD_PARAM_ESTREAM, CMD_PARAM_INT, CMD_PARAM_END }
+    },
+    {}
+};
+
+void cli_${ename}_init(void)
+{
+    multilevel_cli_add_commands(&openrg_commands, &${ename}_cmd_category,
+	${ename}_cmd_commands);
+}
+
+void cli_${ename}_uninit(void)
+{
+    multilevel_cli_remove_commands(&openrg_commands, &${ename}_cmd_category,
+	${ename}_cmd_commands);
+}
+EOF
+new_files="$new_files $file"
+
+file="$epath/$ename/cli/cli.h"
+cat > $file << EOF
+/* LICENSE_CODE JUNGO */
+
+#ifndef _${euname}_COMMANDS_H_
+#define _${euname}_COMMANDS_H_
+
+void cli_${ename}_init(void);
+void cli_${ename}_uninit(void);
+
+#endif
+EOF
+new_files="$new_files $file"
+
+echo "Done!"
+done=1
+

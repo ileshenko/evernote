@@ -1,0 +1,74 @@
+#!/bin/bash 
+
+DIFFPROG=xxdiff
+
+trap '
+echo "Cleaning up..." 
+set -e
+for f in $created_files; 
+do
+	echo Deleting $f;
+	[ $f != "" -a -e $f ] && rm $f;
+done
+' EXIT
+
+usage()
+{
+	echo "Usage:"
+	echo "   $0 [-r rev1] [-r rev2] filename"
+}
+
+calc_int_path()
+{
+	current="$(readlink -f .)"
+	parent=".."
+	if [ -d "${current}/.git" ]; then
+		int_path=""
+		return 0
+	fi
+	while [ "$(readlink -f ${parent})" != '/' ]; do
+		if [ -d "${parent}/.git" ]; then
+			base="$(readlink -f ${parent})/"
+			int_path=${current##${base}}/
+			return 0
+		fi
+		parent="${parent}/.."
+	done
+	return 255
+}
+
+while [ "$*" != "" ]; do
+	if [ "$1" == "-r" ]; 
+	then
+		if [ "$rev1" == "" ]; 
+		then 
+			rev1=$2; 
+		else
+			rev2=$2;
+		fi
+		shift 2;
+	else
+		file=$1
+		shift 1;
+	fi
+done
+
+if [ "$file" == "" ] ; then usage; exit 1; fi
+
+[ "$rev1" == "" ] && rev1="HEAD"
+
+set +e
+
+base=`basename $file`
+temp1=`mktemp /tmp/$base.$rev1.XXXXXX` && created_files="$created_files $temp1"
+calc_int_path
+git show $rev1:$int_path$file > $temp1
+
+if [ "$rev2" != "" ];
+then
+	temp2=`mktemp /tmp/$base.$rev2.XXXXXX` && created_files="$created_files $temp2"
+	git show $rev2:$file > $temp2
+	$DIFFPROG $temp1 $temp2
+else
+	$DIFFPROG $temp1 $file
+fi

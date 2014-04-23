@@ -1,0 +1,59 @@
+#!/bin/bash
+
+C_RED='\033[1;31m'
+C_GREEN='\033[1;32m'
+C_YELLOW='\033[1;33m'
+C_BLUE='\033[1;34m'
+C_PURPLE='\033[1;35m'
+C_CYAN='\033[1;36m'
+C_WHITE='\033[1;37m'
+C_BLACK='\033[1;38m'
+C_DEF='\033[0m'
+C_UNDERLINE='\033[4;37m'
+
+show_list()
+{
+  if [ ${D=`jpwdroot`} ]; then
+    files=`ls -d $D/build.* 2> /dev/null | sed -e 's%.*/build\.\([^/]*\).*%\1%'`
+    build=`ls -l $D/build 2> /dev/null | sed -e 's%.*/build\.\([^/]*\).*%\1%'`
+    tree=`echo $D | sed -e "s%$HOME/\([^/]*\).*%\1%"`
+    #consider changing cvs stat.
+    TAG=`cvs stat Makefile | grep Tag | sed -e 's/\t1/dev ()/' | \
+      sed -e 's/(none)/dev ()/' | sed -e 's/ *Sticky Tag:[^b(]\(.*\) (.*/\1/'`
+    TIME=`cat $D/tree_date 2> /dev/null`
+    printf "$C_GREEN%-11s$C_PURPLE%-18s$C_DEF%-24s\n" $tree $TAG "$TIME"
+
+    for f in $files ;do
+      failure=`ls $D/build.$f/fail* 2> /dev/null`
+      conf=`ls $D/build.$f/config 2> /dev/null`
+      CONF=`cat $conf | \
+          sed -e "s%BUILD=[^ ]*%\\\\$C_BLUE&\\\\$C_DEF%g" \
+	  -e "s%DIST=[^ ]*%\\\\$C_UNDERLINE&\\\\$C_DEF%g" `
+      if [ $build ] && [ $f == $build ]; then
+	printf "$C_DEF  -->" 
+      fi
+      printf "\t$CONF%-10s" 
+      if [ "$failure" != "" ]; then
+	printf "\t$C_RED%-10s --> $failure"  
+      fi
+      printf "\n" 
+    done
+  fi	
+  exit 1
+}
+
+if [ "$#" == "0" ]; then
+  show_list
+else
+  if [ ${D=`jpwdroot`} ]; then
+    rm -f $D/build && ln -sf $D/build.$1 $D/build 
+    link=`ls -l $D/build | cut -d " " -f 10`
+    config=`cat $D/build.$1/config`
+    echo "Switched build to $link:"
+    echo "$config"
+  else
+        echo "NO RG tree around, can't use $1"
+	exit 0
+    fi	
+fi
+

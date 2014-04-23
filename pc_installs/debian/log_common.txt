@@ -1,0 +1,3 @@
+git clone https://github.com/ileshenko/evernote.git evernote_git
+cd
+ln -s evernote_git/pc_installs/debian/home_bin/ ~/bin

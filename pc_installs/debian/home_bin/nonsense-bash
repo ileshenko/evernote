@@ -1,0 +1,5 @@
+# input: a hexa number (without leading 0x, without leading 0's)
+# output: separated to 2-digit bytess (after 0-padding at the beginning), the
+#	ascii characters represented by it
+echo -e `printf "%0$(((\`echo -n $1|wc -c\`+1)/2*2))x\\n" 0x$1 |sed 's/\(..\)/\\\x\1 /g'`
+bash -c "echo `printf "%0$(((\`echo -n $1|wc -c\`+1)/2*2))x\\n" 0x$1 |sed 's/\(..\)/\$'"'"'\\\x\1'"'"' /g'`"
