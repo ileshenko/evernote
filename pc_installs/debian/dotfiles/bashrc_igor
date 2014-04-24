@@ -1,11 +1,3 @@
-#edit  default definitions from bashrc
-# uncomment
-# force_color_prompt=yes
-
-# From Irena: comment section from text
-# "enable programmable completion"
-
-
 # my favorit stuff
 alias ll='ls -l'
 alias grep='grep --color'
@@ -13,6 +5,8 @@ alias grep='grep --color'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
+
+export EDITOR=$'gvim -f'
 
 alias g=gvim
 

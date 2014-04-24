@@ -2,19 +2,20 @@ git clone https://github.com/ileshenko/evernote.git evernote_git
 cd
 ln -s ~/evernote_git/pc_installs/debian/home_bin/ ~/bin
 
-ln -s ~/evernote_git/pc_installs/debian/dotfiles/bashrc_igor ~/.bashrc_igor
-ln -s ~/evernote_git/pc_installs/debian/dotfiles/gitconfig ~/.gitconfig
-ln -s ~/evernote_git/pc_installs/debian/dotfiles/inputrc ~/.inputrc
-ln -s ~/evernote_git/pc_installs/debian/dotfiles/vimrc ~/.vimrc
-ln -s ~/evernote_git/pc_installs/debian/dotfiles/gvimrc ~/.gvimrc
+cd ~/evernote_git/pc_installs/debian/dotfiles
+for i in * ; do ln -v -s `pwd`$i ~/.$i ; done
 
+cd /bin
+sudo ln -sf bash sh
 
 .bashrc:
+#-----------------------------------------------
+uncomment "force_color_prompt=yes"
+add
 if [ -f ~/.bashrc_igor ]; then
     .  ~/.bashrc_igor
 fi
-
-
+#-----------------------------------------------
 
 cd evernote_git/pc_installs/debian/home_bin
 rt chown root:root lpt_pwr
