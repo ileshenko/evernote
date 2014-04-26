@@ -1,0 +1,25 @@
+google:
+"ftdi ft232r gpio access usb library"
+"FTDI CBUS I/O mode"
+
+
+HOWTO
+http://hackaday.com/2009/09/22/introduction-to-ftdi-bitbang-mode/
+http://rtr.ca/ft232r/
+http://www.edaboard.com/thread213703.html
+
+DOCUMENTATION
+http://www.intra2net.com/en/developer/libftdi/documentation/group__libftdi.html
+
+
+MEMORIES:
+FT_PROG - application instead of MPROG
+~/tmp/libftdi-0.20/examples
+
+CLI:
+apt-get install libftdi-dev
+
+gcc -o hello-ftdi hello-ftdi.c -lftdi 
+gcc -o bitbang_cbus bitbang_cbus.c -lftdi 
+
+sudo ./hello-ftdi
