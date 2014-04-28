@@ -34,3 +34,8 @@ Install Chrome:
 - sudo su
 # dpkg -i google-chrome-stable_current_i386.deb
 # sudo apt-get -f install // this fixes errors
+
+rt:
+gcc -o exec_as_root exec_as_root.c
+su root -c "install -m 4755 -o root -g root exec_as_root /usr/bin/rt"
+

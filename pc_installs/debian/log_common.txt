@@ -22,17 +22,4 @@ rt chown root:root lpt_pwr
 rt chmod +s lpt_pwr
 
 
-TODO: 
-# Explicit rule for exec_as_root - don't use external dependencies
-exec_as_root: exec_as_root.c
-	$(CC) -o $@ $<
-
-install_rt: exec_as_root
-ifneq ($(OS),Windows_NT)
-	echo "Please enter root's password (needed by rt - exec_as_root):"
-	su root -c "install -m 4755 -o root -g root exec_as_root /usr/bin/rt"
-else
-	install -m 4755 exec_as_root /usr/bin/rt
-endif
-
 
