@@ -39,3 +39,8 @@ rt:
 gcc -o exec_as_root exec_as_root.c
 su root -c "install -m 4755 -o root -g root exec_as_root /usr/bin/rt"
 
+Fonts:
+Google: debian microsoft fonts
+install ttf-mscorefonts-installer:
+dpkg -i ttf-mscorefonts-installer_3.4+nmu1_all.deb ???
+apt-get install cabextract - seems to be enough
