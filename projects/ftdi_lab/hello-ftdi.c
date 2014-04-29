@@ -26,7 +26,7 @@ int main()
     /* Initialize context for subsequent function calls */
     ftdi_init(&ftdic);
     printf("\n===== %d\n",ftdic.module_detach_mode);
-    ftdic.module_detach_mode = DONT_DETACH_SIO_MODULE;
+//    ftdic.module_detach_mode = DONT_DETACH_SIO_MODULE;
 
 
     /* Open FTDI device based on FT232R vendor & product IDs */
@@ -36,12 +36,12 @@ int main()
         return 1;
     }
 
-#if 0
+#if 1
 
     /* Enable bitbang mode with a single output line */
 //    ftdi_enable_bitbang(&ftdic, LED);
-//    ftdi_set_bitmode(&ftdic, LED, BITMODE_BITBANG);
-    ftdi_set_bitmode(&ftdic, LED, BITMODE_CBUS);
+    ftdi_set_bitmode(&ftdic, LED, BITMODE_BITBANG);
+//    ftdi_set_bitmode(&ftdic, LED, BITMODE_CBUS);
 
     /* Endless loop: invert LED state, write output, pause 1 second */
     for(i = 0; i < 17; i++) {
