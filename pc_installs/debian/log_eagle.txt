@@ -1,0 +1,9 @@
+download eagle-lin-6.5.0.run
+chmod +x
+
+~/eagle-6.5.0/bin/eagle
+
+
+Gerbv
+apt-get install gerbv
+http://sourceforge.net/projects/gerbv/files/gerbv/gerbv-2.6.1/
