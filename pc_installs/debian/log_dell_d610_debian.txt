@@ -44,3 +44,8 @@ Google: debian microsoft fonts
 install ttf-mscorefonts-installer:
 dpkg -i ttf-mscorefonts-installer_3.4+nmu1_all.deb ???
 apt-get install cabextract - seems to be enough
+
+Webcam:
+silver cam - out of the box
+kopete (part of KDE) - to test cam (check selfview in properties)
+apt-get install camorama
