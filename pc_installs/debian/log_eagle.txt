@@ -7,3 +7,9 @@ chmod +x
 Gerbv
 apt-get install gerbv
 http://sourceforge.net/projects/gerbv/files/gerbv/gerbv-2.6.1/
+
+gerber editor // NO NEED, This is a CAD, not gerber editor
+http://www.layouteditor.net/download.html - download
+ layout_20140405_Debian_7.0_i386.deb
+
+dpkg -i layout_20140405_Debian_7.0_i386.deb
