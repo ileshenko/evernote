@@ -15,8 +15,11 @@ logout and login as igorl
 
 . /etc/bash_completion
 
-install "vim-gtk" "firmware-b43-installer" "wicd" "minicom" "git" "flashplugin-nonfree" "adblock-plus" "dropbox" "tree"
-install  gitk xxdiff socat build-essential  htop cmake
+install:
+--------
+"vim-gtk" "firmware-b43-installer" "wicd" "minicom" "git" "flashplugin-nonfree"
+"adblock-plus" "dropbox" "tree" gitk xxdiff socat build-essential  htop cmake
+dos2unix
 
 
 
