@@ -12,3 +12,12 @@
     dc = diff --cached
     pom = push origin master
     logp = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+
+[diff]
+	tool = def
+
+[difftool]
+	prompt = no
+
+[difftool "def"]
+	cmd = $DIFFPROG $LOCAL $REMOTE
