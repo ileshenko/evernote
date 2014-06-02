@@ -1,0 +1,54 @@
+
+timeout 300000
+verbose on
+log /tmp/minilog.txt
+
+loop:
+
+print 11111111111111111111111
+
+expect {
+  "Not running wpa_supplicant"
+  timeout 300000 break
+}
+
+print 222222222222222222222222
+
+send "admin"
+
+expect {
+  "Password:"
+}
+
+print 333333333333333333333333333
+
+send admin
+
+expect {
+  "OpenRG>"
+}
+
+print 444444444444444444444444444
+send ""
+
+expect {
+  "OpenRG>"
+}
+
+print 5555555555555555555555
+send Hello World
+
+expect {
+  "QWERTY"
+  timeout 10 break
+}
+
+print 66666666666666666666666666
+
+send "haha"
+
+print 777777777777777777777777
+goto loop
+
+
+print 8888888888888888888888888888
