@@ -1,0 +1,37 @@
+timeout 300000
+verbose on
+
+loop:
+
+expect {
+  "Hit any key to stop autoboot:"
+  timeout 10 goto oops
+}
+
+#stop autoboot
+send " "
+
+expect {
+  "AR10 #"
+  timeout 10 goto oops
+}
+
+#This CLI command erases DDR configuration data
+#send "sf probe 3 ; sf write 80400000 0x0000FFE8 1 "
+
+#expect {
+#  "VR9 #"
+#  timeout 10 goto oops
+#}
+
+oops:
+
+# This SHELL command adds timestamp to minicom log
+#! date >> /tmp/minicom.log
+#! jpwr off
+! lpt_pwr off
+sleep 5
+#! jpwr on
+! lpt_pwr on
+
+goto loop

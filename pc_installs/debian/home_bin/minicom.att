@@ -1,0 +1,45 @@
+# use "man runscript" for language explanation
+# This command does not work. We have to add timeout to every expect block
+# instead
+timeout 300000
+verbose on
+
+loop:
+
+expect {
+  "Not running wpa_supplicant"
+  timeout 300000 break
+}
+
+send "admin"
+
+expect {
+  "Password:"
+  timeout 300000 break
+}
+
+send admin
+
+expect {
+  "OpenRG>"
+  timeout 300000 break
+}
+
+send 
+
+expect {
+  "OpenRG>"
+  timeout 300000 break
+}
+
+send Hello World
+
+expect {
+  "QWERTY"
+  timeout 10 break
+}
+
+send "system reboot"
+
+goto loop
+
