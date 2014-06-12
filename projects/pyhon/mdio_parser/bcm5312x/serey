@@ -1,0 +1,22 @@
+%s/\(.*\) rd \(.*\) .*/\1 rd \2/
+
+%s@\(.*ar8337 ..\) \(.*\)@echo \2 > /proc/driver/ar8316/reg
+%s@\(.*phy   ..\) \(.*\)@echo \2 > /proc/driver/ar8316/phy
+
+
+///
+Make openrg_conf.txt
+
+cp ar8337_reg_out.txt openrg_conf.txt
+g openrg_conf.txt
+
+%s/^[^ ]* //
+g/rd/d
+g/phy/d
+%s/ar8337 wr/dev ar8316 reg_set eth1/
+
+
+while read line ; do  echo $line > /dev/ttyS0 ; sleep 0.1  ; done < lcs_wrt/openrg_conf.txt 
+
+
+
