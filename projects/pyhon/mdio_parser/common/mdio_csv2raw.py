@@ -4,7 +4,7 @@
 # Input - CSV data from Saleae Logic Analyzer on form "timestamp, mdc, mdio"
 # Output - formatted test in form "timestamp op phyad regad data"
 
-# MDIO instructin contains:
+# MDIO instructin built from:
 # PRE - Preamble (32 empty clocks)
 # ST - Start of Frame (01)
 # OP - Operation Code (01 for read, 10 for write)
@@ -62,7 +62,7 @@ def proc_preamble(ts, mdio):
 	global status
 
 	if mdio == 0:
-		output_file.write('%-.7: Error PREAMBLE\n' % ts)
+		output_file.write('%-.7f: Error PREAMBLE\n' % ts)
 		status = SM_IDLE
 		return
 
@@ -140,7 +140,7 @@ def get_work_edge():
 	global status
 
 #For BCM
-#	return 0
+	return 0
 
 	if status != SM_DATA:
 		return 1
