@@ -30,6 +30,7 @@ SM_DATA,
 # previous frame data
 prev_mdc = 0
 #prev_mdio = 0
+start_ts = 0.0
 
 # State Machine data
 status = SM_IDLE
@@ -74,11 +75,13 @@ def proc_preamble(ts, mdio):
 def proc_start(ts, mdio):
 	global buf_len
 	global status
+	global start_ts
 
 	if buf_len == 0:
 		if mdio == 0:
 			output_file.write("%-.7f " % ts)
 			buf_len += 1
+			start_ts = ts
 		else:
 			return
 	else:
@@ -128,10 +131,16 @@ def proc_turnaround(ts, mdio):
 
 def proc_val(ts, mdio):
 	global status
+	global start_ts
 
 	if bit_push(mdio) < 16:
 		return
-	output_file.write(' %#06x\n' % val)
+	time = ts - start_ts
+	#TODO - BCM vs Standard
+	time = time / 62 * 2
+	freq = 1 / time
+	freq_MHz = freq/1000000
+	output_file.write(' %#06x %-.1f\n' % (val, freq_MHz))
 	status = SM_IDLE
 
 # 1 - rising edge,
@@ -140,7 +149,7 @@ def get_work_edge():
 	global status
 
 #For BCM
-	return 0
+#	return 0
 
 	if status != SM_DATA:
 		return 1
