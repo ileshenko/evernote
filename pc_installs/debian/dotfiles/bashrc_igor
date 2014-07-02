@@ -13,3 +13,8 @@ alias g=gvim
 PATH="/sbin:$PATH"
 PS1="\[\e[1;35m\]\u@\h\[\e[1;36m\] \W\[\e[1;37m\]\$ "
 
+cdg () 
+{ 
+    D=`ltools` && echo $D && cd $D
+}
+

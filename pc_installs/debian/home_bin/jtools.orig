@@ -1,0 +1,175 @@
+#!/bin/bash
+#
+# jtools - useful bash scripts for developers
+#
+
+FUNCS_ARCH="jgcc jcc jgdb jnm jobjdump jobjcopy jstrip jar jas jld jranlib jreadelf jsize jstrings"
+FUNCS_DIR="jpwdsrc jpwdbin jpwdflip jpwdroot jpwdrel"
+
+word_in()
+{
+    local i search=$1
+    shift
+    for i in $* ; do
+	if [ "$i" = $search ] ; then
+	    return 0
+	fi
+    done
+    return 1
+}
+
+# jhelp - what j-commands are available?
+jtoolshelp()
+{
+    echo "jtools [--help] - what jtools-commands are available?"
+    echo "Architecture depndent commands:"
+    echo "  jgcc - run the right gcc for the tree you are in"
+    echo "  jcc - run the right gcc for the tree you are in"
+    echo "  jgdb - run the right gdb for the tree you are in"
+    echo "  jnm - run the right nm for the tree you are in"
+    echo "  jobjdump - run the right objdump for the tree you are in"
+    echo "  jobjcopy - run the right objcopy for the tree you are in"
+    echo "  jstrip - run the right strip for the tree you are in"
+    echo "  jar - run the right ar for the tree you are in"
+    echo "  jas - run the right as for the tree you are in"
+    echo "  jld - run the right ld for the tree you are in"
+    echo "  jranlib - run the right ranlib for the tree you are in"
+    echo "  jreadelf - run the right readelf for the tree you are in"
+    echo "  jsize - run the right size for the tree you are in"
+    echo "  jstrings - run the right strings for the tree you are in"
+    echo "Options for the architecture dependent commands:"
+    echo "  --which - print the path of the tool (for architecture tools)"
+    echo "Directory related commands:"
+    echo "  jpwdsrc - print related src working dir"
+    echo "  jpwdbin - print related bin working dir"
+    echo "  jpwdflip - print related opposite bin/src working dir"
+    echo "  jpwdroot - print src root dir"
+    echo "  jpwdrel - print relative to src/bin root"
+    echo "Functions (jtools_functions.sh that are included from bashrc):"
+    echo "  jcdflip - cd to jpwdflip"
+    echo "  jcdbin - cd to jpwdbin"
+    echo "  jcdsrc - cd to jpwdsrc"
+    echo "  cdr - cd to jpwdroot"
+}
+
+# jdir - prints usefull pathes for rg tree developers 
+jdir()
+{
+    action=$1
+    unset inbin bin root right
+
+    left=`pwd`
+    for ((i=0; i<24; i++)); do
+        if [ -e $left/.rgsrc ] ; then
+	    root=`cat $left/.rgsrc`;
+	    inbin="yes";
+        elif [ -e $left/rg_config.sh -o -e $left/project_config.sh -o \
+                -e $left/.distribution -o -e $left/VERSION \
+                -o -e $left/do_setenv ] ; then
+	    root=$left
+        else
+	    # 'right' is the relative path from 'left' to `pwd`.
+	    # Example: in beginging of script 
+	    # `pwd`=/home/kfir/rg.dev/os/linux-2.4/arch/um/
+	    # On each iteration we go back one dir. After two iterations:
+	    # 'left'=/home/bob/rg.dev/os/linux-2.4/ and 'right'=arch/um/
+	    right=`echo ${left##*/}`/$right
+	    left=`echo ${left%/*}`
+	    continue
+	fi
+	break;
+    done
+
+    if [ -z "$root" ] ; then 
+	echo 'Failed to find RG root directory' >&2
+	exit 1;
+    fi
+
+    [ -e $root/build ] && bin=`readlink $root/build`
+
+    if [ -z "$bin" ] && \
+	( [ "$action" = "jpwdbin" ] || [ "$action" = "jpwdflip" ] ) ; then
+        echo "Could not find a build directory" >&2
+	exit 1
+    fi
+
+    case $action in 
+	"jpwdroot") echo $root ;;
+	"jpwdsrc") echo "$root/$right" ;;
+	"jpwdbin") echo "$bin/$right" ;;
+	"jpwdrel") echo "$right" ;;
+	"jpwdflip") 
+	    if [ -n "$inbin" ] ; then 
+                echo "$root/$right"
+	    else
+	        echo "$bin/$right"
+            fi
+	;;
+	*)
+	    echo "Invalid argument" >&2
+	    exit 1
+    esac
+    exit 0;
+}
+
+## jarch - run the right tool for the arch of the tree you are in
+jarch()
+{
+    [ "$2" = "--which" ] && is_which=1
+    tool_type=${1:1} # jgcc --> gcc
+    shift
+
+    if [ -z "tool_type" ]; then
+	echo "Internal error: tool_type is not set"
+	exit 1
+    fi
+    CDR=`jdir jpwdroot`
+    path=`cd $CDR && \
+        (make --no-print-directory echovar ECHOVAR=SIZE || \
+        make --no-print-directory -C pkg/testing echovar ECHOVAR=SIZE) \
+	2>/dev/null | grep size | sed -e 's/size$//' | head -n1`
+    if [ -z "$path" ] ; then
+	echo "failed 'make' to check the toolchain used. " >&2
+	echo "Did you archconfig your tree?" >&2
+        exit 1
+    fi
+    tool=$path$tool_type
+    if [ ! -x "$tool" ]; then
+	echo "Failed to find $tool"
+	exit 1
+    fi
+    if ((is_which)) ; then
+	echo $tool
+	exit 0
+    fi
+    $tool $*
+    exit $?
+}
+
+# handle symlinks /usr/local/bin/jgcc --> /usr/local/bin/jtools.sh
+basename=`basename $0`
+if word_in $basename $FUNCS_ARCH ; then
+    jarch $basename $*
+    exit 1 # should not reach here
+fi
+
+if word_in $basename $FUNCS_DIR ; then
+    jdir $basename
+    exit 1 # should not reach here
+fi
+
+func=$1
+# handle 'jtools jpwdsrc'
+if word_in $func $FUNCS_DIR ; then
+    jdir $*
+    exit 1 # should not reach here
+fi
+
+# handle 'jtools jgcc'
+if word_in $func $FUNCS_ARCH ; then
+    jarch $*
+    exit 1 # should not reach here
+fi
+
+jtoolshelp
+

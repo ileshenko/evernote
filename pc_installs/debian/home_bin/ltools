@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+
+gidir()
+{
+    left=`pwd`
+    for ((i=0; i<24; i++)); do
+        if [ -e $left/.git ] ; then
+	    root=$left
+        else
+	    left=`echo ${left%/*}`
+	    continue
+	fi
+	break;
+    done
+
+    if [ -z "$root" ] ; then 
+	echo 'Failed to find GIT root directory' >&2
+	exit 1;
+    fi
+    
+    echo $root
+
+    exit 0;
+}
+
+gidir
+exit 1 # should not reach here
+
