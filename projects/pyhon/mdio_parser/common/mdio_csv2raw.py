@@ -192,6 +192,7 @@ def process_line(ts, mdc, mdio):
 		val = 0
 
 def main():
+	prev_mdio = 1
 
 	with open('u.csv', 'rb') as f:
 
@@ -202,7 +203,8 @@ def main():
 			ts = float(ts)
 			mdc = int(mdc)
 			mdio = int(mdio)
-			process_line(ts, mdc, mdio)
+			process_line(ts, mdc, prev_mdio)
+			prev_mdio = mdio
 
 if __name__ == '__main__':
     main()
