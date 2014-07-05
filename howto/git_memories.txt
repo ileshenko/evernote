@@ -1,0 +1,28 @@
+two independent branches
+========================
+
+firmware branch:
+git init
+git checkout --orphan msp430
+git add .
+git commit -m "empty version of firmware"
+git remote add origin <url>
+git push -u origin msp430
+
+cd eagle directory
+git init
+git checkout --orphan eagle
+git add .
+git commit -m "initial version of eagle project"
+git remote add origin <url>
+git push -u origin eagle
+
+cd delme_master branch
+git init
+echo use orphan branches only > no_commits_here.txt
+git add .
+git commit -m "blocker on master branch"
+git remote add origin <url>
+git push origin master
+
+
