@@ -26,3 +26,16 @@ git remote add origin <url>
 git push origin master
 
 
+Git tags
+========
+Create tag:
+		git tag v2.0
+Show tags:
+		git tag
+push all tags to remote:
+		git push origin --tags
+push a single tag:
+		git push origin <tag>
+
+
+
