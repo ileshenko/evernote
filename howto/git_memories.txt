@@ -30,6 +30,7 @@ Git tags
 ========
 Create tag:
 		git tag v2.0
+		git tag -a v1.4 -m 'my version 1.4'
 Show tags:
 		git tag
 push all tags to remote:
