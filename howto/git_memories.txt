@@ -38,5 +38,12 @@ push all tags to remote:
 push a single tag:
 		git push origin <tag>
 
+Remove local changes
+====================
+git checkout . // remove changes in tracked files only
+git reset  // remove from index
+git reset --hard // removes changes in tacked files only. New files - without changes
+git clean -f // remove new files
+
 
 
