@@ -46,4 +46,13 @@ git reset --hard // removes changes in tacked files only. New files - without ch
 git clean -f // remove new files
 
 
+Merge, rebase...
+===============
+git pull is just an alias for
+$> git fetch && git merge origin/master
+
+If you have local changes on your master that aren't reflected on origin, you might want
+$> git rebase origin/master
+to make sure your commits are 'on top'.
+
 
