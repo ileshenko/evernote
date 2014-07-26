@@ -25,7 +25,16 @@ import csv
 # the MDIO pin to 0 durint the second bit time"
 # DATA
 
-#[IDLE, PREAMBLE] = range(8)
+[
+IDLE,
+PRE,
+ST,
+OP,
+PHYAD,
+REGAD,
+TA,
+DATA,
+] = range(8)
 
 prev_ts = 0.0
 prev_clk = 0
