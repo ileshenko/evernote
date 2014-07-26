@@ -59,7 +59,13 @@ If you have local changes on your master that aren't reflected on origin, you mi
 $> git rebase origin/master
 to make sure your commits are 'on top'.
 
-List of ignored files
-=====================
+List of files
+=============
+ignored
+--------
 git ls-files --others -i --exclude-standard // from stack oveflow
 git ls-files --others // my version. Works as well
+
+tracked
+-------
+git ls-files

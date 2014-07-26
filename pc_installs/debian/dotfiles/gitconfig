@@ -14,10 +14,13 @@
     logp = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
 
 [diff]
-	tool = def
+	tool = xxdiff
+
+#[diff]
+#	tool = def_birger
 
 [difftool]
 	prompt = no
 
-[difftool "def"]
+[difftool "def_birger"]
 	cmd = $DIFFPROG $LOCAL $REMOTE
