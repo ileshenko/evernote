@@ -1,3 +1,4 @@
 .*.sw?
 exec_as_root
 *.pyc
+cscope.out

@@ -26,19 +26,27 @@ TIOCM_DSR	DSR (data set ready)
 */
 int main(void)
 {
-    int fd;
+    int fd, i;
     int status = 0;
 
-    fd = open("/dev/ttyUSB0", O_RDWR);
+    fd = open("/dev/JLabI001", O_RDWR);
     printf("fd=%d\n", fd);
     printf("ioctl=%d\n", ioctl(fd, TIOCMGET, &status));
 
     printf("status=%#010x\n", status);
 
-    status ^= TIOCM_DTR | TIOCM_RTS;
+    for (i = 0; i < 1000; i++)
+    {
+	status ^= TIOCM_RTS;
+    	printf("status=%#010x\n", status);
+    	ioctl(fd, TIOCMSET, &status);
+    }
+    printf("status=%#010x\n", status);
+    ioctl(fd, TIOCMGET, &status);
     printf("status=%#010x\n", status);
 
-    printf("ioctl=%d\n%m\n", ioctl(fd, TIOCMSET, &status));
+
+//    printf("ioctl=%d\n%m\n", ioctl(fd, TIOCMSET, &status));
 
     sleep(2);
     close(fd);
