@@ -22,4 +22,8 @@ rt chown root:root lpt_pwr
 rt chmod +s lpt_pwr
 
 
+install
+-------
+git gitk cscope htop cmake dos2unix tree xxdiff socat
+
 

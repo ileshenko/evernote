@@ -17,14 +17,13 @@ logout and login as igorl
 
 install:
 --------
-"vim-gtk" "firmware-b43-installer" "wicd" "minicom" "git" "flashplugin-nonfree"
-"adblock-plus" "dropbox" "tree" gitk xxdiff socat build-essential  htop cmake
-dos2unix
+"vim-gtk" "firmware-b43-installer" "wicd" "minicom" "flashplugin-nonfree"
+"adblock-plus" "dropbox" build-essential
 
 
 
 Add panel at screen up center
-Remove indexer (system settings-> desctop search)
+Remove indexer (system settings-> desktop search)
 
 #> dropbox start -i
 
