@@ -16,5 +16,5 @@ Naming convention
 Use device serials in form JLABIxxx
 Link them into /dev/JLabIxxx
 
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="JLAB*", SYMLINK+=%s{serial}
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="JLAB*", SYMLINK+="%s{serial}"
 
