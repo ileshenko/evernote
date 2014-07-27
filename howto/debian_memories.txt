@@ -1,0 +1,7 @@
+
+
+install *.deb
+=============
+
+rt dpkg -i xxx.deb
+
