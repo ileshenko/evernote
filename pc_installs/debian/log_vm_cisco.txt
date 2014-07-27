@@ -1,0 +1,2 @@
+after reboot local PC - start dropbox:
+#> dropbox start
