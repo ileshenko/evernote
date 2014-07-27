@@ -29,7 +29,7 @@ int main(void)
     int fd, i;
     int status = 0;
 
-    fd = open("/dev/JLabI001", O_RDWR);
+    fd = open("/dev/JLABI001", O_RDWR);
     printf("fd=%d\n", fd);
     printf("ioctl=%d\n", ioctl(fd, TIOCMGET, &status));
 
@@ -37,7 +37,7 @@ int main(void)
 
     for (i = 0; i < 1000; i++)
     {
-	status ^= TIOCM_RTS;
+	status ^= TIOCM_DTR | TIOCM_RTS;
     	printf("status=%#010x\n", status);
     	ioctl(fd, TIOCMSET, &status);
     }

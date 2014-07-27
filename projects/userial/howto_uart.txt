@@ -9,7 +9,12 @@ http://hintshop.ludvig.co.nz/show/persistent-names-usb-serial-devices/
 g /etc/udev/rules.d/99-usb-serial.rules and put the following lines in there:
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="A6008isP", SYMLINK+="LSer0"
 
+
+
 Naming convention
 =================
 Use device serials in form JLABIxxx
 Link them into /dev/JLabIxxx
+
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="JLAB*", SYMLINK+=%s{serial}
+
