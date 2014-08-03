@@ -1,0 +1,704 @@
+Index: os/linux-2.6/include/asm-arm/irqflags.h
+===================================================================
+RCS file: /arch/cvs/rg/os/linux-2.6/include/asm-arm/irqflags.h,v
+retrieving revision 1.2.4.1
+diff -u -p -r1.2.4.1 irqflags.h
+--- os/linux-2.6/include/asm-arm/irqflags.h	10 Nov 2013 11:26:23 -0000	1.2.4.1
++++ os/linux-2.6/include/asm-arm/irqflags.h	31 Jul 2014 13:27:44 -0000
+@@ -10,7 +10,8 @@
+  */
+ #if __LINUX_ARM_ARCH__ >= 6
+ 
+-#define raw_local_irq_save(x)					\
++#error
++#define DDDraw_local_irq_save(x)					\
+ 	({							\
+ 	__asm__ __volatile__(					\
+ 	"mrs	%0, cpsr		@ local_irq_save\n"	\
+@@ -18,20 +19,27 @@
+ 	: "=r" (x) : : "memory", "cc");				\
+ 	})
+ 
+-#define raw_local_irq_enable()  __asm__("cpsie i	@ __sti" : : : "memory", "cc")
+-#define raw_local_irq_disable() __asm__("cpsid i	@ __cli" : : : "memory", "cc")
+-#define local_fiq_enable()  __asm__("cpsie f	@ __stf" : : : "memory", "cc")
+-#define local_fiq_disable() __asm__("cpsid f	@ __clf" : : : "memory", "cc")
++#define DDDraw_local_irq_enable()  __asm__("cpsie i	@ __sti" : : : "memory", "cc")
++#define DDDraw_local_irq_disable() __asm__("cpsid i	@ __cli" : : : "memory", "cc")
++#define DDDlocal_fiq_enable()  __asm__("cpsie f	@ __stf" : : : "memory", "cc")
++#define DDDlocal_fiq_disable() __asm__("cpsid f	@ __clf" : : : "memory", "cc")
+ 
+ #else
+ 
+ /*
+  * Save the current interrupt enable state & disable IRQs
+  */
++
++//void profile_raw_local_irq_save(void);
++//void profile_raw_local_irq_restore(void);
++
++//void profile_raw_local_irq_disable(void);
++//void profile_raw_local_irq_enable(void);
+ #define raw_local_irq_save(x)					\
+ 	({							\
+ 		unsigned long temp;				\
+ 		(void) (&temp == &x);				\
++/*	    	profile_raw_local_irq_save();*/			\
+ 	__asm__ __volatile__(					\
+ 	"mrs	%0, cpsr		@ local_irq_save\n"	\
+ "	orr	%1, %0, #128\n"					\
+@@ -48,6 +56,7 @@
+ 	({							\
+ 		unsigned long temp;				\
+ 		(void) (&temp == &x);				\
++/*	    	profile_raw_local_irq_fiq_save();*/		\
+ 	__asm__ __volatile__(					\
+ 	"mrs	%0, cpsr		@ local_irq_fiq_save\n"	\
+ "	orr	%1, %0, #0xC0\n"				\
+@@ -63,6 +72,7 @@
+ #define raw_local_irq_enable()					\
+ 	({							\
+ 		unsigned long temp;				\
++/*	    	profile_raw_local_irq_enable();	*/		\
+ 	__asm__ __volatile__(					\
+ 	"mrs	%0, cpsr		@ local_irq_enable\n"	\
+ "	bic	%0, %0, #128\n"					\
+@@ -78,6 +88,7 @@
+ #define raw_local_irq_disable()					\
+ 	({							\
+ 		unsigned long temp;				\
++/*	    	profile_raw_local_irq_disable();*/		\
+ 	__asm__ __volatile__(					\
+ 	"mrs	%0, cpsr		@ local_irq_disable\n"	\
+ "	orr	%0, %0, #128\n"					\
+@@ -93,6 +104,7 @@
+ #define local_fiq_enable()					\
+ 	({							\
+ 		unsigned long temp;				\
++/*	    	profile_local_fiq_enable();*/			\
+ 	__asm__ __volatile__(					\
+ 	"mrs	%0, cpsr		@ stf\n"		\
+ "	bic	%0, %0, #64\n"					\
+@@ -108,6 +120,7 @@
+ #define local_fiq_disable()					\
+ 	({							\
+ 		unsigned long temp;				\
++/*	    profile_local_fiq_disable();*/			\
+ 	__asm__ __volatile__(					\
+ 	"mrs	%0, cpsr		@ clf\n"		\
+ "	orr	%0, %0, #64\n"					\
+@@ -133,6 +146,7 @@
+  * restore saved IRQ & FIQ state
+  */
+ #define raw_local_irq_restore(x)				\
++/*	profile_raw_local_irq_restore();	*/		\
+ 	__asm__ __volatile__(					\
+ 	"msr	cpsr_c, %0		@ local_irq_restore\n"	\
+ 	:							\
+Index: os/linux-2.6/include/linux/sched.h
+===================================================================
+RCS file: /arch/cvs/rg/os/linux-2.6/include/linux/sched.h,v
+retrieving revision 1.5
+diff -u -p -r1.5 sched.h
+--- os/linux-2.6/include/linux/sched.h	8 Apr 2010 19:47:52 -0000	1.5
++++ os/linux-2.6/include/linux/sched.h	31 Jul 2014 13:27:44 -0000
+@@ -979,11 +979,13 @@ struct task_struct {
+ 	unsigned int hardirq_enable_event;
+ 	unsigned long hardirq_disable_ip;
+ 	unsigned int hardirq_disable_event;
++	u64 hardirq_disable_clk;
+ 	int softirqs_enabled;
+ 	unsigned long softirq_disable_ip;
+ 	unsigned int softirq_disable_event;
+ 	unsigned long softirq_enable_ip;
+ 	unsigned int softirq_enable_event;
++	u64 softirq_disable_clk;
+ 	int hardirq_context;
+ 	int softirq_context;
+ #endif
+Index: os/linux-2.6/kernel/lockdep.c
+===================================================================
+RCS file: /arch/cvs/rg/os/linux-2.6/kernel/lockdep.c,v
+retrieving revision 1.2
+diff -u -p -r1.2 lockdep.c
+--- os/linux-2.6/kernel/lockdep.c	8 Apr 2010 19:55:21 -0000	1.2
++++ os/linux-2.6/kernel/lockdep.c	31 Jul 2014 13:27:44 -0000
+@@ -259,7 +259,7 @@ static int save_trace(struct stack_trace
+ 	trace->skip = 3;
+ 	trace->all_contexts = 0;
+ 
+-	save_stack_trace(trace, NULL);
++//	save_stack_trace(trace, NULL);
+ 
+ 	trace->max_entries = trace->nr_entries;
+ 
+@@ -1852,10 +1852,46 @@ void early_boot_irqs_on(void)
+ /*
+  * Hardirqs will be enabled:
+  */
++extern int cli_delta;
++extern int cli_trace_on;
++
++#define MV_ASM              __asm__ __volatile__
++static inline  u64 mvCpuCntrsRead(const int counter)
++{
++	u32 low = 0, high = 0;
++
++	switch (counter) {
++	case 0:
++MV_ASM("mrc p15, 0, %0, c15, c13, 0" : "=r"(low));
++MV_ASM("mrc p15, 0, %0, c15, c13, 1" : "=r"(high));
++		break;
++
++	case 1:
++MV_ASM("mrc p15, 0, %0, c15, c13, 2" : "=r"(low));
++MV_ASM("mrc p15, 0, %0, c15, c13, 3" : "=r"(high));
++		break;
++
++	case 2:
++MV_ASM("mrc p15, 0, %0, c15, c13, 4" : "=r"(low));
++MV_ASM("mrc p15, 0, %0, c15, c13, 5" : "=r"(high));
++		break;
++
++	case 3:
++MV_ASM("mrc p15, 0, %0, c15, c13, 6" : "=r"(low));
++MV_ASM("mrc p15, 0, %0, c15, c13, 7" : "=r"(high));
++		break;
++
++	default:
++		printk("mv_cpu_cntrs_read: bad counter number (%d)\n", counter);
++	}
++	return (((u64) high << 32) | low);
++}
++
+ void trace_hardirqs_on(void)
+ {
+ 	struct task_struct *curr = current;
+ 	unsigned long ip;
++	u64 now, how_long;
+ 
+ 	if (unlikely(!debug_locks || current->lockdep_recursion))
+ 		return;
+@@ -1867,6 +1903,7 @@ void trace_hardirqs_on(void)
+ 		debug_atomic_inc(&redundant_hardirqs_on);
+ 		return;
+ 	}
++	now = mvCpuCntrsRead(0);
+ 	/* we'll do an OFF -> ON transition: */
+ 	curr->hardirqs_enabled = 1;
+ 	ip = (unsigned long) __builtin_return_address(0);
+@@ -1893,6 +1930,14 @@ void trace_hardirqs_on(void)
+ 	curr->hardirq_enable_ip = ip;
+ 	curr->hardirq_enable_event = ++curr->irq_events;
+ 	debug_atomic_inc(&hardirqs_on_events);
++
++	how_long = now - curr->hardirq_disable_clk;
++	if (cli_trace_on) printk("%s:%llu\n", __func__, how_long);
++	if (how_long >= cli_delta)
++	{
++	    printk("DDD %s:d %#llx b %#lx e %#lx\n", __func__, how_long,
++		curr->hardirq_disable_ip, curr->hardirq_enable_ip);
++	}
+ }
+ 
+ EXPORT_SYMBOL(trace_hardirqs_on);
+@@ -1916,6 +1961,7 @@ void trace_hardirqs_off(void)
+ 		 */
+ 		curr->hardirqs_enabled = 0;
+ 		curr->hardirq_disable_ip = _RET_IP_;
++		curr->hardirq_disable_clk = mvCpuCntrsRead(0);
+ 		curr->hardirq_disable_event = ++curr->irq_events;
+ 		debug_atomic_inc(&hardirqs_off_events);
+ 	} else
+@@ -1930,6 +1976,7 @@ EXPORT_SYMBOL(trace_hardirqs_off);
+ void trace_softirqs_on(unsigned long ip)
+ {
+ 	struct task_struct *curr = current;
++	u64 now, how_long;
+ 
+ 	if (unlikely(!debug_locks))
+ 		return;
+@@ -1956,6 +2003,14 @@ void trace_softirqs_on(unsigned long ip)
+ 	 */
+ 	if (curr->hardirqs_enabled)
+ 		mark_held_locks(curr, 0, ip);
++	now = mvCpuCntrsRead(0);
++	how_long = now - curr->softirq_disable_clk;
++	if (cli_trace_on) printk("%s:%llu\n", __func__, how_long);
++	if (how_long >= cli_delta)
++	{
++	    printk("DDD %s:d %#llx b %#lx e %#lx\n", __func__, how_long,
++		curr->softirq_disable_ip, curr->softirq_enable_ip);
++	}
+ }
+ 
+ /*
+@@ -1977,6 +2032,7 @@ void trace_softirqs_off(unsigned long ip
+ 		 */
+ 		curr->softirqs_enabled = 0;
+ 		curr->softirq_disable_ip = ip;
++		curr->softirq_disable_clk = mvCpuCntrsRead(0);
+ 		curr->softirq_disable_event = ++curr->irq_events;
+ 		debug_atomic_inc(&softirqs_off_events);
+ 		DEBUG_LOCKS_WARN_ON(!softirq_count());
+Index: pkg/build/config_opt.c
+===================================================================
+RCS file: /arch/cvs/rg/pkg/build/config_opt.c,v
+retrieving revision 1.1398.2.70.2.73
+diff -u -p -r1.1398.2.70.2.73 config_opt.c
+--- pkg/build/config_opt.c	16 Jul 2014 12:45:26 -0000	1.1398.2.70.2.73
++++ pkg/build/config_opt.c	31 Jul 2014 13:27:44 -0000
+@@ -310,6 +310,31 @@ option_t openrg_distribution_options[] =
+ };
+ 
+ option_t config_options_base[] = {
++
++    // see os/linux-3.x/lib/Kconfig.debug
++    { "CONFIG_DEBUG_KMEMLEAK" },
++    { "CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE" },
++    { "CONFIG_DEBUG_KMEMLEAK_TEST" },
++    { "CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF" },
++    //{ "CONFIG_DEBUG_PREEMPT" },
++    { "CONFIG_DEBUG_RT_MUTEXES" },
++    { "CONFIG_DEBUG_PI_LIST" },
++    { "CONFIG_RT_MUTEX_TESTER" },
++    { "CONFIG_DEBUG_SPINLOCK" },
++    //{ "CONFIG_DEBUG_MUTEXES" },
++    { "CONFIG_DEBUG_LOCK_ALLOC" },
++    { "CONFIG_PROVE_LOCKING" },	// <<---- use this
++    { "CONFIG_PROVE_RCU" },
++    { "CONFIG_PROVE_RCU_REPEATEDLY" },
++    { "CONFIG_SPARSE_RCU_POINTER" },
++    { "CONFIG_LOCKDEP" },
++    { "CONFIG_LOCK_STAT" },
++    { "CONFIG_DEBUG_LOCKDEP" },
++    { "CONFIG_TRACE_IRQFLAGS" },
++    { "CONFIG_DEBUG_ATOMIC_SLEEP" },
++    { "CONFIG_STACKTRACE_SUPPORT" },
++    { "CONFIG_STACKTRACE" },
++    { "CONFIG_LOCKDEP_SUPPORT" },
+     /* The following are device configs - for each new device type, add
+      * a config, so we'll know it exists in an image. */
+     { "CONFIG_RG_DEV_IF_EEPRO100", NULL },
+@@ -3528,6 +3553,7 @@ option_t config_options_base[] = {
+     { "CONFIG_MTD_IFX_NAND_LATCH_ENABLE" },
+     { "CONFIG_IFX_SPI" },
+     { "CONFIG_IFX_SPI_ASYNCHRONOUS" },
++    { "CONFIG_IFX_SPI_DEBUG" },
+     { "CONFIG_IFX_3PORT_SWITCH" },
+     { "CONFIG_IFX_7PORT_SWITCH" },
+     { "CONFIG_IFX_ETH_FRAMEWORK" },
+@@ -4086,6 +4112,8 @@ option_t config_options_base[] = {
+     { "CONFIG_OCF_OCF" },
+     { "CONFIG_IPSEC_USE_FEROCEON_CRYPTO", NULL, OPT_HC|OPT_MK},
+ 
++    { "CONFIG_MV_CPU_PERF_CNTRS" },
++
+     /* Feroceon DSP support */
+     { "CONFIG_MARVELL_MMP", NULL, OPT_MODULE_EXPAND|OPT_EXPORT|OPT_HC },
+     { "CONFIG_PHONE" },
+Index: pkg/build/feature_config.c
+===================================================================
+RCS file: /arch/cvs/rg/pkg/build/feature_config.c,v
+retrieving revision 1.1202.2.50.2.38
+diff -u -p -r1.1202.2.50.2.38 feature_config.c
+--- pkg/build/feature_config.c	7 Jul 2014 08:33:41 -0000	1.1202.2.50.2.38
++++ pkg/build/feature_config.c	31 Jul 2014 13:27:44 -0000
+@@ -4043,6 +4043,7 @@ void general_features(void)
+ 	/* SoC options */
+ 	token_set_y("CONFIG_MV88F6500");
+ 
++	token_set_y("CONFIG_MV_CPU_PERF_CNTRS");
+         /* Etherenet Support */
+         if (token_get("CONFIG_MV_ETHERNET"))
+         {
+@@ -5550,6 +5551,11 @@ void general_features(void)
+ 	{
+ 	    /* required for all ARM-based platforms */
+ 	    token_set_y("CONFIG_UID16");
++	    token_set_y("CONFIG_STACKTRACE");
++	    token_set_y("CONFIG_STACKTRACE_SUPPORT");
++	    token_set_y("CONFIG_DEBUG_LOCK_ALLOC");
++	    token_set_y("CONFIG_LOCKDEP");
++	    token_set_y("CONFIG_TRACE_IRQFLAGS");
+ 	    token_set_y("CONFIG_TRACE_IRQFLAGS_SUPPORT");
+ 	    token_set_y("CONFIG_GENERIC_HWEIGHT");
+ 	    token_set_y("CONFIG_RTC_LIB");
+@@ -5736,6 +5742,20 @@ void general_features(void)
+ 
+     if (token_get("CONFIG_RG_VIRTUAL_WAN"))
+ 	token_set_y("CONFIG_RG_DEV_IF_VIRTUAL_WAN");
++
++    if (token_get("CONFIG_PROVE_LOCKING"))
++    {
++	token_set_y("CONFIG_STACKTRACE");
++	token_set_y("CONFIG_TRACE_IRQFLAGS");
++	token_set_y("CONFIG_DEBUG_LOCK_ALLOC");
++	token_set_y("CONFIG_DEBUG_MUTEXES");
++	token_set_y("CONFIG_LOCKDEP");
++	token_set_y("CONFIG_LOCKDEP_SUPPORT");
++	token_set_y("CONFIG_STACKTRACE_SUPPORT");
++	token_set_y("CONFIG_TRACE_IRQFLAGS_SUPPORT");
++	token_set_y("CONFIG_DEBUG_KERNEL");
++	token_set_y("CONFIG_DEBUG_SPINLOCK");
++    }
+ }    
+ 
+ /* Features that are always defined */
+Index: pkg/main/mt_main.c
+===================================================================
+RCS file: /arch/cvs/rg/pkg/main/mt_main.c,v
+retrieving revision 1.662.2.17.6.5
+diff -u -p -r1.662.2.17.6.5 mt_main.c
+--- pkg/main/mt_main.c	7 Jul 2014 11:13:38 -0000	1.662.2.17.6.5
++++ pkg/main/mt_main.c	31 Jul 2014 13:27:44 -0000
+@@ -1037,6 +1037,7 @@ static void do_main(void *data)
+     int ret;
+     char *maps = sys_get(&ret, "cat /proc/%d/maps", getpid());
+     console_printf("MAPS: \n%s", maps);
++    sleep(1);
+     str_free(&maps);
+ 
+     if ((!cCONFIG_INIT_BASIC_RUNLEVELS || run_level > 2) && 
+Index: vendor/marvell/feroceon/linux-2.6/arch/arm/mach-feroceon-kw2/core.c
+===================================================================
+RCS file: /arch/cvs/rg/vendor/marvell/feroceon/linux-2.6/arch/arm/mach-feroceon-kw2/Attic/core.c,v
+retrieving revision 1.1.14.2
+diff -u -p -r1.1.14.2 core.c
+--- vendor/marvell/feroceon/linux-2.6/arch/arm/mach-feroceon-kw2/core.c	1 Mar 2014 11:52:25 -0000	1.1.14.2
++++ vendor/marvell/feroceon/linux-2.6/arch/arm/mach-feroceon-kw2/core.c	31 Jul 2014 13:27:44 -0000
+@@ -46,6 +46,7 @@
+ #include <linux/proc_fs.h>
+ #include <linux/mtd/partitions.h>
+ #include <linux/mtd/nand.h>
++#include <linux/debug_locks.h>
+ 
+ #include <asm/arch/serial.h>
+ 
+@@ -588,6 +589,44 @@ static void __init kirkwood_l2_init(void
+ #endif
+ }
+ 
++static struct proc_dir_entry* g_cli_dir = NULL;
++static int proc_read_statistic(char *buf, char **start, off_t offset, int count, int *eof, void *data);
++static int proc_read_delta(char *buf, char **start, off_t offset, int count, int *eof, void *data);
++static int proc_read_test(char *buf, char **start, off_t offset, int count, int *eof, void *data);
++static int proc_write_delta(struct file *file, const char *buf, unsigned long count, void *data);
++static int proc_write_test(struct file *file, const char *buf, unsigned long count, void *data);
++
++static inline void proc_file_create(void)
++{
++    struct proc_dir_entry *res;
++
++    proc_mkdir("cisco", NULL);
++    g_cli_dir = proc_mkdir("cisco/cli", NULL);
++
++    create_proc_read_entry("statistic",
++                            0,
++                            g_cli_dir,
++                            proc_read_statistic,
++                            NULL);
++
++    res = create_proc_entry("delta",
++                            0,
++                            g_cli_dir);
++    if ( res != NULL ) {
++        res->read_proc  = proc_read_delta;
++        res->write_proc = proc_write_delta;
++    }
++
++    res = create_proc_entry("test",
++                            0,
++                            g_cli_dir);
++    if ( res != NULL ) {
++        res->read_proc  = proc_read_test;
++        res->write_proc = proc_write_test;
++    }
++}
++
++
+ static void __init mv_init(void)
+ {
+ 	MV_U32 boardId;
+@@ -713,6 +752,9 @@ static void __init mv_init(void)
+ 	boardId = mvBoardIdGet();
+ 	if (boardId == DB_88F6535_BP_ID || boardId == RD_88F6560_GW_ID)
+ 		platform_device_register_simple("kw_cpuidle", 0, NULL, 0);
++
++
++	proc_file_create();
+ }
+ 
+ MACHINE_START(FEROCEON_KW2 ,"Feroceon-KW2")
+@@ -725,3 +767,255 @@ MACHINE_START(FEROCEON_KW2 ,"Feroceon-KW
+ 	.timer = &mv_timer,
+ 	.init_machine = mv_init,
+ MACHINE_END
++
++#if 1
++//static void* profile_irq_disable_ra = (void *)0xdedababa;
++//static unsigned long profile_irq_disable_jiffies;
++//static int profile_irq_disable_cnt;
++int cli_delta = 1200000;
++static int test_l = 2;
++int cli_trace_on = 0;
++
++#if 0
++static int profile_raw_local_irq_save_cnt;
++static int profile_raw_local_irq_restore_cnt;
++static int profile_raw_local_irq_disable_cnt;
++static int profile_raw_local_irq_enable_cnt;
++static int profile_local_fiq_enable_cnt;
++static int profile_raw_local_irq_fiq_save_cnt;
++
++void profile_raw_local_irq_save(void)
++{
++    profile_raw_local_irq_save_cnt++;
++    if (!profile_irq_disable_cnt++)
++    {
++	profile_irq_disable_ra = __builtin_return_address(0);
++	profile_irq_disable_jiffies = jiffies;
++    }
++}
++
++void profile_raw_local_irq_restore(void)
++{
++    void *ra = __builtin_return_address(0);
++    unsigned long d;
++
++    profile_raw_local_irq_restore_cnt++;
++    if (profile_irq_disable_ra == (void *)0xdeadbaba) return;
++    if (!profile_irq_disable_cnt)
++    {
++//	printk("FOOOOOOOOOOOO %s:%p\n", __func__, ra);
++	return;
++    }
++    d = jiffies - profile_irq_disable_jiffies;
++    if (d > delta)
++	printk("delta %s:d %lu b %p e %p\n", __func__, d, profile_irq_disable_ra, ra);
++    profile_irq_disable_cnt = 0;
++}
++
++void profile_raw_local_irq_disable(void)
++{
++    profile_raw_local_irq_disable_cnt++;
++    if (!profile_irq_disable_cnt++)
++    {
++	profile_irq_disable_ra = __builtin_return_address(0);
++	profile_irq_disable_jiffies = jiffies;
++    }
++}
++
++void profile_raw_local_irq_enable(void)
++{
++    void *ra = __builtin_return_address(0);
++    unsigned long d;
++
++    profile_raw_local_irq_enable_cnt++;
++    if (profile_irq_disable_ra == (void *)0xdeadbaba) return;
++    if (!profile_irq_disable_cnt)
++    {
++//	printk("FOOOOOOOOOOOO %s:%p\n", __func__, ra);
++	return;
++    }
++    d = jiffies - profile_irq_disable_jiffies;
++    if (d > delta)
++	printk("delta %s:d %lu b %p e %p\n", __func__, d, profile_irq_disable_ra, ra);
++    profile_irq_disable_cnt = 0;
++}
++
++void profile_raw_local_irq_fiq_save(void)
++{
++    profile_raw_local_irq_fiq_save_cnt++;
++    if (!profile_irq_disable_cnt++)
++    {
++	profile_irq_disable_ra = __builtin_return_address(0);
++	profile_irq_disable_jiffies = jiffies;
++    }
++}
++
++void profile_local_fiq_enable(void)
++{
++    void *ra = __builtin_return_address(0);
++    unsigned long d;
++
++    profile_local_fiq_enable_cnt++;
++    if (profile_irq_disable_ra == (void *)0xdeadbaba) return;
++    if (!profile_irq_disable_cnt)
++    {
++//	printk("FOOOOOOOOOOOO %s:%p\n", __func__, ra);
++	return;
++    }
++    d = jiffies - profile_irq_disable_jiffies;
++    if (d > delta)
++	printk("delta %s:d %lu b %p e %p\n", __func__, d, profile_irq_disable_ra, ra);
++    profile_irq_disable_cnt = 0;
++}
++
++EXPORT_SYMBOL(profile_raw_local_irq_save);
++EXPORT_SYMBOL(profile_raw_local_irq_restore);
++EXPORT_SYMBOL(profile_raw_local_irq_disable);
++EXPORT_SYMBOL(profile_raw_local_irq_enable);
++EXPORT_SYMBOL(profile_local_fiq_enable);
++EXPORT_SYMBOL(profile_raw_local_irq_fiq_save);
++#endif
++static int proc_read_statistic(char *buf, char **start, off_t offset, int count, int *eof, void *data)
++{
++    int len = 0;
++
++    len += sprintf(buf + len, "\nDelta %d, test %d\n", cli_delta, test_l);
++#if 0
++    len += sprintf(buf + len, "profile_raw_local_irq_save %d\n", profile_raw_local_irq_save_cnt);
++    len += sprintf(buf + len, "profile_raw_local_irq_restore %d\n", profile_raw_local_irq_restore_cnt);
++    len += sprintf(buf + len, "profile_raw_local_irq_disable %d\n", profile_raw_local_irq_disable_cnt);
++    len += sprintf(buf + len, "profile_raw_local_irq_enable %d\n", profile_raw_local_irq_enable_cnt);
++    len += sprintf(buf + len, "profile_local_fiq_enable %d\n", profile_local_fiq_enable_cnt);
++    len += sprintf(buf + len, "profile_raw_local_irq_fiq_save %d\n", profile_raw_local_irq_fiq_save_cnt);
++#endif
++    if ( offset >= len )
++    {
++        *start = buf;
++        *eof = 1;
++        return 0;
++    }
++    *start = buf + offset;
++    if ( (len -= offset) > count )
++        return count;
++    *eof = 1;
++    return len;
++}
++
++static int proc_read_delta(char *buf, char **start, off_t offset, int count, int *eof, void *data)
++{
++    int len = 0;
++
++    len += sprintf(buf + len, "\n%d\n", cli_delta);
++
++    if ( offset >= len )
++    {
++        *start = buf;
++        *eof = 1;
++        return 0;
++    }
++    *start = buf + offset;
++    if ( (len -= offset) > count )
++        return count;
++    *eof = 1;
++    return len;
++}
++
++#define MV_ASM              __asm__ __volatile__
++static inline  u64 mvCpuCntrsRead(const int counter)
++{
++	u32 low = 0, high = 0;
++
++	switch (counter) {
++	case 0:
++MV_ASM("mrc p15, 0, %0, c15, c13, 0" : "=r"(low));
++MV_ASM("mrc p15, 0, %0, c15, c13, 1" : "=r"(high));
++		break;
++
++	case 1:
++MV_ASM("mrc p15, 0, %0, c15, c13, 2" : "=r"(low));
++MV_ASM("mrc p15, 0, %0, c15, c13, 3" : "=r"(high));
++		break;
++
++	case 2:
++MV_ASM("mrc p15, 0, %0, c15, c13, 4" : "=r"(low));
++MV_ASM("mrc p15, 0, %0, c15, c13, 5" : "=r"(high));
++		break;
++
++	case 3:
++MV_ASM("mrc p15, 0, %0, c15, c13, 6" : "=r"(low));
++MV_ASM("mrc p15, 0, %0, c15, c13, 7" : "=r"(high));
++		break;
++
++	default:
++		printk("mv_cpu_cntrs_read: bad counter number (%d)\n", counter);
++	}
++	return (((u64) high << 32) | low);
++}
++
++static int proc_read_test(char *buf, char **start, off_t offset, int count, int *eof, void *data)
++{
++    int len = 0, cnt = test_l;
++    volatile unsigned int blst;
++    unsigned long flags;
++    u64 now;
++
++    now = mvCpuCntrsRead(0);
++    len += sprintf(buf + len, "%d c %llu ... ", test_l, now);
++
++    debug_locks = 1;
++    cli_trace_on = 0;
++    local_irq_save(flags);
++    while (cnt--)
++	for (blst = 0x00ffffff; blst; blst--);
++    local_irq_restore(flags);
++    cli_trace_on = 0;
++    debug_locks = 0;
++
++    now = mvCpuCntrsRead(0);
++    len += sprintf(buf + len, "%llu\n", now);
++
++    if ( offset >= len )
++    {
++        *start = buf;
++        *eof = 1;
++        return 0;
++    }
++    *start = buf + offset;
++    if ( (len -= offset) > count )
++        return count;
++    *eof = 1;
++    return len;
++}
++
++static int proc_write_delta(struct file *file, const char *buf, unsigned long count, void *data)
++{
++    char str[128];
++    int len;
++
++    len = count < sizeof(str) ? count : sizeof(str) - 1;
++    copy_from_user(str, buf, len);
++
++    /* Buffer is not null terminated */
++    str[len-1] = 0;
++
++    sscanf(str, "%d", &cli_delta);
++
++    return count;
++}
++
++static int proc_write_test(struct file *file, const char *buf, unsigned long count, void *data)
++{
++    char str[128];
++    int len;
++
++    len = count < sizeof(str) ? count : sizeof(str) - 1;
++    copy_from_user(str, buf, len);
++
++    /* Buffer is not null terminated */
++    str[len-1] = 0;
++
++    sscanf(str, "%d", &test_l);
++
++    return count;
++}
++#endif
+Index: vendor/marvell/feroceon/linux-2.6/arch/arm/plat-feroceon/mv_drivers_lsp/mv_tpm/core/tpm_init.c
+===================================================================
+RCS file: /arch/cvs/rg/vendor/marvell/feroceon/linux-2.6/arch/arm/plat-feroceon/mv_drivers_lsp/mv_tpm/core/Attic/tpm_init.c,v
+retrieving revision 1.1.10.4
+diff -u -p -r1.1.10.4 tpm_init.c
+--- vendor/marvell/feroceon/linux-2.6/arch/arm/plat-feroceon/mv_drivers_lsp/mv_tpm/core/tpm_init.c	28 Apr 2014 10:36:30 -0000	1.1.10.4
++++ vendor/marvell/feroceon/linux-2.6/arch/arm/plat-feroceon/mv_drivers_lsp/mv_tpm/core/tpm_init.c	31 Jul 2014 13:27:44 -0000
+@@ -2910,7 +2910,7 @@ int32_t tpm_init_info_set(void)
+ void tpm_init_locks_init(void)
+ {
+ 	spin_lock_init(&tpmPncLock);
+-	spin_lock_init(&tpmModLock);
++//	spin_lock_init(&tpmModLock);
+ 	spin_lock_init(&tpmTcamAgingLock);
+ }
+ 

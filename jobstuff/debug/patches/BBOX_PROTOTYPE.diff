@@ -1,0 +1,456 @@
+Index: os/linux-2.6/arch/mips/kernel/genex.S
+===================================================================
+RCS file: /arch/cvs/rg/os/linux-2.6/arch/mips/kernel/genex.S,v
+retrieving revision 1.5.4.1
+diff -p -u -r1.5.4.1 genex.S
+--- os/linux-2.6/arch/mips/kernel/genex.S	8 May 2012 09:04:38 -0000	1.5.4.1
++++ os/linux-2.6/arch/mips/kernel/genex.S	31 Jul 2014 14:53:27 -0000
+@@ -185,6 +185,7 @@ NESTED(handle_int, PT_SIZE, sp)
+ 	SAVE_ALL
+ 	CLI
+ 	TRACE_IRQS_OFF
++	move	a0, sp
+ 
+ 	LONG_L	s0, TI_REGS($28)
+ 	LONG_S	sp, TI_REGS($28)
+Index: os/linux-2.6/arch/mips/kernel/traps.c
+===================================================================
+RCS file: /arch/cvs/rg/os/linux-2.6/arch/mips/kernel/traps.c,v
+retrieving revision 1.12.4.1
+diff -p -u -r1.12.4.1 traps.c
+--- os/linux-2.6/arch/mips/kernel/traps.c	8 May 2012 09:04:40 -0000	1.12.4.1
++++ os/linux-2.6/arch/mips/kernel/traps.c	31 Jul 2014 14:53:27 -0000
+@@ -332,9 +332,21 @@ void show_regs(struct pt_regs *regs)
+ 	printk("PrId  : %08x\n", read_c0_prid());
+ }
+ 
++extern int bbox_stop;
++extern unsigned long bbox_enters;
++extern unsigned long bbox_exits;
++void  __attribute__ ((no_instrument_function)) bbox_dump(void);
++
++static void show_bbox(void)
++{
++	bbox_stop++;
++	bbox_dump();
++}
++
+ void show_registers(struct pt_regs *regs)
+ {
+ 	show_regs(regs);
++	show_bbox();
+ 	print_modules();
+ 	printk("Process %s (pid: %d, threadinfo=%p, task=%p)\n",
+ 	        current->comm, current->pid, current_thread_info(), current);
+Index: os/linux-2.6/arch/mips/kernel/unaligned.c
+===================================================================
+RCS file: /arch/cvs/rg/os/linux-2.6/arch/mips/kernel/unaligned.c,v
+retrieving revision 1.9
+diff -p -u -r1.9 unaligned.c
+--- os/linux-2.6/arch/mips/kernel/unaligned.c	8 Apr 2010 18:25:09 -0000	1.9
++++ os/linux-2.6/arch/mips/kernel/unaligned.c	31 Jul 2014 14:53:27 -0000
+@@ -495,13 +495,22 @@ fault:
+ 	if (fixup_exception(regs))
+ 		return 1;
+ 
+-	die_if_kernel ("Unhandled kernel unaligned access", regs);
++if (unlikely(!user_mode(regs)))
++	printk("UNALIGNED trap: at %lx: %lx <-instr. (ra=%lx)\n",
++	    regs->cp0_epc, *((unsigned long *)(regs->cp0_epc)),
++	    regs->regs[31]);
++
++	die_if_kernel ("Unhandled kernel unaligned access 1", regs);
+ 	send_sig(SIGSEGV, current, 1);
+ 
+ 	return 0;
+ 
+ sigbus:
+-	die_if_kernel("Unhandled kernel unaligned access", regs);
++if (unlikely(!user_mode(regs)))
++    printk("UNALIGNED trap: at %lx: %lx <-instr. (ra=%lx)\n",
++	    regs->cp0_epc, *((unsigned long *)(regs->cp0_epc)),
++	    regs->regs[31]);
++	die_if_kernel("Unhandled kernel unaligned access 2", regs);
+ 	send_sig(SIGBUS, current, 1);
+ 
+ 	return 0;
+Index: os/linux-2.6/drivers/mtd/mtdpart.c
+===================================================================
+RCS file: /arch/cvs/rg/os/linux-2.6/drivers/mtd/mtdpart.c,v
+retrieving revision 1.4.4.3
+diff -p -u -r1.4.4.3 mtdpart.c
+--- os/linux-2.6/drivers/mtd/mtdpart.c	17 May 2012 08:32:36 -0000	1.4.4.3
++++ os/linux-2.6/drivers/mtd/mtdpart.c	31 Jul 2014 14:53:27 -0000
+@@ -20,6 +20,7 @@
+ #include <linux/mtd/mtd.h>
+ #include <linux/mtd/partitions.h>
+ #include <linux/mtd/compatmac.h>
++#include <linux/interrupt.h>
+ 
+ /* Our partition linked list */
+ static LIST_HEAD(mtd_partitions);
+@@ -494,6 +495,121 @@ int add_mtd_partitions(struct mtd_info *
+ EXPORT_SYMBOL(add_mtd_partitions);
+ EXPORT_SYMBOL(del_mtd_partitions);
+ 
++volatile int bbox_stop = 0;
++volatile unsigned long bbox_enters;
++volatile unsigned long bbox_exits;
++typedef struct {
++    int in;
++    void *func_address;
++    void *call_site;
++    long int gp;
++} bbox_ring_t;
++
++static bbox_ring_t bbox_ring[0x00ff+1];
++volatile static unsigned int bbox_idx;
++volatile static int bbox_recurs;
++
++void  __attribute__ ((no_instrument_function)) bbox_dump(void)
++{
++    unsigned int bbox_idx_save = ((bbox_idx-1) & 0xff);
++    bbox_ring_t *record;
++
++    printk("************* Black BOX ****************\n");
++    printk(" bbox_idx %u (%#x)\n", bbox_idx, bbox_idx);
++    printk(" bbox_enters %lu bbox_exits %lu\n", bbox_enters, bbox_exits);
++
++    while ((bbox_idx & 0xff) != bbox_idx_save)
++    {
++	record = bbox_ring + (bbox_idx++ & 0xff);
++	printk ("%c %p from %p gp %#010lx\n", record->in? '>' : '<',
++	    record->func_address, record->call_site, record->gp);
++    }
++    printk("****************************************\n");
++}
++
++void __attribute__ ((no_instrument_function)) __cyg_profile_func_enter
++   ( void *func_address, void *call_site )
++{
++    register long int _gp  __asm__ ("$28");
++    bbox_ring_t *record;
++    unsigned long flags;
++
++//    if (bbox_enters < 959)
++	bbox_enters++;
++
++    if (bbox_stop)
++	return;
++
++
++//	if (bbox_idx >=200)
++//	    bbox_stop = 1;
++
++
++#if 0
++    if (bbox_recurs++)
++    {
++	restore_flags(flags);
++	printk("ZHOPA~~~~~~~~~~~~\n");
++	*(int *)0 = 0xcacac0c0;
++    }
++    save_and_cli(flags);
++#endif
++
++    record = bbox_ring + (bbox_idx++ & 0xff);
++    record->in = 1;
++    record->func_address = func_address;
++    record->call_site = call_site;
++    record->gp = _gp;
++
++
++//    bbox_recurs--;
++//    restore_flags(flags);
++
++//    bbox_enters++;
++}
++
++void __attribute__ ((no_instrument_function)) __cyg_profile_func_exit
++   ( void *func_address, void *call_site )
++{
++    register long int _gp  __asm__ ("$28");
++    bbox_ring_t *record;
++    unsigned long flags;
++
++    bbox_exits ++;
++
++    if (unlikely(bbox_stop))
++	return;
++
++//    if (bbox_idx >= 200)
++//	bbox_stop = 1;
++
++#if 0
++
++    if (bbox_recurs)
++    {
++	restore_flags(flags);
++	printk("FOO ~~~~~~~~~~~~\n");
++//	*(int *)0 = 0xc0c0caca;
++    }
++
++    save_and_cli(flags);
++#endif
++
++    record = bbox_ring + (bbox_idx++ & 0xff);
++    record->in = 0;
++    record->func_address = func_address;
++    record->call_site = call_site;
++    record->gp = _gp;
++
++//    if (bbox_exits < 1024)
++
++//    restore_flags(flags);
++   
++}
++
++EXPORT_SYMBOL(__cyg_profile_func_enter);
++EXPORT_SYMBOL(__cyg_profile_func_exit);
++
+ static DEFINE_SPINLOCK(part_parser_lock);
+ static LIST_HEAD(part_parsers);
+ 
+Index: os/linux-2.6/drivers/serial/8250.c
+===================================================================
+RCS file: /arch/cvs/rg/os/linux-2.6/drivers/serial/8250.c,v
+retrieving revision 1.13.10.1
+diff -p -u -r1.13.10.1 8250.c
+--- os/linux-2.6/drivers/serial/8250.c	14 Jan 2013 17:01:53 -0000	1.13.10.1
++++ os/linux-2.6/drivers/serial/8250.c	31 Jul 2014 14:53:27 -0000
+@@ -1255,6 +1255,53 @@ static void serial8250_enable_ms(struct 
+ 	serial_out(up, UART_IER, up->ier);
+ }
+ 
++int gil = 0;
++void test_qwerty(void)
++{
++#if 0
++    int i;
++    volatile int *oi;
++    unsigned long pp = &i;
++
++    printk("========== %#x %p", pp, current);
++#endif
++//    oi = &i;
++
++
++#if 0
++    oi = &i;
++    oi += 0x1000;
++    while ((unsigned long)oi&0x7fff != 0x4000)
++	*oi-- = 0xc0cac01a;
++
++    oi = &i;
++    oi -= 0x1000;
++    while ((unsigned long)oi&0x7fff != 0x4000)
++	*oi-- = 0xc0cac01a;
++#endif
++
++//#define    current 0;
++//    current = 0xbc1de001;
++//    current_thread_info()->task = 0xbc1de001;
++    gil = -1;
++
++#if 0
++	__asm__ __volatile__(
++		".set\tnoreorder\n\t"
++		".set\tnoat\n\t"
++		"lui\t$28,0xbc1d\n\t"
++		"addiu\t$28,$28,0xe001\n\t"
++		".set\tat\n\t"
++		".set\treorder");
++
++//	if ((current->thread.mflags & MF_FIXADE) == 0)
++//	    printk("Foooo\n");
++
++#endif
++
++//    *((volatile int *)(0x10dd10d3)) = 0xC0FECACA;
++}
++
+ static void
+ receive_chars(struct uart_8250_port *up, unsigned int *status)
+ {
+@@ -1267,6 +1314,11 @@ receive_chars(struct uart_8250_port *up,
+ 		ch = serial_inp(up, UART_RX);
+ 		flag = TTY_NORMAL;
+ 		up->port.icount.rx++;
++if (ch == '}')
++{
++    test_qwerty();
++    printk("TTTTTTTTTTTTTTTTTTRRRRRRRRRRAAAAAAPPPP\n");
++}
+ 
+ #ifdef CONFIG_SERIAL_8250_CONSOLE
+ 		/*
+Index: os/linux-2.6/kernel/irq/manage.c
+===================================================================
+RCS file: /arch/cvs/rg/os/linux-2.6/kernel/irq/manage.c,v
+retrieving revision 1.4
+diff -p -u -r1.4 manage.c
+--- os/linux-2.6/kernel/irq/manage.c	8 Apr 2010 19:56:28 -0000	1.4
++++ os/linux-2.6/kernel/irq/manage.c	31 Jul 2014 14:53:27 -0000
+@@ -501,6 +501,9 @@ int request_irq(unsigned int irq, irq_ha
+ 	struct irqaction *action;
+ 	int retval;
+ 
++printk("****************************** request_irq %d \"%s\" from %p\n",
++    irq, devname, __builtin_return_address(0));
++
+ #ifdef CONFIG_LOCKDEP
+ 	/*
+ 	 * Lockdep wants atomic interrupt handlers:
+Index: pkg/build/config_host.c
+===================================================================
+RCS file: /arch/cvs/rg/pkg/build/config_host.c,v
+retrieving revision 1.217.2.3.10.6
+diff -p -u -r1.217.2.3.10.6 config_host.c
+--- pkg/build/config_host.c	27 Jan 2013 19:11:02 -0000	1.217.2.3.10.6
++++ pkg/build/config_host.c	31 Jul 2014 14:53:27 -0000
+@@ -1712,6 +1712,9 @@ static void conf_rg_linux_cflags(void)
+     if (!token_get("CONFIG_FRAME_POINTER"))
+ 	str_catprintf(&f, "-fomit-frame-pointer ");
+ 
++    if (token_get("CONFIG_RG_DBG_KERNEL_BBOX"))
++	str_catprintf(&f, "-finstrument-functions ");
++
+     if (token_get("CONFIG_SL2312_COMMON"))
+     {
+ 	str_catprintf(&f, "-Os -Uarm -mapcs-32 -D__LINUX_ARM_ARCH__=4 "
+Index: pkg/build/config_opt.c
+===================================================================
+RCS file: /arch/cvs/rg/pkg/build/config_opt.c,v
+retrieving revision 1.1398.2.19.6.61
+diff -p -u -r1.1398.2.19.6.61 config_opt.c
+--- pkg/build/config_opt.c	28 Jan 2013 21:21:22 -0000	1.1398.2.19.6.61
++++ pkg/build/config_opt.c	31 Jul 2014 14:53:27 -0000
+@@ -558,6 +558,7 @@ option_t config_options_base[] = {
+      * Depends on CONFIG_RG_DEBUG_ULIBC_MALLOC and severely impairs performance.
+      * */
+     { "CONFIG_RG_DBG_ULIBC_MEM_POISON" , NULL, OPT_NUMBER },
++    { "CONFIG_RG_DBG_KERNEL_BBOX" },
+     { "CONFIG_DISABLE_NETDEV_MODIFYING" }, /* some vendor drivers (received
+ 					    * as binary) don't allow 
+ 					    * modification of the net_device
+Index: pkg/build/dist_config.c
+===================================================================
+RCS file: /arch/cvs/rg/pkg/build/dist_config.c,v
+retrieving revision 1.1548.2.10.10.100
+diff -p -u -r1.1548.2.10.10.100 dist_config.c
+--- pkg/build/dist_config.c	28 Jan 2013 21:21:22 -0000	1.1548.2.10.10.100
++++ pkg/build/dist_config.c	31 Jul 2014 14:53:27 -0000
+@@ -1393,6 +1393,19 @@ void distribution_features()
+ 	token_set_y("CONFIG_RG_FOOTPRINT_REDUCTION");
+ 
+ 	token_set_y("CONFIG_RG_RMT_UPGRADE_IMG_IN_MEM");
++
++	/* Debugging tools */
++#if 1	/* Enable those features only for development compilations */
++	token_set_y("CONFIG_RG_DBG_ULIBC_MALLOC");
++	/* Redirect malloc error messages from stdout to /dev/console */
++	token_set_y("CONFIG_RG_DBG_MALLOC_2_CON");
++	/* Crash task in case of found memory error */
++	token_set_y("CONFIG_RG_DBG_ULIBC_MALLOC_CRASH");
++	/* This feature fills freed memory with 0xeb value. If you found case of
++	 * usage released memory - use is_mem_valid(ptr) for memory validation.
++	 * Impairs board performance severely!!! */ 
++	token_set("CONFIG_RG_DBG_ULIBC_MEM_POISON", "1024");
++#endif
+     }
+     else if (IS_DIST("RGLOADER_WNDR3400_CABLEVISION"))
+     {
+Index: pkg/kernel/linux/boot/misc.c
+===================================================================
+RCS file: /arch/cvs/rg/pkg/kernel/linux/boot/misc.c,v
+retrieving revision 1.22.2.1
+diff -p -u -r1.22.2.1 misc.c
+--- pkg/kernel/linux/boot/misc.c	19 Jun 2012 06:41:12 -0000	1.22.2.1
++++ pkg/kernel/linux/boot/misc.c	31 Jul 2014 14:53:27 -0000
+@@ -600,3 +600,13 @@ addr_t do_boot(register addr_t start_add
+     return kernel(silent_serial, cramfs_start, CRAMFS_LEN, 
+ 	(unsigned long)cramfs_location);
+ }
++void __attribute__ ((no_instrument_function)) __cyg_profile_func_enter
++   ( void *func_address, void *call_site )
++{
++}
++
++void __attribute__ ((no_instrument_function)) __cyg_profile_func_exit
++   ( void *func_address, void *call_site )
++{
++}
++
+Index: pkg/kernel/linux/klog/Makefile
+===================================================================
+RCS file: /arch/cvs/rg/pkg/kernel/linux/klog/Makefile,v
+retrieving revision 1.3
+diff -p -u -r1.3 Makefile
+--- pkg/kernel/linux/klog/Makefile	28 Jul 2009 18:31:40 -0000	1.3
++++ pkg/kernel/linux/klog/Makefile	31 Jul 2014 14:53:28 -0000
+@@ -8,6 +8,8 @@ JMK_OX_OBJS_rg_klog.o += klog.o
+ JMK_O_OBJS_rg_klog_chardev.o += klog_chardev.o
+ JMK_OX_OBJS_rg_klog_ram_be.o += klog_ram_storage.o 
+ 
++JMK_CFLAGS_REMOVE+=-finstrument-functions
++
+ JMK_EXPORT_HEADERS_DIR = klog
+ JMK_EXPORT_HEADERS += klog_chardev.h klog.h
+ JMK_INTERNAL_HEADERS += klog_console.h
+Index: pkg/kernel/one_module/Makefile
+===================================================================
+RCS file: /arch/cvs/rg/pkg/kernel/one_module/Makefile,v
+retrieving revision 1.12
+diff -p -u -r1.12 Makefile
+--- pkg/kernel/one_module/Makefile	26 Jan 2012 14:50:36 -0000	1.12
++++ pkg/kernel/one_module/Makefile	31 Jul 2014 14:53:28 -0000
+@@ -3,6 +3,7 @@ ifndef JMKE_ENV_INCLUDED
+   include $(JMK_ROOT)/jmk/env_root.mak
+ endif
+ 
++#JMK_CFLAGS_REMOVE+=-finstrument-functions
+ JMK_MOD_TARGET=one_module.o
+ JMK_O_OBJS_one_module.o=one_module.o
+ JMK_L_OBJS_one_module.o+=$(JMKE_BUILDDIR)/pkg/kos/kos_lib.o
+Index: pkg/main/mt_main.c
+===================================================================
+RCS file: /arch/cvs/rg/pkg/main/mt_main.c,v
+retrieving revision 1.662.2.5.4.14
+diff -p -u -r1.662.2.5.4.14 mt_main.c
+--- pkg/main/mt_main.c	19 Jul 2012 11:12:58 -0000	1.662.2.5.4.14
++++ pkg/main/mt_main.c	31 Jul 2014 14:53:28 -0000
+@@ -1031,6 +1031,7 @@ static void do_main(void *data)
+     char *maps = sys_get(&ret, "cat /proc/%d/maps", getpid());
+     console_printf("MAPS: \n%s", maps);
+     str_free(&maps);
++    sleep(1);
+ 
+     if ((!cCONFIG_INIT_BASIC_RUNLEVELS || run_level > 2) && 
+ 	!is_rerun && rg_load_kernel_modules())
+Index: vendor/broadcom/bcm947xx/linux-2.6/arch/mips/brcm-boards/bcm947xx/irq.c
+===================================================================
+RCS file: /arch/cvs/rg/vendor/broadcom/bcm947xx/linux-2.6/arch/mips/brcm-boards/bcm947xx/irq.c,v
+retrieving revision 1.1.6.1
+diff -p -u -r1.1.6.1 irq.c
+--- vendor/broadcom/bcm947xx/linux-2.6/arch/mips/brcm-boards/bcm947xx/irq.c	8 May 2012 08:48:23 -0000	1.1.6.1
++++ vendor/broadcom/bcm947xx/linux-2.6/arch/mips/brcm-boards/bcm947xx/irq.c	31 Jul 2014 14:53:28 -0000
+@@ -170,6 +170,8 @@ plat_irq_dispatch(struct pt_regs *regs)
+ 	uint32 flags = 0;
+ 	int irq;
+ 
++//    *(int *)0x0 = 0xc0cac01a;
++
+ 	/* Disable MIPS IRQs with pending interrupts */
+ 	pending = read_c0_cause() & CAUSEF_IP;
+ 	pending &= read_c0_status();
+@@ -264,6 +266,10 @@ plat_irq_dispatch(struct pt_regs *regs)
+ 	if (local_softirq_pending() && !in_interrupt())
+ 		__do_softirq();
+ 	local_irq_restore(flags);
++extern int gil;
++if (gil)
++    regs->cp0_epc = 0x7f000000;
++
+ }
+ 
+ /* MIPS IRQ0 to IRQ7 interrupt controller */
