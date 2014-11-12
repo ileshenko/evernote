@@ -15,7 +15,7 @@
 #define PIN_RI  0x80
 
 
-#define LED PIN_RI
+#define LED PIN_RTS
 
 int main()
 {
@@ -44,9 +44,10 @@ int main()
 //    ftdi_set_bitmode(&ftdic, LED, BITMODE_CBUS);
 
     /* Endless loop: invert LED state, write output, pause 1 second */
-    for(i = 0; i < 17; i++) {
+    for(i = 17; i; i--) {
         c ^= LED;
         ftdi_write_data(&ftdic, &c, 1);
+	printf("%d\n", i);
         sleep(1);
     }
     ftdi_disable_bitbang(&ftdic);

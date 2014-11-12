@@ -21,7 +21,8 @@ apt-get install libftdi-dev
 
 libftdi examples compilation FROM Debian Sources:
 cd /tmp
-apt-get sources libftdi
+apt-get source libftdi
+mkdir -p ~/dev/libftdi_stuff
 mv libftdi-0.20/ ~/dev/libftdi_stuff/
 cd ~/dev/libftdi_stuff/libftdi-0.20/
 mkdir build
@@ -36,6 +37,7 @@ cd libftdi_git
 mkdir build
 
 gcc -o hello-ftdi hello-ftdi.c -lftdi 
+gcc -o bitbang_cbus bitbang_cbus.c -lftdi 
 gcc -o bitbang_cbus bitbang_cbus.c -lftdi 
 
 sudo ./hello-ftdi

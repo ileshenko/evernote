@@ -6,5 +6,16 @@ rt rmmod usbserial
 #rt insmod /lib/modules/2.6.39-2-686-pae/kernel/drivers/usb/serial/ftdi_sio.ko
 rt modprobe ftdi_sio
 
+
+rt rmmod ftdi_sio ; rt rmmod usbserial; rt modprobe ftdi_sio
+
 while true ; do rt stty hupcl -F /dev/ttyUSB0 ; rt stty -hupcl -F /dev/ttyUSB0 ; done
+
+while true ; do rt stty -hupcl -F /dev/ttyUSB0 0     ; sleep 0.1 ;\
+                rt stty -hupcl -F /dev/ttyUSB0 115200; sleep 0.1 ; done
+
+
+libftdi - open source project
+libftd2xx - ftdi library. No sources
+
 
