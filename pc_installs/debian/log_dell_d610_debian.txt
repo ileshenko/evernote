@@ -51,3 +51,9 @@ Webcam:
 silver cam - out of the box
 kopete (part of KDE) - to test cam (check selfview in properties)
 apt-get install camorama
+
+Skype: 32 bits / i386
+# wget -O skype-install.deb http://www.skype.com/go/getskype-linux-deb
+# dpkg -i skype-install.deb
+To fix missing dependencies, you might want to use:
+# apt-get -f install
