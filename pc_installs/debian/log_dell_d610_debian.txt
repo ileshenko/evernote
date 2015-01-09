@@ -27,7 +27,19 @@ Remove indexer (system settings-> desktop search)
 
 #> dropbox start -i
 
-install copy.com XXX I did run it as root. Possible this is an error TODO - validate it
+install copy.com XXX I did run it as root. Possible this is an error TODO - validate it:
+- in browser https://www.copy.com
+- Download application
+- mkdir ~/bin2
+- . ~/.bashrc_igor
+- mv -v ~/Downloads/copy_agent* ~/bin2
+- cd ~/bin2
+- tar zxvf copy_agent*
+- mkdir -p ~/Clouds/copy_il_mr/
+- ./copy/x86/CopyAgent -installOverlay
+- select /home/igorl/Clouds/copy_il_mr
+
+Next time it will start automatically
 
 Disable KDE Wallet (System Settings -> Account Details -> KDE)
 

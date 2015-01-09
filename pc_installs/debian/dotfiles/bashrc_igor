@@ -18,6 +18,11 @@ else
   echo no
 fi
 
+# set PATH so it includes user's private bin2 if it exists
+if [ -d "$HOME/bin2" ] ; then
+    PATH="$HOME/bin2:$PATH"
+fi
+
 cdg () 
 { 
     D=`ltools` && echo $D && cd $D
