@@ -3,7 +3,7 @@ cd
 ln -s ~/evernote_git/pc_installs/debian/home_bin/ ~/bin
 
 cd ~/evernote_git/pc_installs/debian/dotfiles
-for i in * ; do ln -v -s `pwd`$i ~/.$i ; done
+for i in * ; do ln -v -s `pwd`/$i ~/.$i ; done
 
 cd /bin
 sudo ln -sf bash sh
