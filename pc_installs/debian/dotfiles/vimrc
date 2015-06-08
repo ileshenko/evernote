@@ -6,6 +6,7 @@
 set nobackup
 set sm
 set is
+set tabpagemax=20
 
 let g:dont_load_funcheader = 1 
 
@@ -20,13 +21,13 @@ map <S-Insert> <MiddleMouse>
 map! <S-Insert> <MiddleMouse>
 
 map <f1> :cs add cscope.out<cr>:set cst<cr>
-map <f2> :execute ':!cvsdiff' TokenUnderCursor(1) '&' <cr><cr>
+map <f2> :execute ':!git difftool' TokenUnderCursor(1) '&' <cr><cr>
 map <silent> <f3> /^.\{81,\}\\|^\t.\{73,\}\\|^\t\t.\{65,\}<cr>
 map <silent> <s-f3> /^\s*\n\s*$<cr>
 "map <f4> :%s/ethernet frame size:// <cr> :%s/\n.*ed:// <cr> :%s/pa.*ec:/-/ <cr>
 "map <f4> :set ts=4 nowrap columns=120<cr>
 "map <f4> :execute ':!xxdiff /tmp/ikan_dev/' . TokenUnderCursor(1) '~/rg/5_1.commit/vendor/ikanos/' . TokenUnderCursor(1) '&' <cr><cr>
-map <f4> :execute ':!cvs stat ' TokenUnderCursor(1)  <cr>
+map <f4> :execute ':!git status -s ' TokenUnderCursor(1) <cr>
 
 let g:dont_load_fuzzyfinder = 1
 map <f5> :execute ':!cvsdiff -r ugw-4_2-ga -r ugw-5_1-linux' TokenUnderCursor(1) '&' <cr><cr>

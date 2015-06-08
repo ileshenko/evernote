@@ -69,3 +69,16 @@ git ls-files --others // my version. Works as well
 tracked
 -------
 git ls-files
+
+standard branches
+=================
+: show branches
+git branch
+: create branch
+#git branch dev/igor/qqq
+git checkout -b dev/igor/qqq
+: list of files, modified on a branch
+git diff --name-only master this_branch
+:list of commits done on current branch
+git log origin/master.. --oneline
+

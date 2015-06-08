@@ -6,9 +6,11 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias la='ls -al'
 alias ll='ls -l'
+alias gitdiff='git difftool'
+alias jgrep='git grep -n --color'
 
 host=`hostname`
-if [ $host == "jlab" -o  $host == "nps10" ]; then
+if [ $host == "jlab" -o $host == "nps10" -o $host == "nps19" ]; then
   export EDITOR=$'gvim -f'
 
   alias g=gvim
