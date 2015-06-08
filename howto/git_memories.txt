@@ -82,3 +82,12 @@ git diff --name-only master this_branch
 :list of commits done on current branch
 git log origin/master.. --oneline
 
+collaborations
+===============
+: create patch from commit (on NPS##)
+git format-patch -M origin/master
+: apply patch on second (laptop)
+git am <path to file>
+: after pushing changes to github, on NPS
+git stash ;git fetch; git merge --ff-only origin/master ; git stash pop
+
