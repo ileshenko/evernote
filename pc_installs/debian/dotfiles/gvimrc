@@ -9,8 +9,8 @@
 "set nocompatible	" Use Vim defaults (much better!)
 "set bs=2		" allow backspacing over everything in insert mode
 "set ai			" always set autoindenting on
-"set ts=8		" set tab size tp 8 -GABI
-"set sw=4		" set shift width to 4
+set ts=4		" set tab size tp 8 -GABI
+set sw=4		" set shift width to 4
 "set nobackup		" keep a backup file
 "set viminfo='20,\"50	" read/write a .viminfo file, don't store more
 			" than 50 lines of registers
@@ -39,6 +39,7 @@ set novb
 if &diff
   "set guifont=-Adobe-Courier-Medium-R-Normal--12-120-75-75-M-70-koi8-ub
   set guifont=LucidaConsole\ 8
+  set guifont=Bitstream\ Vera\ Sans\ Mono\ 13
   "set guifont=Courier\ 9
   "set guifont=LucidaTypewriter\ 10
   "set guifont=Fixed\ 9
@@ -48,10 +49,11 @@ if &diff
   "map <Tab> ]c
   "map <S-Tab> [c
   "map dr :diffget<CR>
-  "map du :diffupdate<CR>
+  map du :diffupdate<CR>
   set columns=156
   set lines=55
   colorscheme peachpuff
+  cmap q qa
 endif
 
 nmap <S-Insert> <MiddleMouse>
@@ -153,7 +155,7 @@ if !&diff
     "set guifont=Courier\ New\ 13
     set guifont=Bitstream\ Vera\ Sans\ Mono\ 13
     "set guifont=LucidaSansTypewriter\ 9
-    set columns=80
+    set columns=130
 "    colorscheme morning
     " exe "wincmd l"
     " exe "normal gg"
@@ -164,6 +166,8 @@ noremap <C-F1> :execute ':!cvsxdiff' TokenUnderCursor(1) '&' <cr><cr>
 "noremap <F1> :execute ':!cvsdiff' TokenUnderCursor(1) '&' <cr><cr>
 "noremap <F1> :call BranchDiff()<Enter>
 noremap <M-F1> :execute ':!gvim' TokenUnderCursor(1) '&' <cr><cr>
+
+map wq :set columns=170<cr> 
 
 "function BranchDiff()
 "  let vl = getline(line("."))
