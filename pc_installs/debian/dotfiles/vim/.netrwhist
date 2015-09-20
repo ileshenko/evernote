@@ -1,5 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =3
-let g:netrw_dirhist_1='/home/igor/HOWTO/daily'
-let g:netrw_dirhist_2='/home/igor/sandbox/dev.3/apps/pcie/pcie_03_hp_dp'
-let g:netrw_dirhist_3='/home/igor/sandbox/dev.3/apps/pcie/pcie_03_hp_dp/src'

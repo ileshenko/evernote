@@ -12,5 +12,13 @@ PWD=`pwd`
 ##      -name "*.[chxsS]" -print >/home/jru/cscope/cscope.files
 
 #find "$PWD/apps/pcie" "$PWD/dpe" "$PWD/samples/pci_stack/pci_stack_app/src" -name "*.[chxsS]" -print > cscope.files
-find "$PWD/dpe" "$PWD/samples/pci_stack/pci_stack_app/src" -name "*.[chxsS]" -print > cscope.files
+#find "$PWD/dpe" "$PWD/samples/pci_stack/pci_stack_app/src" -name "*.[chxsS]" -print > cscope.files
+#find "/home/npsdb/br/ldk/x86_64/linux" "$PWD/ldk/build/nps_transp" -name "*.[chxsS]" -print > cscope.files
+#find "$PWD/dpe" "$PWD/apps/pci_tr" -name "*.[chxsS]" -print > cscope.files
+PPP=``
+for var in "$@"
+do
+    PPP+=" $PWD/$var"
+done
 
+find $PPP -name "*.[chxsS]" -print > cscope.files
