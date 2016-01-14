@@ -1,6 +1,7 @@
 #!/bin/bash 
 
-DIFFPROG=xxdiff
+#DIFFPROG=xxdiff
+DIFFPROG=gvimdiff
 
 trap '
 echo "Cleaning up..." 

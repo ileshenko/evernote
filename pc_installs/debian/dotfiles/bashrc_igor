@@ -10,7 +10,9 @@ alias gitdiff='git difftool'
 alias jgrep='git grep -n --color'
 
 host=`hostname`
-if [ $host == "jlab" -o $host == "nps10" -o $host == "nps19" ]; then
+# if [[ $host == "jlab" -o $host == *"nps"* ]]; then
+if [[ $host == *"nps"* ]]; then
+  echo yes
   export EDITOR=$'gvim -f'
 
   alias g=gvim
