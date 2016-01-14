@@ -1,10 +1,11 @@
-[user]
-    name = Igor Leshenko
-    email = jungoigorl@gmail.com
 [color]
     branch = auto
     diff = auto
     status = auto
+    interactive = auto
+    pager = true
+    ui = auto
+
 [alias]
     a = add -A
     ci = commit
@@ -12,15 +13,22 @@
     dc = diff --cached
     pom = push origin master
     logp = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+    lp = log --date=short --pretty=format:'%C(yellow)%h%Creset %ae %Cgreen%ad%Creset%C(cyan)%d%Creset %s'
 
-[diff]
-	tool = xxdiff
+#[diff]
+#	tool = xxdiff
 
 #[diff]
 #	tool = def_birger
+
+[diff]
+	tool = gvimdiff
 
 [difftool]
 	prompt = no
 
 [difftool "def_birger"]
 	cmd = $DIFFPROG $LOCAL $REMOTE
+
+[merge]
+  tool = meld
