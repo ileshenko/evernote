@@ -8,6 +8,9 @@ alias la='ls -al'
 alias ll='ls -l'
 alias gitdiff='git difftool'
 alias jgrep='git grep -n --color'
+alias cdr=cdg
+
+source ~/.git-completion.bash
 
 host=`hostname`
 # if [[ $host == "jlab" -o $host == *"nps"* ]]; then
