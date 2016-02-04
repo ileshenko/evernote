@@ -5,6 +5,17 @@ edit /etc/apt/sources.list
 - add "deb http://ftp.de.debian.org/debian squeeze main contrib"
 - add "deb http://linux.dropbox.com/debian squeeze main"
 
+--------------------------------------------------------------------------------------
+Dropbox:
+Add the following line to /etc/apt/sources.list. Replace squeeze with your build's name.
+deb http://linux.dropbox.com/debian squeeze main
+To import our GPG keys into your apt repository, perform the following command from your terminal shell:
+
+$ sudo apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 1C61A2656FB57B7E4DE0F4C1FC918B335044912E
+
+----------------------------------------------------------
+
+
 adduser maint
 adduser igorl
 adduser igorl sudo
