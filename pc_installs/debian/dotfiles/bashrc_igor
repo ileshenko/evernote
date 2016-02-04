@@ -14,7 +14,7 @@ source ~/.git-completion.bash
 
 host=`hostname`
 # if [[ $host == "jlab" -o $host == *"nps"* ]]; then
-if [[ $host == *"nps"* ]]; then
+#if [[ $host == *"nps"* ]]; then
   echo yes
   export EDITOR=$'gvim -f'
 
@@ -23,9 +23,9 @@ if [[ $host == *"nps"* ]]; then
   PATH="/sbin:$PATH"
   export PS1='\[\e[1;35m\]\u\[\e[1;37m\]@\[\e[1;33m\]\h\[\e[1;36m\] \W\[\e[1;37m\]\$ '
 
-else
-  echo no
-fi
+#else
+#  echo no
+#fi
 
 # set PATH so it includes user's private bin2 if it exists
 if [ -d "$HOME/bin2" ] ; then

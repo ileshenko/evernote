@@ -76,7 +76,19 @@ kopete (part of KDE) - to test cam (check selfview in properties)
 apt-get install camorama
 
 Skype: 32 bits / i386
+See https://wiki.debian.org/skype for reference
 # wget -O skype-install.deb http://www.skype.com/go/getskype-linux-deb
 # dpkg -i skype-install.deb
 To fix missing dependencies, you might want to use:
 # apt-get -f install
+Video for Skype
+- Make sure, that your webcam works generally (use kopete)
+- #apt-get install libv4l-0:i386
+- Find location of v4l1compat.so
+- create NEW file /usr/local/bin/skype
+- add
+***********
+#!/bin/bash
+LD_PRELOAD=/usr/lib/i386-linux-gnu/libv4l/v4l1compat.so /usr/bin/skype 
+***********
+- chmod a+x /usr/local/bin/skype
