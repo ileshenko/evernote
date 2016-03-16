@@ -10,7 +10,9 @@ alias gitdiff='git difftool'
 alias jgrep='git grep -n --color'
 alias cdr=cdg
 
-source ~/.git-completion.bash
+if [[ $USER == "igorle" ]]; then
+  source ~/.git-completion.bash
+fi
 
 host=`hostname`
 # if [[ $host == "jlab" -o $host == *"nps"* ]]; then
@@ -21,7 +23,7 @@ host=`hostname`
   alias g=gvim
 
   PATH="/sbin:$PATH"
-  export PS1='\[\e[1;35m\]\u\[\e[1;37m\]@\[\e[1;33m\]\h\[\e[1;36m\] \W\[\e[1;37m\]\$ '
+  export PS1='\[\e[1;35m\]\u\[\e[1;37m\]@\[\e[1;33m\]\h\[\e[1;36m\] \W\[\e[1;37m\]\$ \[\e[0;37m\]'
 
 #else
 #  echo no

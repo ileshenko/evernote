@@ -28,8 +28,8 @@ logout and login as igorl
 
 install:
 --------
-"vim-gtk" "firmware-b43-installer" "wicd" "minicom" "flashplugin-nonfree"
-"adblock-plus" "dropbox" build-essential
+"vim-gtk" "firmware-b43-installer" "minicom" "flashplugin-nonfree"
+ "dropbox" 
 
 
 

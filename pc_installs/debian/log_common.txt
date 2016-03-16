@@ -1,8 +1,7 @@
-git clone https://github.com/ileshenko/evernote.git evernote_git
-cd
-ln -s ~/evernote_git/pc_installs/debian/home_bin/ ~/bin
+git clone https://github.com/ileshenko/evernote.git evergit
+ln -s ~/evergit/pc_installs/debian/home_bin/ ~/bin
 
-cd ~/evernote_git/pc_installs/debian/dotfiles
+cd ~/evergit/pc_installs/debian/dotfiles
 for i in * ; do ln -v -s `pwd`/$i ~/.$i ; done
 
 cd /bin
@@ -17,13 +16,15 @@ if [ -f ~/.bashrc_igor ]; then
 fi
 #-----------------------------------------------
 
-cd evernote_git/pc_installs/debian/home_bin
+cd evergit/pc_installs/debian/home_bin
 rt chown root:root lpt_pwr
 rt chmod +s lpt_pwr
 
 
 install
 -------
-git gitk cscope htop cmake dos2unix tree xxdiff socat gdb
+git vim-gtk
+gitk cscope htop cmake dos2unix tree xxdiff socat gdb build-essential
+wicd adblock-plus
 
 
