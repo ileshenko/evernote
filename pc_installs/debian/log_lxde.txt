@@ -1,0 +1,4 @@
+apt-get install lxde
+
+keyboard layout
+setxkbmap -option grp:toggle us,ru
