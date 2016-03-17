@@ -9,6 +9,7 @@ alias ll='ls -l'
 alias gitdiff='git difftool'
 alias jgrep='git grep -n --color'
 alias cdr=cdg
+alias jd="notify-send -u critical -t 1000000 -i info $(pwd) 'Job is Done'"
 
 if [[ $USER == "igorle" ]]; then
   source ~/.git-completion.bash
