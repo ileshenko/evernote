@@ -1,0 +1,1 @@
+rm -f rename_me.bin ; make netlowgen ; ./netlowgen ; while true ; do cat rename_me.bin | nc -u -w 1 10.1.21.159 2055 ; done
