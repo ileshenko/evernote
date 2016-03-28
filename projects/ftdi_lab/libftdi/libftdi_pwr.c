@@ -41,6 +41,7 @@ int main(void)
     unsigned char buf[1];
     unsigned char bitmask;
     unsigned char input[10];
+	int i;
 
     if (ftdi_init(&ftdic) < 0)
     {
@@ -56,7 +57,11 @@ int main(void)
     }
     printf("ftdi open succeeded: %d\n",f);
     ftdi_set_bitmode(&ftdic, 0xf4, BITMODE_CBUS);
-    sleep(3);
+	for (i = 10; i; i--)
+	{
+		printf ("%d\n", i);
+		sleep (1);
+	}
     ftdi_set_bitmode(&ftdic, 0xf0, BITMODE_CBUS);
 #if 0
     while (1)
