@@ -5,8 +5,11 @@
 
 //eznetflow_field_type
 
-
+#ifdef IPFIX_PROTO
+#define NTOP_BASE_ID 0
+#else
 #define NTOP_BASE_ID 57472
+#endif
 
 /* 1024 custom ntop elements for v9 should be enough */
 #define NTOP_BASE_NETFLOW_ID  NTOP_BASE_ID+1024

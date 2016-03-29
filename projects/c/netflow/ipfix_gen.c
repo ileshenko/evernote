@@ -3,16 +3,16 @@
 #include <string.h>
 #include <fcntl.h>
 
+#define IPFIX_PROTO
 #include "netflow_defs.h"
 
 #define __packed __attribute__((packed))
-#define ARR_SZ(arrname) (sizeof(arrname)/sizeof(*(arrname))) 
+#define ARR_SZ(arrname) (sizeof(arrname)/sizeof(*(arrname)))
 #define NTOP_ENEPRISE_ID 35632
 
 struct netflow_header {
 	uint16_t version;
-//	uint16_t count;
-	uint32_t system_uptime;
+	uint16_t length;
 	uint32_t unix_seconds;
 	uint32_t package_sequence;
 	uint32_t source_id;
@@ -27,10 +27,7 @@ struct options_template_header {
 	uint16_t template_id;
 	uint16_t field_count;
 	uint16_t scope_field_count;
-//	uint16_t option_scope_length;
-//	uint16_t option_length;
 } __packed;
-
 
 struct data_template_header {
 	uint16_t template_id;
@@ -50,8 +47,8 @@ static struct netflow_header *set_header(void)
 	struct netflow_header *header = (void*)&accum[0];
 
 	header->version = htobe16(10);
-	header->count = 0; //save in host endian untill end
-	header->system_uptime = htobe32(0x00000050);
+	header->length = 0;
+//	header->system_uptime = htobe32(0x00000050);
 	header->unix_seconds = htobe32(1458490401);
 	header->package_sequence = htobe32(0);
 	header->source_id = htobe32(1);
@@ -87,46 +84,41 @@ static void set_opt_template(void)
 	start = pos;
 
 	flowset = (void*)&accum[pos];
-	pos += sizeof (*flowset);
+	pos += sizeof(*flowset);
 	flowset->id = htobe16(3); //Options Template V10
 
 	options_template = (void*)&accum[pos];
-	pos += sizeof (*options_template);
+	pos += sizeof(*options_template);
 
 	options_template->template_id = htobe16(256);
 	options_template->field_count = 0;
 	options_template->scope_field_count = 0;
-//	options_template->option_scope_length = 0;
-//	options_template->option_length = 0;
 
 	for (i = 0; i < ARR_SZ(options_scope); i++)
 	{
 		field = (void*)&accum[pos];
-		pos += sizeof (*field);
+		pos += sizeof(*field);
 
 		field->type = htobe16(options_scope[i].field);
 		field->length = htobe16(options_scope[i].len);
 		options_template->field_count++;
 		options_template->scope_field_count++;
-//		options_template->option_scope_length += sizeof (*field);
 	}
 
 	for (i = 0; i < ARR_SZ(options); i++)
 	{
 		field = (void*)&accum[pos];
-		pos += sizeof (*field);
+		pos += sizeof(*field);
 
 		field->type = htobe16(options[i].field);
 		field->length = htobe16(options[i].len);
-//		options_template->option_length += sizeof (*field);
 		options_template->field_count++;
 
 		if (!(options[i].field & 0x8000))
 			continue;
 		enterprise_id = (void*)&accum[pos];
-		pos += sizeof (*enterprise_id);
-		*enterprise_id = htobe32 (NTOP_ENEPRISE_ID);
-//		options_template->option_length += sizeof (*enterprise_id);
+		pos += sizeof(*enterprise_id);
+		*enterprise_id = htobe32(NTOP_ENEPRISE_ID);
 	}
 
 	flowset->length = pos - start;
@@ -140,27 +132,27 @@ static void set_opt_template(void)
 		flowset->length, options_template->field_count,
 		options_template->scope_field_count);
 
-	flowset->length = htobe16 (flowset->length);
-	options_template->field_count = htobe16 (options_template->field_count);
-	options_template->scope_field_count = htobe16 (options_template->scope_field_count);
+	flowset->length = htobe16(flowset->length);
+	options_template->field_count = htobe16(options_template->field_count);
+	options_template->scope_field_count = htobe16(options_template->scope_field_count);
 }
 
 setup_t data[] = {
-	{FIRST_SWITCHED, FIRST_SWITCHED_LEN, {{0x00, 0x00, 0x00, 0x4d}, {0x00, 0x00, 0x01, 0x4d}, {0x00, 0x00, 0x01, 0x0d}}},
-	{LAST_SWITCHED, LAST_SWITCHED_LEN, {{0x00, 0x00, 0x00, 0x50}, {0x00, 0x00, 0x002, 0x50}, {0x00, 0x00, 0x002, 0x05}}},
-	{PROTOCOL, PROTOCOL_LEN, {{6}, {17}, {1}}},
-	{IPV4_SRC_ADDR, IPV4_SRC_ADDR_LEN, {{0x11, 0x22, 0x33, 0x44}, {0x11, 0x22, 0x33, 0x55}, {0x11, 0x22, 0x44, 0x44}}},
-	{IPV4_DST_ADDR, IPV4_DST_ADDR_LEN, {{0x44, 0x33, 0x22, 0x11}, {0x44, 0x33, 0x22, 0x11}, {0x44, 0x33, 0x22, 0x11}}},
-	{L4_SRC_PORT, L4_SRC_PORT_LEN, {{0x12, 0x34}, {0x12, 0x43}, {0x12, 0xc3}}},
-	{L4_DST_PORT, L4_DST_PORT_LEN, {{0x23, 0x45}, {0x23, 0x56}, {0x12, 0x3c}}},
 	{IN_BYTES, IN_BYTES_LEN, {{0x00, 0x00, 0xbb, 0xcc}, {0x00, 0x00, 0xdd, 0xbb}, {0x00, 0x00, 0xcc, 0xbb}}},
 	{IN_PKTS, IN_PKTS_LEN, {{0x00, 0x00, 0x00, 0xcc}, {0x00, 0x00, 0x01, 0xcc}, {0x00, 0x00, 0x0c, 0xcb}}},
-	{FLOWS, FLOWS_LEN, {{0x00, 0x00, 0x00, 0x01}, {0x00, 0x00, 0x00, 0x10}, {0x00, 0x00, 0x01, 0x00}}},
+	{PROTOCOL, PROTOCOL_LEN, {{6}, {17}, {1}}},
+	{L4_SRC_PORT, L4_SRC_PORT_LEN, {{0x12, 0x34}, {0x12, 0x43}, {0x12, 0xc3}}},
+	{IPV4_SRC_ADDR, IPV4_SRC_ADDR_LEN, {{0x11, 0x22, 0x33, 0x44}, {0x11, 0x22, 0x33, 0x55}, {0x11, 0x22, 0x44, 0x44}}},
+	{L4_DST_PORT, L4_DST_PORT_LEN, {{0x23, 0x45}, {0x23, 0x56}, {0x12, 0x3c}}},
+	{IPV4_DST_ADDR, IPV4_DST_ADDR_LEN, {{0x44, 0x33, 0x22, 0x11}, {0x44, 0x33, 0x22, 0x11}, {0x44, 0x33, 0x22, 0x11}}},
+	{LAST_SWITCHED, LAST_SWITCHED_LEN, {{0x00, 0x00, 0x00, 0x50}, {0x00, 0x00, 0x002, 0x50}, {0x00, 0x00, 0x002, 0x05}}},
+	{FIRST_SWITCHED, FIRST_SWITCHED_LEN, {{0x00, 0x00, 0x00, 0x4d}, {0x00, 0x00, 0x01, 0x4d}, {0x00, 0x00, 0x01, 0x0d}}},
+//	{FLOWS, FLOWS_LEN, {{0x00, 0x00, 0x00, 0x01}, {0x00, 0x00, 0x00, 0x10}, {0x00, 0x00, 0x01, 0x00}}},
 //	{APPLICATION_NAME,APPLICATION_NAME_LEN, "sdfgsdfgsdfg"},
 //	{APPLICATION_TAG, APPLICATION_TAG_LEN, {{0x01, 0x00, 0x00, 47}, {0x01, 0x00, 0x00, 65}, {0x01, 0x00, 0x00, 0}}},
-	{L7_PROTO | 0x8000, L7_PROTO_LEN, {{0x01, 0x06}, {0x01, 0x07}, {0x01, 0x08}}},
+	{L7_PROTO | 0x8000, L7_PROTO_LEN, {{0x00, 0x10}, {0x00, 0x11}, {0x00, 0x12}}},
+	{L7_PROTO_NAME | 0x8000, L7_PROTO_NAME_LEN, {"mama", "papa", "ira"}},
 };
-
 
 static void set_data_template(void)
 {
@@ -173,19 +165,19 @@ static void set_data_template(void)
 	start = pos;
 
 	flowset = (void*)&accum[pos];
-	pos += sizeof (*flowset);
-	flowset->id = htobe16(2); //Data Template V9
+	pos += sizeof(*flowset);
+	flowset->id = htobe16(2); //Data Template V10
 
 	data_template = (void*)&accum[pos];
-	pos += sizeof (*data_template);
+	pos += sizeof(*data_template);
 
-	data_template->template_id = htobe16(259);
+	data_template->template_id = htobe16(270);
 	data_template->field_count = 0; /*convert endianess at the end */
 
 	for (i = 0; i < ARR_SZ(data); i++)
 	{
 		field = (void*)&accum[pos];
-		pos += sizeof (*field);
+		pos += sizeof(*field);
 
 		field->type = htobe16(data[i].field);
 		field->length = htobe16(data[i].len);
@@ -195,8 +187,8 @@ static void set_data_template(void)
 			continue;
 
 		enterprise_id = (void*)&accum[pos];
-		pos += sizeof (*enterprise_id);
-		*enterprise_id = htobe32 (NTOP_ENEPRISE_ID);
+		pos += sizeof(*enterprise_id);
+		*enterprise_id = htobe32(NTOP_ENEPRISE_ID);
 	}
 
 	flowset->length = pos-start;
@@ -213,7 +205,7 @@ static void set_options(void)
 	start = pos;
 
 	flowset = (void*)&accum[pos];
-	pos += sizeof (*flowset);
+	pos += sizeof(*flowset);
 	flowset->id = htobe16(256); /* Options */
 
 	for (j = 0; j<3; j++)
@@ -253,8 +245,8 @@ static void set_data(void)
 	start = pos;
 
 	flowset = (void*)&accum[pos];
-	pos += sizeof (*flowset);
-	flowset->id = htobe16(259); /*Data*/
+	pos += sizeof(*flowset);
+	flowset->id = htobe16(270); /*Data*/
 
 	for (j = 0; j<3; j++)
 	{
@@ -274,7 +266,6 @@ static void set_data(void)
 		flowset->length++;
 	}
 
-
 	flowset->length = pos-start;
 	printf("--------------\ndata len %d, pos %d\n============\n", flowset->length, pos);
 	flowset->length = htobe16(flowset->length);
@@ -285,28 +276,15 @@ int main(void)
 	int fd = open("rename_me.bin", O_WRONLY | O_CREAT | O_APPEND, 0666);
 	struct netflow_header *pkt_head;
 
-
 	pkt_head = set_header();
-	set_opt_template();
-	pkt_head->count++;
-
-
+//	set_opt_template();
 	set_data_template();
-	pkt_head->count++;
-
-	set_options();
-	pkt_head->count++;
-
+//	set_options();
 	set_data();
-	pkt_head->count++;
 
-	pkt_head->count = htobe16(pkt_head->count);
+	pkt_head->length = htobe16(pos);
 	write(fd, accum, pos);
 
 	close(fd);
 	return 0;
-
-
-
-	
 }
