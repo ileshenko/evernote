@@ -1,3 +1,7 @@
+#use following sintax for including me
+#[include]
+#	path = .gitconfig_igor
+
 [color]
     branch = auto
     diff = auto
