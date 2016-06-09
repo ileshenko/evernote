@@ -3,3 +3,4 @@ exec_as_root
 *.pyc
 cscope.out
 pc_installs/debian/dotfiles/vim/.netrwhist
+imem_parse
