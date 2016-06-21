@@ -1,0 +1,31 @@
+
+From https://www.linode.com/docs/websites/apache/apache-web-server-debian-8
+
+To check your hostname run:
+
+1> hostname
+2> hostname -f
+
+The first command should show your short hostname, and the second should show your fully qualified domain name (FQDN).
+===============
+
+apt-get install apache2 apache2-doc apache2-utils
+===============
+Edit the main Apache configuration file and turn off the KeepAlive setting:
+
+vim /etc/apache2/apache2.conf
+~~~~~
+#> KeepAlive Off
+==================
+....
+Some stuff from URL skipped second time. No influence found currently
+===================
+
+chmod -R a+w /var/www
+
+
+===
+scp -r ~/Documents/windows/Netflow_instructions* ~/Documents/windows/App_team_resources* ~/Documents/windows/README.txt maint@labcnsl01:/var/www/html
+scp ~/Documents/windows/App_team_resources.htm maint@labcnsl01:/var/www/html/index.html
+
+
