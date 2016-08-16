@@ -1,4 +1,4 @@
-#inlude <stdio.h>
+#include <stdio.h>
 
 enum {
 	r, g, v
