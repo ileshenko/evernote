@@ -25,6 +25,6 @@ install
 -------
 git vim-gtk
 gitk cscope htop cmake dos2unix tree xxdiff socat gdb build-essential
-wicd adblock-plus
+wicd adblock-plus ntp
 
 
