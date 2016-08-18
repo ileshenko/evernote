@@ -13,12 +13,12 @@
 
 /* python commands:
  
-f1=open('/tmp/igorle_hist', 'w+')
+f1=open('/tmp/igorle_chaos', 'w+')
 
 def prnt():
 	print >> f1, cpe.cp.prm.read_mem(channel_id=0, mem_id='INT_MEM',
 	mem_space_index=0, lsb_address=0, msb_address=0, single_copy=False,
-	gci_copy=False, copy_index=0, length=4*1027).result.get('params').get('data');
+	gci_copy=False, copy_index=0, length=4*1024 + 4 + 4).result.get('params').get('data');
 	f1.flush()
 
 def rst():
@@ -32,14 +32,19 @@ def stp(shift):
 	single_copy=False, gci_copy=False, copy_index=0, data_size=1, data=shift,
 	range_size=1)
 
+def sw(mode):
+	cpe.cp.prm.write_mem(channel_id=0, mem_id='INT_MEM', mem_space_index=0,
+	lsb_address=1024*4+3, msb_address=0, range=True, range_step=1,
+	single_copy=False, gci_copy=False, copy_index=0, data_size=1, data=mode,
+	range_size=1)
+
 */
 
 #if 0
-ihist_parse /tmp/igorle_hist
+ichaos_parse /tmp/igorle_chaos
 
 rst()
 prnt()
-sw('00')
 stp('0a')
 
 #endif
@@ -60,17 +65,17 @@ cpe.cp.prm.write_mem(channel_id=0, mem_id='INT_MEM', mem_space_index=0, lsb_addr
 cpe.cp.prm.read_mem(channel_id=0, mem_id='INT_MEM', mem_space_index=0, lsb_address=0, msb_address=0, single_copy=False, gci_copy=False, copy_index=0, length=8).result.get('params').get('data')
 #endif
 
-static void print_chart(unsigned char *chart)
+static void print_chart(int *chart)
 {
 	int i, p;
 	int line_is_blank;
 	char *clr, chr;
 
-	for (p = 20; p > 0; p--)
+	for (p = 32; p > 0; p--)
 	{
 		line_is_blank = 1;
 
-		for (i = 0; i < 64; i++)
+		for (i = 0; i < 128; i++)
 		{
 			if (chart[i] >= p)
 				line_is_blank = 0;
@@ -79,7 +84,7 @@ static void print_chart(unsigned char *chart)
 		if (line_is_blank)
 			continue;
 
-		for (i = 0; i < 64; i++)
+		for (i = 0; i < 128; i++)
 		{
 			if (chart[i] > 30)
 				clr = ANSI_COLOR_RED;
@@ -88,10 +93,12 @@ static void print_chart(unsigned char *chart)
 			else
 				clr = ANSI_COLOR_BLUE;
 
-			if (chart[i] >= 20)
+			if (chart[i] >= 32)
 				chr = '*';
 			else if (chart[i] >= p)
 				chr = '#';
+			else if (p == 1 && chart[i] == -1)
+				chr = '.';
 			else
 				chr = ' ';
 			
@@ -103,26 +110,25 @@ static void print_chart(unsigned char *chart)
 
 static void summary(uint32_t *vals)
 {
-	uint32_t start, step, sw;
+	uint32_t step, sw;
 
-	start = vals[0];
+	sw = vals[0];
 	step = vals[1];
-	sw = vals[2];
 	
-	printf("switch %u, begin %u end %u step %u (%d)\n", sw, start, (1<<step)*256 + start, 1<<step, step);
+	printf("SW %02x, from %d to %d step %u (%d)\n", sw, -512*(1<<step), 512*(1<<step)-1, 1<<step, step);
 }
 
 static void report(uint32_t *vals)
 {
 	unsigned int i, j;
 	uint64_t acc, percent_weight;
-	unsigned char chart[64];
+	int chart[128];
 
 	acc = 0;
-	for (i = 0; i<256; i++)
+	for (i = 0; i<1024; i++)
 		acc += vals[i];
 
-	percent_weight = acc / 128;
+	percent_weight = acc / 256;
 	
 	if (!percent_weight)
 	{
@@ -130,17 +136,20 @@ static void report(uint32_t *vals)
 		return;
 	}
 
-	for (i = 0; i < 64; i++)
+	for (i = 0; i < 128; i++)
 	{
 		acc = 0;
-		for (j = 0; j < 4; j++)
-			acc += vals[i * 4 + j];
+		for (j = 0; j < 8; j++)
+			acc += vals[i * 8 + j];
 
 		chart[i] = (acc + percent_weight / 2) / percent_weight;
+		if (chart[i] == 0 && acc != 0)
+			chart[i] = -1;
 	}
 
 	print_chart(chart);
-	printf("1=======10========20========30========40========50========60====\n");
+	printf("===60========50========40========30========20========10=========");
+	printf("0========10========20========30========40========50========60===\n");
 }
 
 static void histogram(uint32_t *vals)
@@ -230,9 +239,7 @@ int main(int argc, char* argv[])
 {
 	FILE *f;
 	char buff[256];
-	uint32_t vals[1024+3]; /* Data and start, step, switch */
-	                          
-	int start, stop;
+	uint32_t vals[1024 + 1]; /* Data and step */
 	int tail, cnt, i;
 
 	if (argc != 2)
@@ -268,8 +275,6 @@ int main(int argc, char* argv[])
 			{
 				summary(vals + 1024);
 				report(vals);
-				report(vals + 256);
-				report(vals + 512);
 				tail = cnt = 0;
 				break;
 			}
