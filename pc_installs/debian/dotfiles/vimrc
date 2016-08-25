@@ -21,7 +21,8 @@ map <S-Insert> <MiddleMouse>
 map! <S-Insert> <MiddleMouse>
 
 map <f1> :cs add cscope.out<cr>:set cst<cr>
-map <f2> :execute ':!git difftool' TokenUnderCursor(1) '&' <cr><cr>
+map <f2> :execute ':!git difftool --' TokenUnderCursor(1) '&' <cr><cr>
+map <s-f2> :execute ':!git diff --' TokenUnderCursor(1) <cr>
 map <silent> <f3> /^.\{81,\}\\|^\t.\{73,\}\\|^\t\t.\{65,\}<cr>
 map <silent> <s-f3> /^\s*\n\s*$<cr>
 "map <f4> :%s/ethernet frame size:// <cr> :%s/\n.*ed:// <cr> :%s/pa.*ec:/-/ <cr>

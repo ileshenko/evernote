@@ -38,15 +38,20 @@ static struct {
 } comments[] = {
 	{0, 0x000, "Left classifier"},
 	{128, 0x000, "Right classifier"},
+	{249, 0x000, "Dsorter A"},
+	{250, 0x000, "Dsorter B"},
+	{251, 0x000, "Dsorter C"},
+	{252, 0x000, "Dsorter D"},
 	{253, 0x000, "Enc. lookup"},
 	{253, 0x001, "Wait for sorter"},
 	{253, 0x003, "sec slot alloc"},
 	{253, 0x007, "HW encryption"},
-	{253, 0x00f, "free slot and finish"},
+	{253, 0x00f, "free sec slot"},
+	{253, 0x01f, "finish"},
 	{254, 0x000, "Dec. lookup"},
 	{254, 0x001, "sec slot alloc"},
 	{254, 0x003, "HW decription"},
-	{254, 0x007, "Wait for sorter"},
+	{254, 0x007, "Free sec slot"},
 	{254, 0x00f, "Finish"},
 	{0, 0, NULL}
 };
@@ -82,10 +87,13 @@ void print_2(uint32_t *vals, int first, int last)
 	}
 
 	id = vals[first] >> 24;
+
 	if (id == 253)
 		printf(ANSI_COLOR_CYAN);
 	else if (id == 254)
 		printf(ANSI_COLOR_BLUE);
+	else if (id >= 249)
+		printf(ANSI_COLOR_RED);
 
 	stage = vals[first] & 0x00fff000;
 	stage >>= 12;
