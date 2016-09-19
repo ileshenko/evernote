@@ -27,4 +27,5 @@ git vim-gtk
 gitk cscope htop cmake dos2unix tree xxdiff socat gdb build-essential
 wicd adblock-plus ntp
 
-
+for pdf. Instead of acroread use evince
+apt-get install evince
