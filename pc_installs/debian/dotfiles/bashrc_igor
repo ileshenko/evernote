@@ -11,14 +11,24 @@ alias jgrep='git grep -n --color'
 alias cdr=cdg
 alias jd="notify-send -u critical -t 1000000 -i info $(pwd) 'Job is Done'"
 
+
+if ( shopt -q login_shell ); then
+	echo Login shell
+else
+	echo Not Login shell
+	# set PATH so it includes user's private bin if it exists
+	if [ -d "$HOME/bin" ] ; then
+		PATH="$HOME/bin:$PATH"
+	fi
+fi
+
 if [[ $USER == "igorle" ]]; then
   source ~/.git-completion.bash
 fi
 
-host=`hostname`
+#host=`hostname`
 # if [[ $host == "jlab" -o $host == *"nps"* ]]; then
 #if [[ $host == *"nps"* ]]; then
-  echo yes
   export EDITOR=$'gvim -f'
 
   alias g=gvim
