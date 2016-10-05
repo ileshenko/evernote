@@ -29,3 +29,10 @@ wicd adblock-plus ntp
 
 for pdf. Instead of acroread use evince
 apt-get install evince
+
+flash plugin:
+-------------
+Install:
+sudo apt-get install flashplugin-nonfree
+Update
+sudo update-flashplugin-nonfree --install
