@@ -9,6 +9,8 @@ struct c_wa {
 	char carr[42];
 };
 
+#define C_WA_SZ sizeof(c_wa)
+
 struct c_tiny_wa {
 	char t_a;
 	char t_b;

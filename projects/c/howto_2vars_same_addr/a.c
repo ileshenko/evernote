@@ -1,9 +1,9 @@
 /* Main project file */
 
 #include <stdio.h>
+
+#include "a.h"
 #include "b.h"
-
-
 
 
 struct a_wa {

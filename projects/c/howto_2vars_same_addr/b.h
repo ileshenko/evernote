@@ -12,6 +12,8 @@ struct b_wa {
 	struct c_tiny_wa tiny_wa;
 };
 
+#define B_WA_SZ sizeof(b_wa)
+
 //extern struct b_wa g_bwa;
 extern struct b_wa g_bwa ASMNAME(my_cmem.bwa);
 
