@@ -1,17 +1,22 @@
 #include <stdio.h>
-#include "c.h"
+#include <string.h>
 
-//extern int y;
-//extern int y ASMNAME(x);
+#include "g.h"
+#include "c_api.h"
+
+void c_init(void)
+{
+	printf("%s:>>>\n", __func__);
+	memset(&C_WA, 0x42, sizeof(C_WA));
+	printf("%s:<<<\n", __func__);
+}
 
 void c_foo(void)
 {
-//	printf("y = %d\n", y);
-//	y = 99;
-//	printf("y = %d\n", y);
-	printf("b_foo: q_bwa.x was %d\n", g_bwa.x);
-	g_bwa.x = 42;
-	printf("b_foo: q_bwa.x become %d\n", g_bwa.x);
+	printf("%s:enter, WA %p (%d)\n", __func__, &C_WA, C_WA_SZ);
+	printf("change C_WA.x from %d ", C_WA.cx);
+	printf("to %d\n", C_WA.cx=44);
 }
+
 
 
