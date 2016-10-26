@@ -6,6 +6,8 @@
 #include "b_types.h"
 #include "c_api.h"
 
+#include <stdio.h>
+
 static void __always_inline b_bar(void)
 {
 	printf("%s:>>>>> WA %p    (%d)\n", __func__, &B_WA, B_WA_SZ);

@@ -5,7 +5,9 @@
 
 #include "c_types.h"
 
-void __always_inline c_bar(void)
+#include <stdio.h>
+
+static void __always_inline c_bar(void)
 {
 	printf("%s:>>>>> WA %p (%d)\n", __func__, &C_WA, C_WA_SZ);
 	printf("change C_WA.x from %d ", C_WA.cx);
@@ -13,7 +15,7 @@ void __always_inline c_bar(void)
 	printf("%s:<<<<<\n", __func__);
 }
 
-void __always_inline ct_foo(void)
+static void __always_inline ct_foo(void)
 {
 	printf("%s:DDDDDDD WA %p (%d)\n", __func__, &CT_WA, sizeof(CT_WA));
 	printf("change CT_WA.t_a from %d ", CT_WA.t_a);
@@ -21,7 +23,7 @@ void __always_inline ct_foo(void)
 	printf("%s:dddddd\n", __func__);
 }
 
-void __always_inline ct_bar(void)
+static void __always_inline ct_bar(void)
 {
 	printf("%s:DDDDDDD WA %p (%d)\n", __func__, &CT_WA, sizeof(CT_WA));
 	printf("change CT_WA.t_a from %d ", CT_WA.t_a);

@@ -1,17 +1,26 @@
-#include <stdio.h>
 
 #include "g.h"
+
+#ifdef NPS
+#include "c_inl.h"
 #include "b_inl.h"
+#endif
+
+#include "c_api.h"
 #include "b_api.h"
 
+#include <stdio.h>
 #include <string.h>
 
 void b_init(void)
 {
 	printf("%s:>>>\n", __func__);
+
+	g_ct_wa = B_WA.c_tiny_wa; /* Important Init before usage C tiny API */
+
 	memset(&B_WA, 0xca, sizeof(B_WA));
-	g_ct_wa = &B_WA.tiny_wa;
 	c_init();
+
 	printf("%s:<<<\n", __func__);
 }
 

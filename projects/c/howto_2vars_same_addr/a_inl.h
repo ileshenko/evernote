@@ -4,6 +4,7 @@
 #define _A_INL_H_
 
 #include "b_api.h"
+
 #include "a_types.h"
 
 static void __always_inline a_bar(void)

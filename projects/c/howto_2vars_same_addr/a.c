@@ -1,18 +1,25 @@
 /* Main project file */
+/* comilation for NPS
+ *    cc -DNPS -o demo a.c a2.c b.c c.c && ./demo
+ * Compilation for X86
+ *    cc -DX86 -o demo a.c a2.c b.c c.c && ./demo
+ */
 
 #include <stdio.h>
 
 #include "g.h"
 
+#ifdef NPS
 #include "c_inl.h"
 #include "b_inl.h"
 #include "a_inl.h"
+#endif
 
 #include "c_api.h"
 #include "b_api.h"
 #include "a_api.h"
 
-struct c_tiny_wa *g_ct_wa;
+uint8_t *g_ct_wa; /* may be inside c.c */
 uint8_t g_was[MAX3(A_WA_SZ, B_WA_SZ, C_WA_SZ)];
 
 static void a_foo(void)

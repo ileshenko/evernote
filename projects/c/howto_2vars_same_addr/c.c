@@ -1,8 +1,15 @@
-#include <stdio.h>
-#include <string.h>
+/* Basic library. Part of API used tiny working area */
 
 #include "g.h"
+
+#ifdef NPS
+#include "c_inl.h"
+#endif
+
 #include "c_api.h"
+
+#include <stdio.h>
+#include <string.h>
 
 void c_init(void)
 {
@@ -17,6 +24,4 @@ void c_foo(void)
 	printf("change C_WA.x from %d ", C_WA.cx);
 	printf("to %d\n", C_WA.cx=44);
 }
-
-
 
