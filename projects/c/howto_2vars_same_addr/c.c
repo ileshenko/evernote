@@ -20,7 +20,7 @@ void c_init(void)
 
 void c_foo(void)
 {
-	printf("%s:enter, WA %p (%d)\n", __func__, &C_WA, C_WA_SZ);
+	printf("%s:enter, WA %p (%lu)\n", __func__, &C_WA, C_WA_SZ);
 	printf("change C_WA.x from %d ", C_WA.cx);
 	printf("to %d\n", C_WA.cx=44);
 }

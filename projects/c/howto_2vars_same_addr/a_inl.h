@@ -7,9 +7,9 @@
 
 #include "a_types.h"
 
-static void __always_inline a_bar(void)
+__always_inline static void a_bar(void)
 {
-	printf("%s:>>>>> WA %p    (%d)\n", __func__, &A_WA, A_WA_SZ);
+	printf("%s:>>>>> WA %p    (%lu)\n", __func__, &A_WA, A_WA_SZ);
 	printf("change A_WA.x from %d ", A_WA.ax);
 	printf("to %d\n", A_WA.ax=101);
 

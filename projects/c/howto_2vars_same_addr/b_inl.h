@@ -8,9 +8,9 @@
 
 #include <stdio.h>
 
-static void __always_inline b_bar(void)
+__always_inline static void b_bar(void)
 {
-	printf("%s:>>>>> WA %p    (%d)\n", __func__, &B_WA, B_WA_SZ);
+	printf("%s:>>>>> WA %p    (%lu)\n", __func__, &B_WA, B_WA_SZ);
 	printf("change B_WA.x from %d ", B_WA.bx);
 	printf("to %d\n", B_WA.bx=1001);
 

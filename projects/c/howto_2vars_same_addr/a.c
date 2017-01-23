@@ -20,11 +20,12 @@
 #include "a_api.h"
 
 uint8_t *g_ct_wa; /* may be inside c.c */
+uint8_t d;
 uint8_t g_was[MAX3(A_WA_SZ, B_WA_SZ, C_WA_SZ)];
 
 static void a_foo(void)
 {
-	printf("%s:enter, WA %p (%d)\n", __func__, &A_WA, A_WA_SZ);
+	printf("%s:enter, WA %p (%lu)\n", __func__, &A_WA, A_WA_SZ);
 	printf("change A_WA.x from %d ", A_WA.ax);
 	printf("to %d\n", A_WA.ax=22);
 }
