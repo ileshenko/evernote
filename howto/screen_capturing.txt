@@ -1,0 +1,3 @@
+Windows: 
+video - use CamStudio
+screenshot - use "snipping tool"
