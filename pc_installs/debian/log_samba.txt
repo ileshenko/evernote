@@ -1,0 +1,20 @@
+
+sudo apt-get install samba
+sudo smbpasswd -a igorle
+
+sudo vim /etc/samba/smb.conf
+add to end of file
+========================
+[share]
+path = /home/igorle/
+available = yes
+valid users = igorle
+read only = no
+browsable = yes
+public = yes
+writable = yes
+=====================
+
+sudo service smbd restart
+
+on Windows: \\IP\igorle
