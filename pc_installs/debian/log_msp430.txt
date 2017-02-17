@@ -1,0 +1,30 @@
+Code Composer:
+see:
+http://processors.wiki.ti.com/index.php/Linux_Host_Support_CCSv7
+
+Before installation - 
+sudo apt-get install libc6:i386
+
+http://processors.wiki.ti.com/index.php/Download_CCS
+Version 7.00 CCS7.0.0.00043_linux-x64.tar.gz
+
+
+Burner:
+From https://e2e.ti.com/support/microcontrollers/msp430/f/166/t/101403
+found http://dlbeer.co.nz/mspdebug/
+Downloaded from https://github.com/dlbeer/mspdebug/releases v0.24 mspdebug-0.24.tar.gz
+sudo apt-get install libusb-dev
+make WITHOUT_READLINE=1
+sudo make WITHOUT_READLINE=1 install
+
+/home/igorl/dev/msp430/mspdebug-0.24/mspdebug rf2500
+
+http://hackaday.com/2010/08/11/how-to-launchpad-programming-with-linux/
+
+prog main.elf (in my case "prog SoWa2_explorer.out"
+run
+
+NOTE: many examples work with *.hex or *.txt files
+For creation it go to properties of the project and Build->Msp430 Hex Utility-> Enable
+This works only for new projects.
+
