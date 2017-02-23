@@ -1,0 +1,19 @@
+
+/* :setfiletype c */
+
+/* From demo_cp */
+{
+	EZc8                  cKernelModule[16];
+	FILE                  *fp;
+	EZbool                bIsRealChip = FALSE;
+
+	fp = popen("lsmod | grep nps_cp", "r");
+
+	if (fp != NULL)
+	{
+		bIsRealChip = fread(cKernelModule, 1, sizeof(cKernelModule), fp) > 0;
+
+		pclose( fp );
+	}
+
+}
