@@ -1,0 +1,7 @@
+imagination - for linux slide show
+
+start:
+new slide show.
+Format:flv
+video size 640x480
+background - something nice
