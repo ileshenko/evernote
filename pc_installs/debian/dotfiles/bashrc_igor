@@ -12,7 +12,6 @@ alias cdr=cdg
 alias cdrr='cdg ; cd ..; cdg'
 alias jd="notify-send -u critical -t 1000000 -i info $(pwd) 'Job is Done'"
 
-
 if ( shopt -q login_shell ); then
 	echo Login shell
 else
@@ -45,6 +44,11 @@ fi
 if [ -d "$HOME/bin2" ] ; then
     PATH="$HOME/bin2:$PATH"
 fi
+
+dim ()
+{
+	echo `tput cols`x`tput lines`
+}
 
 cdg () 
 { 
