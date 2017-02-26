@@ -1,4 +1,6 @@
 *.in
 *.out
 *.pdf
+*.o
 hash17
+var2
