@@ -1,0 +1,5 @@
+install library:
+sudo apt-get install djvulibre-bin ghostscript
+
+convert
+ddjvu -format=pdf -quality=85 -verbose a.djvu a.pdf
