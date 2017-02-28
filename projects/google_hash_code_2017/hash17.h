@@ -9,6 +9,9 @@ struct request {
 	int Rv; /* Video */
 	int Re; /* Endpoint */
 	int Rn; /* number */
+	/* service values */
+	int sVsize;
+	int sKcurr;
 };
 
 struct endpoint {
@@ -35,10 +38,21 @@ extern int SumRn;
 
 extern struct submission *submissions;
 extern unsigned long *Vscores;
-extern unsigned long long curr_score;
 extern int *V_sorted_fat_first;
 extern int *V_sorted_ignored_first;
 
 
 
 void read_input(void);
+void init_submission(void);
+
+/* V1 only */
+void remove_unused(void);
+void final_remove_ignored_first(void);
+void final_remove_fat_first(void);
+void create_V_sorted_ignored_first(void);
+
+/* V2 only */
+void requests_add_service_data(void);
+void requests_sort_smart(void);
+void initial_fill(void);
