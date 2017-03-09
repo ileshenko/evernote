@@ -56,3 +56,7 @@ void create_V_sorted_ignored_first(void);
 void requests_add_service_data(void);
 void requests_sort_smart(void);
 void initial_fill(void);
+
+/* V3 only */
+void videos_by_popularity(void); /* creates Video_pop */
+void requests_sort_video_pop_first(void);

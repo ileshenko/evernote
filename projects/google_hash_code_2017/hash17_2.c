@@ -6,79 +6,6 @@
 struct submission *submissions;
 unsigned long *Vscores;
 
-#if 0
-struct connection {
-	int c; /* The ID of the cache server */
-	int Lc; /* Tha latency from this server */
-	int Sc; /* Score Ld-Lc */
-};
-
-static struct request {
-	int Rv; /* Video */
-	int Re; /* Endpoint */
-	int Rn; /* number */
-} *requests;
-
-
-static int V, E, R, C, X;
-static int *Vsizes;
-static unsigned long *Vscores;
-static int SumRn;
-static unsigned long long curr_score;
-
-static struct endpoint {
-	int Ld; /* Latency datacenter */
-	int K; /* number of connected cache servers */
-	struct connection *connections;
-} *endpoints;
-
-
-struct VinCache {
-	int service;
-	int skip;
-};
-
-static struct submission {
-	int load;
-	struct VinCache *Varr;
-} *submissions;
-
-static int *V_sorted_fat_first;
-static int *V_sorted_ignored_first;
-
-static void read_input(void)
-{
-	int i, j;
-	scanf("%d %d %d %d %d\n", &V, &E, &R, &C, &X);
-
-	Vsizes = malloc(sizeof(int) * V);
-
-	for (i = 0; i < V; i++)
-		scanf("%d", Vsizes+i);
-
-	endpoints = malloc(sizeof(struct endpoint) * E);
-
-	for (i = 0; i < E; i++)
-	{
-		scanf("%d %d\n", &endpoints[i].Ld, &endpoints[i].K);
-		endpoints[i].connections = malloc(sizeof(struct connection) * endpoints[i].K);
-		for (j = 0; j < endpoints[i].K; j++)
-		{
-			scanf("%d %d", &endpoints[i].connections[j].c, &endpoints[i].connections[j].Lc);
-			endpoints[i].connections[j].Sc = endpoints[i].Ld - endpoints[i].connections[j].Lc;
-		}
-	}
-
-	requests = malloc(sizeof(struct request) * R);
-
-	for (i = 0; i < R; i++)
-	{
-		scanf("%d %d %d\n", &requests[i].Rv, &requests[i].Re, &requests[i].Rn);
-		SumRn += requests[i].Rn;
-	}
-}
-#endif
-
 static void sort_connections(void)
 {
 	int i, j, l;
@@ -198,16 +125,18 @@ int main(void)
 	unsigned long long curr_score;
 
 	read_input();
-//report_Requests();
 	init_submission();
 
 	sort_connections(); /* First connection - fastests */
-//	curr_score = calcullate_score();
-//	printf("a %lld\n", curr_score * 1000 / SumRn);
+	requests_add_service_data(); /* add Vsizes for quick calculation */
 
 #if 0 /* V1 */
+
+	curr_score = calcullate_score();
+	printf("a %lld\n", curr_score * 1000 / SumRn);
+
 	remove_unused();
-//	report_loads();
+	report_loads();
 
 	create_Vscores();
 
@@ -221,17 +150,23 @@ int main(void)
 
 #endif
 
+#if 0 /* var2 */
 	requests_add_service_data(); /* add Vsizes for quick calculation */
 	requests_sort_smart();
 //report_Requests();
 
 	initial_fill(); /* Only one cache for request */
 //	improve_fill();
+#endif
+
+	/* Var3 */
+	videos_by_popularity(); /* creates Video_pop */
+	requests_sort_video_pop_first();
+	initial_fill(); /* Only one cache for request */
 
 	report_loads();
 
-	curr_score = calcullate_score();
-	printf("b %lld\n", curr_score * 1000 / SumRn);
+	printf("b %lld\n", calcullate_score() * 1000 / SumRn);
 
 	submit_report();
 	return 0;
