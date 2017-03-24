@@ -1,0 +1,14 @@
+read
+http://www.tecmint.com/things-to-do-after-fedora-24-workstation-installation/
+
+dnf upgrade
+dnf install vim-X11
+
+Activate RPMFusion Repository
+rpm -ivh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-25.noarch.rpm
+rpm -ivh http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-25.noarch.rpm
+
+
+dnf install vlc
+
+Software application. search "gnome tweak tool"
