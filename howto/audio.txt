@@ -1,0 +1,26 @@
+audacity support mp3
+====================
+sudo apt-get install lame libmp3lame0
+
+The fix is to modify the /usr/share/applications/audacity.desktop file.
+This way we modify the way audacity starts.  We need to replace the line:
+
+    Exec=audacity %F
+
+with this one:
+
+    Exec=env PULSE_LATENCY_MSEC=30 audacity %U
+
+The most practical way to do this is to run the following command:
+
+    sudo sed -i 's/^Exec=.*/Exec=env PULSE_LATENCY_MSEC=30 audacity %U/' /usr/share/applications/audacity.desktop
+
+
+Run audacity from menu, not from command line
+==================================================
+
+From command line:
+
+$> env PULSE_LATENCY_MSEC=30 audacity
+
+
