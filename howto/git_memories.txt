@@ -100,5 +100,9 @@ diff -u \
  <(git rev-list --first-parent master) | \
  sed -ne 's/^ //p' | head -1
 
+==================================================
+List of conflicts after merge
+
+git diff --name-only --diff-filter=U
 
 
