@@ -2,7 +2,7 @@ read
 http://www.tecmint.com/things-to-do-after-fedora-24-workstation-installation/
 
 dnf upgrade
-dnf install vim-X11
+dnf install vim-X11 vim-enhanced
 
 Activate RPMFusion Repository
 rpm -ivh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-25.noarch.rpm
@@ -12,3 +12,11 @@ rpm -ivh http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release
 dnf install vlc
 
 Software application. search "gnome tweak tool"
+
+dnf install fuse-sshfs nmap htop dropbox
+
+install flash player
+## Adobe Repository 64-bit x86_64 ##
+rpm -ivh http://linuxdownload.adobe.com/adobe-release/adobe-release-x86_64-1.0-1.noarch.rpm
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-adobe-linux
+dnf install flash-plugin alsa-plugins-pulseaudio libcurl
