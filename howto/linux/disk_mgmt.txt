@@ -1,0 +1,11 @@
+check usb disk for bad block
+DESTRUCTIVE!!!:
+sudo badblocks -w -s -o usbstick.log /dev/sdz
+
+non destructive:
+sudo badblocks -n -s -o usbstick.log /dev/sdz
+
+
+fix lost clusters:
+sudo dosfsck -w -r -l -a -v -t /dev/sdb1
+
