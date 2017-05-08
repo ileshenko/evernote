@@ -1,3 +1,26 @@
+check, that /etc/apt/sources.list contains "contrib" component:
+
+deb http://httpredir.debian.org/debian/ jessie main contrib
+apt-get install java-package
+
+
+Download the desired Java JDK/JRE binary distribution (http://www.oracle.com/technetwork/java/javase/downloads/index.html).
+Choose tar.gz archives or self-extracting archives, do not choose the RPM! 
+
+Use java-package to create a Debian package, for example:
+
+non root > make-jpkg jdk-8u131-linux-x64.tar.gz
+
+dpkg -i oracle-java8-jdk_8u131_amd64.deb
+update-alternatives --auto java
+
+sudo apt-get install icedtea-plugin
+
+Then go to about:addons, in the plugin section, check if the plugin is enabled. Mozilla disables insecure plugins by default, that means that Java is disable even after installation due security concerns. You need to activate it before using it.
+
+================================================================================
+
 https://ssl-il.mellanox.com/dana-na/auth/url_default/welcome.cgi?
+
 
 https://outlook.office.com/owa/?realm=mellanox.com
