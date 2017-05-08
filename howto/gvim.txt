@@ -1,0 +1,9 @@
+insert date
+:r !date
+!!date
+Under Windows, use:
+:r !date /t
+!!date /t
+
+
+
