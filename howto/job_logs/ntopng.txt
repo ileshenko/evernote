@@ -1,10 +1,10 @@
-
+Debian 8.7 Jessie
+~~~~~~~~~~~~~~~~~~
 Mon May  8 13:37:18 IDT 2017
 ============================
 
 git clone https://github.com/ntop/ntopng.git
 git clone https://github.com/ntop/nDPI.git
-
 
 VM:
 host: gen-l-vrt-deb-2
@@ -16,7 +16,6 @@ netflow pcaps from Daria
 
 /home/daria/sandbox_2/EZdk-nps/testing/apps/suites/dpi_test_suite/qosmos_fidelity_automation/reports
 
-
 ================================
 Install on debian 8 jessie
 
@@ -24,7 +23,7 @@ Install on debian 8 jessie
 uid=0(root) gid=0(root) groups=0(root)
 
 # wget http://apt.ntop.org/jessie/all/apt-ntop.deb
-# dpkg -i apt-ntop.deb  
+# dpkg -i apt-ntop.deb
 
 # cat /etc/apt/sources.list
 deb http://ftp.us.debian.org/debian/ jessie main
@@ -41,12 +40,12 @@ deb http://http.us.debian.org/debian/ jessie non-free
 
 # apt-get clean all
 # apt-get update
-# apt-get install pfring nprobe ntopng ntopng-data n2disk nbox 
+# apt-get install pfring nprobe ntopng ntopng-data n2disk nbox
 
 # apt-get install snmp-mibs-downloader
 ####Check service is running
 # netstat -tlpn | grep ntopng
-tcp        0      0 0.0.0.0:3000            0.0.0.0:*               LISTEN      8968/ntopng 
+tcp        0      0 0.0.0.0:3000            0.0.0.0:*               LISTEN      8968/ntopng
 
 # /etc/init.d/ntopng
 Usage: /etc/init.d/ntopng {start|force-start|stop|restart|status}]
@@ -58,3 +57,28 @@ Username: admin
 Password: admin
 
 ntopng
+
+=================================
+after first access to ntopng it requests to change password.
+Username: admin
+Password: ezchip
+=================================
+
+Next step: RUN NPROBE IN COLLECTOR MODE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sudo gvim /etc/ntopng/ntopng.conf
+-------------------------------------------
+-G=/var/run/ntopng.pid
+--daemon
+--dont-change-user
+--interface="tcp://127.0.0.1:5557"
+--disable-autologout
+--community
+-------------------------------------------
+
+sudo service ntopng restart    ??? this does not work
+sudo /etc/init.d/ntopng restart +++ this works
+
+
+sudo touch /etc/nprobe/nprobe-none.start
+ sudo service nprobe start
