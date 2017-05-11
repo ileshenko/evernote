@@ -1,0 +1,177 @@
+How to check CentOS version:
+
+cat /etc/redhat-release
+
+
+CentOS 7:
+yum install epel-release wget
+
+
+cat <<EOT > /etc/yum.repos.d/ntop.repo
+[ntop]
+name=ntop packages
+baseurl=http://packages.ntop.org/centos/\$releasever/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://packages.ntop.org/centos/RPM-GPG-KEY-deri
+[ntop-noarch]
+name=ntop packages
+baseurl=http://packages.ntop.org/centos/\$releasever/noarch/
+enabled=1
+gpgcheck=1
+gpgkey=http://packages.ntop.org/centos/RPM-GPG-KEY-deri
+EOT
+
+
+yum install ntopng ntopng-data
+yum install hiredis-devel
+systemctl start redis.service
+systemctl start ntopng.service
+
+#firewall-cmd --direct --add-rule ipv4 filter IN_public_allow 0 -m tcp -p tcp --dport 3000 -s 10.1.21.50 -j ACCEPT
+
+firewall-cmd --permanent --zone=public --add-port=3000/tcp
+firewall-cmd --permanent --zone=public --add-port=2055/udp
+firewall-cmd --permanent --zone=public --add-port=80/tcp
+
+firewall-cmd --reload
+firewall-cmd --list-all
+
+...
+edit /etc/ntopng/ntopng.conf
+
+-G=/var/tmp/ntopng.pid \
+--community\
+--dont-change-user \
+-i tcp://127.0.0.1:5557 
+
+systemctl restart ntopng
+systemctl status ntopng
+
+
+==============================
+nprobe
+==============================
+yum install nprobe
+
+
+nprobe \
+--zmq "tcp://127.0.0.1:5557" \
+-i none \
+-n none \
+--collector-port 2055 \
+-b 2 \
+-T "%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %L4_SRC_PORT %L4_DST_PORT %IN_BYTES %IN_PKTS %APPLICATION_ID %APPLICATION_NAME %L7_PROTO %L7_PROTO_NAME" \
+--disable-l7-protocol-guess \
+-U 256 \
+-d 1 \
+--disable-cache \
+-V 9 &
+
+nprobe \
+--zmq "tcp://127.0.0.1:5557" \
+-i none \
+-n none \
+--collector-port 2055 \
+-b 2 \
+-T "%IPV4_SRC_ADDR %IPV4_DST_ADDR %IPV4_NEXT_HOP %INPUT_SNMP %OUTPUT_SNMP %IN_PKTS %IN_BYTES %FIRST_SWITCHED %LAST_SWITCHED %L4_SRC_PORT %L4_DST_PORT %TCP_FLAGS %PROTOCOL %SRC_TOS %SRC_AS %DST_AS %IPV4_SRC_MASK %IPV4_DST_MASK" \
+--disable-l7-protocol-guess \
+-U 256 \
+-d 1 \
+--disable-cache \
+-V 9
+
+
+nprobe --zmq "tcp://127.0.0.1:5557" -i none -n none --collector-port 2055 -b 1 -T "%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %L4_SRC_PORT %L4_DST_PORT %IN_BYTES %IN_PKTS %APPLICATION_ID %APPLICATION_NAME %L7_PROTO %L7_PROTO_NAME" \
+--disable-l7-protocol-guess -U 256  --disable-cache -V 9
+
+from 21/03/16
+nprobe --zmq "tcp://127.0.0.1:5557" -i none -n none --collector-port 2055 -b 1 -T "%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %L4_SRC_PORT %L4_DST_PORT %IN_BYTES %IN_PKTS %APPLICATION_ID %APPLICATION_NAME %L7_PROTO %L7_PROTO_NAME" --disable-l7-protocol-guess -U 256  --disable-cache -V 9
+
+nprobe --zmq "tcp://127.0.0.1:5557" -i none -n none --collector-port 2055 -T "%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %IN_BYTES %IN_PKTS %APPLICATION_ID %APPLICATION_NAME" --disable-l7-protocol-guess --disable-cache -V 9 &
+
+nprobe --zmq "tcp://127.0.0.1:5557" -i none -n none --collector-port 2055 -T "%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %L4_SRC_PORT %L4_DST_PORT %IN_BYTES %IN_PKTS %APPLICATION_ID %APPLICATION_NAME %L7_PROTO %L7_PROTO_NAME" &
+
+nprobe -T “%IPV4_SRC_ADDR %L4_SRC_PORT %IPV4_DST_ADDR %L4_DST_PORT %PROTOCOL %IN_BYTES %OUT_BYTES %FIRST_SWITCHED %LAST_SWITCHED %HTTP_SITE %HTTP_RET_CODE %IN_PKTS %OUT_PKTS %IP_PROTOCOL_VERSION %APPLICATION_ID %L7_PROTO_NAME %ICMP_TYPE” –tcp “127.0.0.1:3333” -b 2 -i eth0 –json-labels
+
+nprobe -T "" -tcp "127.0.0.1:5557" -b 2 -i none 
+
+
+nprobe --zmq "tcp://127.0.0.1:5557" -i none -n none --collector-port 2055 -T "%IPV4_SRC_ADDR %L4_SRC_PORT %IPV4_DST_ADDR %L4_DST_PORT %PROTOCOL %IN_BYTES %OUT_BYTES %FIRST_SWITCHED %LAST_SWITCHED %HTTP_SITE %HTTP_RET_CODE %IN_PKTS %OUT_PKTS %IP_PROTOCOL_VERSION %APPLICATION_ID %L7_PROTO_NAME %ICMP_TYPE" --disable-l7-protocol-guess --disable-cache -V 9 --json-labels -b2 &
+
+
+
+lsof -i :2055 -P 
+tcpdump -w igor.pcap udp port 2055
+=============================
+nc ncat tcpreplay
+============================
+tcpreplay -i lo -p 5 netflow_with_app_short.pcap
+nc -u -w 1 19.1.21.169 2055
+
+while true ; do  for i in `ls`  ; do echo $i; cat $i | nc -u  -w 2 10.1.21.159 2055  ; done ; done
+while true ; do cat netflow_1_0.bin | nc -u  -w 2 10.1.21.159 2055  ; done
+
+/from nps:
+tcprewrite -C -i 55.pcap -o 55m.pcap -D 192.168.13.7:10.1.21.159 -S 192.168.13.254:10.1.3.216 --enet-smac=00:23:33:cf:2f:4d,A0:36:9F:0D:45:8C --enet-dmac=f4:ec:38:80:19:d8,00:0c:29:9c:98:59
+
+from igorle@esxlabvm4
+tcprewrite -C -i 55.pcap -o 55m.pcap -D 192.168.13.7:10.1.21.159 -S 192.168.13.254:10.1.21.148 --enet-smac=00:0c:29:53:ca:7a --enet-dmac=00:0c:29:9c:98:59
+
+scp 55m.pcap igorle@esxlabvm4:
+while true ; do rt tcpreplay -i eth0 55md.pcap ; done
+
+~~~~~~~~~~~~~~~~~~~~~~``
+http://www.gossamer-threads.com/lists/ntop/users/39211
+
+I have also read this thread 
+http://www.gossamer-threads.com/lists/ntop/misc/38960 
+and this excellent article 
+http://www.ntop.org/ntopng/creating-a-hierarchical-cluster-of-ntopng-instances/ 
+
+=================================
+
+ntopng compilation
+
+yum install libcap-devel.x86_64
+yum install pfring
+
+git clone https://github.com/ntop/PF_RING.git
+git clone https://github.com/ntop/ntopng.git
+git checkout 2.2-stable
+
+git clone https://github.com/ntop/nDPI.git; cd nDPI; ./autogen.sh; make; cd ../ntopng
+
+two days later:
+yum install libpcap libpcap-devel 
+yum install tcp_wrappers-devel 
+yum clean all 
+yum update 
+yum install pfring n2disk nProbe ntopng ntopng-data nbox 
+yum install libcurl-devel
+yum install sqlite-devel
+yum install libmysqlclient-dev
+
+rpm -qa | grep curl
+wget https://raw.githubusercontent.com/simonemainardi/ntopng/b71dd158f88c695d4c39745b02bf946c912c19e1/configure.seed
+##################################################################################
+# http://www.ntop.org/ntop/mini-tutorial-fresh-install-of-ntopng-on-centos-7/
+##################################################################################
+
+yum install libxml2-devel glib2-devel
+
+branches:
+ntopng - dev
+nDPI - dev
+PF_RING (~/PF_RING) 6.2.0-stable
+
+######################################33
+Debian 8 (jessie)
+wget http://apt.ntop.org/jessie/all/apt-ntop.deb
+sudo dpkg -i apt-ntop.deb
+then run
+apt-get clean all
+apt-get update
+apt-get install pfring nprobe ntopng ntopng-data n2disk nbox
+
+
