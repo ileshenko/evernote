@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <fcntl.h>
+#include <endian.h>
 
 #define IPFIX_PROTO
 #include "netflow_defs.h"

@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <fcntl.h>
+#include <endian.h>
 
 #include "netflow_defs.h"
 
