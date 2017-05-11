@@ -118,7 +118,7 @@ static struct netflow_header *set_header(void)
 
 typedef struct {
 	uint16_t field, len;
-	uint8_t data[3][32];
+	uint8_t value[3][32];
 } setup_t;
 
 setup_t options_scope[] = {
@@ -200,7 +200,8 @@ setup_t data[] = {
 	{IN_PKTS, IN_PKTS_LEN, {{0x00, 0x00, 0x00, 0xcc}, {0x00, 0x00, 0x01, 0xcc}, {0x00, 0x00, 0x0c, 0xcb}}},
 	{FLOWS, FLOWS_LEN, {{0x00, 0x00, 0x00, 0x01}, {0x00, 0x00, 0x00, 0x10}, {0x00, 0x00, 0x01, 0x00}}},
 //	{APPLICATION_NAME,APPLICATION_NAME_LEN, "sdfgsdfgsdfg"},
-	{APPLICATION_TAG, APPLICATION_TAG_LEN, {{0x01, 0x00, 0x00, 47}, {0x01, 0x00, 0x00, 65}, {0x01, 0x00, 0x00, 0}}},
+//	{APPLICATION_TAG, APPLICATION_TAG_LEN, {{0x01, 0x00, 0x00, 47}, {0x01, 0x00, 0x00, 65}, {0x01, 0x00, 0x00, 0}}},
+	{L7_PROTO, L7_PROTO_LEN, {{0x00, 68}, {0x00, 69}, {0x00, 70}}},
 };
 
 
@@ -255,14 +256,14 @@ static void set_options(void)
 #define WA options_scope
 		for (i = 0; i < ARR_SZ(WA); i++)
 		{
-			memcpy(&accum[pos], WA[i].data[j], WA[i].len);
+			memcpy(&accum[pos], WA[i].value[j], WA[i].len);
 			pos += WA[i].len;
 		}
 #undef WA
 #define WA options
 		for (i = 0; i < ARR_SZ(WA); i++)
 		{
-			memcpy(&accum[pos], WA[i].data[j], WA[i].len);
+			memcpy(&accum[pos], WA[i].value[j], WA[i].len);
 			pos += WA[i].len;
 		}
 #undef WA
@@ -295,7 +296,7 @@ static void set_data(void)
 #define WA data
 		for (i = 0; i < ARR_SZ(WA); i++)
 		{
-			memcpy(&accum[pos], WA[i].data[j], WA[i].len);
+			memcpy(&accum[pos], WA[i].value[j], WA[i].len);
 			pos += WA[i].len;
 		}
 #undef WA
@@ -321,15 +322,15 @@ int main(void)
 
 
 	pkt_head = set_header();
-	set_opt_template();
-	pkt_head->count++;
+//	set_opt_template();
+//	pkt_head->count++;
 
 
 	set_data_template();
 	pkt_head->count++;
 
-	set_options();
-	pkt_head->count++;
+//	set_options();
+//	pkt_head->count++;
 
 	set_data();
 	pkt_head->count++;

@@ -1,0 +1,26 @@
+sudo service nprobe stop
+
+
+nprobe --zmq "tcp://127.0.0.1:5557" -i none -n none --collector-port 2055 -T "%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %IN_BYTES %IN_PKTS %APPLICATION_ID %APPLICATION_NAME" --disable-l7-protocol-guess --disable-cache -V 9 &
+
+nprobe --zmq "tcp://127.0.0.1:5569" -i none -n none --collector-port 2055 \
+ -T "%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %IN_BYTES %IN_PKTS %APPLICATION_ID %APPLICATION_NAME" \
+ --disable-l7-protocol-guess --disable-cache -V 9 --json-labels -b 2 
+
+
+=======================================================
+first command, that works with app id (L7_PROTO)
+nprobe --zmq "tcp://127.0.0.1:5569" -i none -n none --collector-port 2055 \
+-T "%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %IN_BYTES %IN_PKTS %APPLICATION_ID %L7_PROTO_NAME %L7_PROTO"  --disable-l7-protocol-guess -V 9 -b 2
+
+in pair with
+ntopng -G /var/run/ntopng.pid --dont-change-user --interface tcp://127.0.0.1:5569
+
+.......................................
+Second command works as well (see intreface->protocols)
+
+nprobe --zmq "tcp://127.0.0.1:5569" -i none -n none --collector-port 2055 \
+-T "%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %IN_BYTES %IN_PKTS %L7_PROTO_NAME %L7_PROTO" \
+--disable-l7-protocol-guess -V 9 -b 2
+
+ntopng -G /var/run/ntopng.pid --dont-change-user --interface tcp://127.0.0.1:5569 --community 

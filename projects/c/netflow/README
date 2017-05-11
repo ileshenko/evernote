@@ -1,2 +1,4 @@
 rm -f rename_me.bin && make netflowgen && ./netflowgen && while true ; do cat rename_me.bin | nc -u -w 1 10.1.21.159 2055 ; done
 rm -f rename_me.bin && make ipfix_gen && ./ipfix_gen && while true ; do cat rename_me.bin | nc -u -w 1 10.1.21.159 2055 ; done
+
+rm -f rename_me.bin && make netflowgen && ./netflowgen && while true ; do cat rename_me.bin | nc -u -w 1 127.0.0.1 2055 ; done

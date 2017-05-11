@@ -1,0 +1,31 @@
+Validate machine:
+=================
+
+How to check CentOS version:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cat /etc/redhat-release
+
+How to check Debian version:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cat /etc/issue
+cat /etc/debian_version
+
+
+
+Validate, that tprob/ntop/netcat works
+======================================
+
+someone writes into port 2055
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+lsof -i :2055 -P
+
+
+sudo netstat -lpn | grep -e ntopng -e nprobe
+netstat -lpn | grep nprobe
+
+capture to file
+~~~~~~~~~~~~~~~
+sudo tcpdump -w igor.pcap udp port 2055
+sudo tcpdump -i lo -w netflow.pcap udp port 2055    //loopback
+sudo tcpdump -i lo -w nprobe2ntop.pcap tcp port 5569
+
