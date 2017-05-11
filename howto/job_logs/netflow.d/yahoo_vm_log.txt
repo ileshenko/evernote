@@ -1,0 +1,54 @@
+ssh -X netflow@gen-l-vrt-net3
+pwd: netflow
+su
+pwd: 3tango
+
+ssh-copy-id -i ~/.ssh/id_rsa.pub netflow@gen-l-vrt-net3
+
+
+apt-get update
+apt-get install git vim-gtk tree xxdiff socat gdb build-essential
+apt-get install tcpdump netcat wireshark
+
+# id
+uid=0(root) gid=0(root) groups=0(root)
+
+cd Downloads
+wget http://apt.ntop.org/jessie/all/apt-ntop.deb
+dpkg -i apt-ntop.deb
+
+apt-get clean all
+apt-get update
+apt-get install pfring nprobe ntopng ntopng-data n2disk cento
+apt-get install snmp-mibs-downloader
+
+cat <<EOT >/etc/ntopng/ntopng.conf
+-G=/var/run/ntopng.pid
+--dont-change-user
+--interface="tcp://127.0.0.1:5569"
+EOT
+
+touch /etc/ntopng/ntopng.start
+
+
+cat <<EOT >/etc/nprobe/nprobe-none.conf
+--zmq="tcp://127.0.0.1:5569"
+-i=none
+-n=none
+--collector-port=2055
+-T="%FIRST_SWITCHED %LAST_SWITCHED %PROTOCOL %IPV4_SRC_ADDR %IPV4_DST_ADDR %IN_BYTES %IN_PKTS %L7_PROTO_NAME %L7_PROTO"
+--disable-l7-protocol-guess
+-V=9
+EOT
+
+touch /etc/nprobe/nprobe-none.start
+
+
+==============================================
+service nprobe restart
+service ntopng restart
+netstat -lpn | grep -e ntopng -e nprob --color
+
+http://gen-l-vrt-net3:3000
+
+admin/admin -> admin/ezchip

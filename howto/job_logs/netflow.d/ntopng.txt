@@ -6,11 +6,6 @@ Mon May  8 13:37:18 IDT 2017
 git clone https://github.com/ntop/ntopng.git
 git clone https://github.com/ntop/nDPI.git
 
-VM:
-host: gen-l-vrt-deb-2
-user: root
-password: 3tango
-
 =================================
 netflow pcaps from Daria
 
@@ -41,6 +36,7 @@ deb http://http.us.debian.org/debian/ jessie non-free
 # apt-get clean all
 # apt-get update
 # apt-get install pfring nprobe ntopng ntopng-data n2disk nbox
+  apt-get install pfring nprobe ntopng ntopng-data n2disk cento
 
 # apt-get install snmp-mibs-downloader
 ####Check service is running

@@ -1,0 +1,16 @@
+
+
+Thu May 11 20:33:53 IDT 2017
+VM for yahoo demo preparation:
+
+
+host: gen-l-vrt-net3
+10.137.137.201
+
+User : netflow
+Pass : neflow
+
+User : root
+Pass : 3tango
+
+================================
