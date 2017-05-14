@@ -35,6 +35,7 @@ touch /etc/ntopng/ntopng.start
 
 cat <<EOT >/etc/nprobe/nprobe-none.conf
 --zmq="tcp://127.0.0.1:5569"
+-g=/var/run/nprobe-none.pid
 -i=none
 -n=none
 --collector-port=2055
