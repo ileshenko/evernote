@@ -98,7 +98,7 @@ nprobe --zmq "tcp://127.0.0.1:5557" -i none -n none --collector-port 2055 -T "%I
 
 
 lsof -i :2055 -P 
-tcpdump -w igor.pcap udp port 2055
+tcpdump -w netflow.pcap udp port 2055
 =============================
 nc ncat tcpreplay
 ============================

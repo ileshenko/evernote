@@ -8,7 +8,9 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub netflow@gen-l-vrt-net3
 
 apt-get update
 apt-get install git vim-gtk tree xxdiff socat gdb build-essential
-apt-get install tcpdump netcat wireshark
+apt-get install tcpdump netcat wireshark sudo
+
+adduser netflow sudo
 
 # id
 uid=0(root) gid=0(root) groups=0(root)
@@ -45,9 +47,9 @@ touch /etc/nprobe/nprobe-none.start
 
 
 ==============================================
-service nprobe restart
-service ntopng restart
-netstat -lpn | grep -e ntopng -e nprob --color
+sudo service nprobe restart
+sudo service ntopng restart
+sudo netstat -lpn | grep -e ntopng -e nprob --color
 
 http://gen-l-vrt-net3:3000
 

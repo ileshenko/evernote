@@ -25,7 +25,7 @@ netstat -lpn | grep nprobe
 
 capture to file
 ~~~~~~~~~~~~~~~
-sudo tcpdump -w igor.pcap udp port 2055
+sudo tcpdump -w netflow.pcap udp port 2055
 sudo tcpdump -i lo -w netflow.pcap udp port 2055    //loopback
 sudo tcpdump -i lo -w nprobe2ntop.pcap tcp port 5569
 
