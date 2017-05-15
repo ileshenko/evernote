@@ -1,0 +1,3 @@
+sudo ifconfig usb0 up 
+sudo dhclient usb0
+

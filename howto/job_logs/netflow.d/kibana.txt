@@ -1,0 +1,98 @@
+Install Java 8:
+========================================================================
+1. Add Java 8 PPA
+
+$ sudo gvim /etc/apt/sources.list.d/java-8-debian.list
+
+and add following content in it.
+
+deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main
+deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main
+
+Now import GPG key on your system for validating packages before installing them.
+
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886
+
+2. Install Java 8 on Debian
+
+$ sudo apt-get update
+$ sudo apt-get install oracle-java8-installer
+
+3. Verify Java Version
+
+$ java -version
+
+
+
+
+
+
+google: install elasticsearch debian
+https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html
+
+
+=================================================================
+=================================================================
+google: install kibana debian
+https://www.elastic.co/guide/en/kibana/current/deb.html
+
+Download and install the public signing key:
+cd ~/Downloads
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+
+sudo apt-get install apt-transport-https
+
+Save the repository definition to /etc/apt/sources.list.d/elastic-5.x.list:
+echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
+
+sudo apt-get update && sudo apt-get install kibana
+sudo apt-get update && sudo apt-get install elasticsearch
+
+
+========================================================
+
+To configure Kibana to start automatically when the system boots up, run the following commands:
+
+sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl enable kibana.service
+
+Kibana can be started and stopped as follows:
+
+sudo systemctl start kibana.service
+sudo systemctl stop kibana.service
+
+These commands provide no feedback as to whether Kibana was started successfully or not. Instead, this information will be written in the log files located in /var/log/kibana/.
+
+
+=======================================================
+Running Elasticsearch with systemd
+
+To configure Elasticsearch to start automatically when the system boots up, run the following commands:
+
+sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl enable elasticsearch.service
+
+Elasticsearch can be started and stopped as follows:
+
+sudo systemctl start elasticsearch.service
+sudo systemctl stop elasticsearch.service
+
+These commands provide no feedback as to whether Elasticsearch was started successfully or not. Instead, this information will be written in the log files located in /var/log/elasticsearch/.
+
+By default the Elasticsearch service doesn’t log information in the systemd journal. To enable journalctl logging, the --quiet option must be removed from the ExecStart command line in the elasticsearch.service file.
+
+When systemd logging is enabled, the logging information are available using the journalctl commands:
+
+To tail the journal:
+
+sudo journalctl -f
+
+To list journal entries for the elasticsearch service:
+
+sudo journalctl --unit elasticsearch
+
+To list journal entries for the elasticsearch service starting from a given time:
+
+sudo journalctl --unit elasticsearch --since  "2016-10-30 18:17:16"
+
+Check man journalctl or https://www.freedesktop.org/software/systemd/man/journalctl.html for more command line options.
