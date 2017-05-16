@@ -1,3 +1,24 @@
+####   ####  #####  ####    ###   
+#   #  #   # #      #   #  #   #  
+####   ####  ####   ####   #####   
+#      # #   #      #      #   #   
+#      #  #  #####  #      #   #   
+
+   ___  ___  _______  ___   ___  ___ ______________  _  __
+  / _ \/ _ \/ __/ _ \/ _ | / _ \/ _ /_  __/  _/ __ \/ |/ /
+ / ___/ , _/ _// ___/ __ |/ , _/ __ |/ / _/ // /_/ /    / 
+/_/  /_/|_/___/_/  /_/ |_/_/|_/_/ |_/_/ /___/\____/_/|_/  
+
+Install haveged (fix performance issue)
+=======================================
+
+sudo apt-get install haveged
+g /etc/default/haveged .... make sure that it contains option
+DAEMON_ARGS="-w 1024"
+
+Configure to start on boot
+sudo update-rc.d haveged defaults
+
 Install Java 8:
 ========================================================================
 1. Add Java 8 PPA
@@ -23,14 +44,6 @@ $ sudo apt-get install oracle-java8-installer
 $ java -version
 
 
-
-
-
-
-google: install elasticsearch debian
-https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html
-
-
 =================================================================
 =================================================================
 google: install kibana debian
@@ -45,54 +58,82 @@ sudo apt-get install apt-transport-https
 Save the repository definition to /etc/apt/sources.list.d/elastic-5.x.list:
 echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
 
-sudo apt-get update && sudo apt-get install kibana
+sudo apt-get update && sudo apt-get install kibana elasticsearch logstash
 sudo apt-get update && sudo apt-get install elasticsearch
+sudo apt-get update && sudo apt-get install logstash
+
+
+<configure logstash>
+
+
+start everything up and set to start on boot:
+
+sudo /bin/systemctl daemon-reload
+
+sudo /bin/systemctl enable elasticsearch.service
+sudo /bin/systemctl enable logstash.service
+sudo /bin/systemctl enable kibana.service
+
+sudo systemctl start elasticsearch.service
+sudo systemctl start logstash.service
+sudo systemctl start kibana.service
+
+For stopping
+sudo systemctl stop kibana.service
+sudo systemctl stop logstash.service
+sudo systemctl stop elasticsearch.service
 
 
 ========================================================
 
-To configure Kibana to start automatically when the system boots up, run the following commands:
 
-sudo /bin/systemctl daemon-reload
-sudo /bin/systemctl enable kibana.service
+LOGGING / DEBUGING
+====================
+/var/log/kibana/.
+/var/log/elasticsearch/.
+/var/log/logstash/.
 
-Kibana can be started and stopped as follows:
+tail -f /var/log/logstash/logstash-plain.log
 
-sudo systemctl start kibana.service
-sudo systemctl stop kibana.service
-
-These commands provide no feedback as to whether Kibana was started successfully or not. Instead, this information will be written in the log files located in /var/log/kibana/.
-
-
-=======================================================
-Running Elasticsearch with systemd
-
-To configure Elasticsearch to start automatically when the system boots up, run the following commands:
-
-sudo /bin/systemctl daemon-reload
-sudo /bin/systemctl enable elasticsearch.service
-
-Elasticsearch can be started and stopped as follows:
-
-sudo systemctl start elasticsearch.service
-sudo systemctl stop elasticsearch.service
-
-These commands provide no feedback as to whether Elasticsearch was started successfully or not. Instead, this information will be written in the log files located in /var/log/elasticsearch/.
-
-By default the Elasticsearch service doesn’t log information in the systemd journal. To enable journalctl logging, the --quiet option must be removed from the ExecStart command line in the elasticsearch.service file.
+##########################################################################################
+# By default the Elasticsearch service doesn’t log information in the systemd journal.   #
+# To enable journalctl logging, the --quiet option must be removed from the ExecStart    #
+# command line in the elasticsearch.service file.                                        #
+##########################################################################################
 
 When systemd logging is enabled, the logging information are available using the journalctl commands:
 
-To tail the journal:
+# To tail the journal:
 
 sudo journalctl -f
 
-To list journal entries for the elasticsearch service:
+# To list journal entries for the elasticsearch service:
 
 sudo journalctl --unit elasticsearch
 
-To list journal entries for the elasticsearch service starting from a given time:
+# To list journal entries for the elasticsearch service starting from a given time:
 
 sudo journalctl --unit elasticsearch --since  "2016-10-30 18:17:16"
 
-Check man journalctl or https://www.freedesktop.org/software/systemd/man/journalctl.html for more command line options.
+#Check man journalctl or https://www.freedesktop.org/software/systemd/man/journalctl.html for more command line options.
+
+
+=======================================================
+
+
+=============================================
+  _    ___   ___ ___ _____ _   ___ _  _ 
+ | |  / _ \ / __/ __|_   _/_\ / __| || |
+ | |_| (_) | (_ \__ \ | |/ _ \\__ \ __ |
+ |____\___/ \___|___/ |_/_/ \_\___/_||_|
+
+=============================================
+
+STD:
+  wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+  sudo apt-get install apt-transport-https
+  echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
+
+
+
+See Running Logstash for details about managing Logstash as a system service.
