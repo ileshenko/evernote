@@ -12,7 +12,6 @@ g /etc/logstash/conf.d/logstash-netflow.conf
 
 input {
   udp {
-    host => localhost
     port => 2096
     codec => netflow {
       versions => [5, 9]
@@ -24,7 +23,7 @@ output {
     stdout { codec => rubydebug }
     elasticsearch {
       index => "logstash-%{+YYYY.MM.dd}"
-      host => "localhost"
+      hosts => "localhost"
     }
 }
 
