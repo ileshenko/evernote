@@ -1,0 +1,32 @@
+logstash validation:
+
+
+sudo /usr/share/logstash/bin/logstash -e 'input { stdin { } } output { stdout {} }' --path.settings /etc/logstash
+
+wait for start and print "hello world" enter
+===============================================
+
+
+g /etc/logstash/conf.d/logstash-netflow.conf
+
+
+input {
+  udp {
+    host => localhost
+    port => 2096
+    codec => netflow {
+      versions => [5, 9]
+    }
+    type => netflow
+  }
+}
+output {
+    stdout { codec => rubydebug }
+    elasticsearch {
+      index => "logstash-%{+YYYY.MM.dd}"
+      host => "localhost"
+    }
+}
+
+sudo /usr/share/logstash/bin/logstash --path.settings /etc/logstash -f /etc/logstash/conf.d/logstash-netflow.conf
+
