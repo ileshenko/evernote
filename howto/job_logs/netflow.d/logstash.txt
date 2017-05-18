@@ -1,15 +1,27 @@
 logstash validation:
 
+1) stdin->stdout
 
 sudo /usr/share/logstash/bin/logstash -e 'input { stdin { } } output { stdout {} }' --path.settings /etc/logstash
 
 wait for start and print "hello world" enter
+
+2) stdin->elasticsearch
+
+sudo /usr/share/logstash/bin/logstash -e 'input { stdin { } } output { elasticsearch { hosts => localhost } }' --path.settings /etc/logstash
+
+print message and check url: http://localhost:9200/_search?pretty
+==============================================
+Add translate plugin
+
+sudo /usr/share/logstash/bin/logstash-plugin install logstash-filter-translate
+
 ===============================================
 
 
 g /etc/logstash/conf.d/logstash-netflow.conf
 
-
+V1:
 input {
   udp {
     port => 2096
@@ -27,5 +39,129 @@ output {
     }
 }
 
+V2:
+input {
+  udp {
+    port => 2096
+    codec => netflow {
+      versions => [5, 9]
+    }
+    type => netflow
+  }
+}
+filter {
+  translate {
+    field => "[netflow][application_id]"
+    destination => "[netflow][application_name]"
+	dictionary_path =>"/tmp/qosmos.csv"
+  }
+}
+output {
+  translate {
+    field => "application_id"
+	dictionary_path =>"/tmp/qosmos.csv"
+  }
+  stdout { codec => rubydebug }
+  elasticsearch {
+    index => "logstash_test-%{+YYYY.MM.dd}"
+    hosts => "localhost"
+  }
+}
+
+/tmp/qosmos.csv
+================
+"1000",bittorent
+"1001",icq
+"1002",yahoo messenger
+"1003",eDonkey
+"1004",Tetris
+================
+
 sudo /usr/share/logstash/bin/logstash --path.settings /etc/logstash -f /etc/logstash/conf.d/logstash-netflow.conf
+
+============================
+
+curl -XPUT localhost:9200/_template/logstash_eznetflow -d '{
+    "template" : "logstash_eznetflow-*",
+    "settings": {
+      "index.refresh_interval": "5s"
+    },
+    "mappings" : {
+      "_default_" : {
+        "_all" : {"enabled" : false},
+        "properties" : {
+          "@version": { "index": "analyzed", "type": "integer" },
+          "@timestamp": { "index": "analyzed", "type": "date" },
+          "netflow": {
+            "dynamic": true,
+            "type": "object",
+            "properties": {
+              "version": { "index": "analyzed", "type": "integer" },
+              "flow_seq_num": { "index": "not_analyzed", "type": "long" },
+              "engine_type": { "index": "not_analyzed", "type": "integer" },
+              "engine_id": { "index": "not_analyzed", "type": "integer" },
+              "sampling_algorithm": { "index": "not_analyzed", "type": "integer" },
+              "sampling_interval": { "index": "not_analyzed", "type": "integer" },
+              "flow_records": { "index": "not_analyzed", "type": "integer" },
+              "ipv4_src_addr": { "index": "analyzed", "type": "ip" },
+              "ipv4_dst_addr": { "index": "analyzed", "type": "ip" },
+              "ipv4_next_hop": { "index": "analyzed", "type": "ip" },
+              "input_snmp": { "index": "not_analyzed", "type": "long" },
+              "output_snmp": { "index": "not_analyzed", "type": "long" },
+              "in_pkts": { "index": "analyzed", "type": "long" },
+              "in_bytes": { "index": "analyzed", "type": "long" },
+              "first_switched": { "index": "not_analyzed", "type": "date" },
+              "last_switched": { "index": "not_analyzed", "type": "date" },
+              "l4_src_port": { "index": "analyzed", "type": "long" },
+              "l4_dst_port": { "index": "analyzed", "type": "long" }, 
+              "tcp_flags": { "index": "analyzed", "type": "integer" },
+              "protocol": { "index": "analyzed", "type": "integer" },
+              "src_tos": { "index": "analyzed", "type": "integer" },
+              "src_as": { "index": "analyzed", "type": "integer" },
+              "dst_as": { "index": "analyzed", "type": "integer" },
+              "src_mask": { "index": "analyzed", "type": "integer" },
+              "dst_mask": { "index": "analyzed", "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  }'
+
+curl -XPUT localhost:9200/_template/logstash_test -d '{
+    "template" : "logstash_test-*",
+    "settings": {
+      "index.refresh_interval": "5s"
+    },
+    "mappings" : {
+      "_default_" : {
+        "_all" : {"enabled" : false},
+        "properties" : {
+          "@version": { "index": "analyzed", "type": "integer" },
+          "@timestamp": { "index": "analyzed", "type": "date" },
+          "netflow": {
+            "dynamic": true,
+            "type": "object",
+            "properties": {
+              "version": { "index": "analyzed", "type": "integer" },
+              "application_id": { "index": "analyzed", "type": "integer" },
+              "flow_seq_num": { "index": "not_analyzed", "type": "long" },
+              "engine_type": { "index": "not_analyzed", "type": "integer" },
+              "engine_id": { "index": "not_analyzed", "type": "integer" },
+              "flow_records": { "index": "not_analyzed", "type": "integer" },
+              "ipv4_src_addr": { "index": "analyzed", "type": "ip" },
+              "ipv4_dst_addr": { "index": "analyzed", "type": "ip" },
+              "ipv4_next_hop": { "index": "analyzed", "type": "ip" },
+              "in_pkts": { "index": "analyzed", "type": "long" },
+              "in_bytes": { "index": "analyzed", "type": "long" },
+              "l4_src_port": { "index": "analyzed", "type": "long" },
+              "l4_dst_port": { "index": "analyzed", "type": "long" }, 
+              "tcp_flags": { "index": "analyzed", "type": "integer" },
+              "protocol": { "index": "analyzed", "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  }'
 

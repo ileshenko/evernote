@@ -99,11 +99,14 @@ sudo systemctl start elasticsearch.service
 sudo systemctl start logstash.service
 sudo systemctl start kibana.service
 
+sudo systemctl start elasticsearch.service logstash.service kibana.service
+
 For stopping
 sudo systemctl stop kibana.service
 sudo systemctl stop logstash.service
 sudo systemctl stop elasticsearch.service
 
+sudo systemctl stop kibana.service logstash.service elasticsearch.service
 
 ========================================================
 
