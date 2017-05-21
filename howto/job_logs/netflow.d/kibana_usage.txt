@@ -1,0 +1,7 @@
+GET _cat/indices
+GET _cat/indices?v
+
+DELETE logstash-*
+
+GET /_template
+DELETE /_template/logstash_*
