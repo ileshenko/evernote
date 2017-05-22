@@ -1,3 +1,6 @@
+http://host:5601
+
+
 GET _cat/indices
 GET _cat/indices?v
 

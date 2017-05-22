@@ -79,13 +79,29 @@ sudo apt-get install apt-transport-https
 Save the repository definition to /etc/apt/sources.list.d/elastic-5.x.list:
 echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
 
-sudo apt-get update && sudo apt-get install kibana elasticsearch logstash
-sudo apt-get update && sudo apt-get install elasticsearch
-sudo apt-get update && sudo apt-get install logstash
+sudo apt-get update
+sudo apt-get install kibana
+sudo apt-get install elasticsearch
+sudo apt-get install logstash
 
+sudo /usr/share/logstash/bin/logstash-plugin install logstash-filter-translate
 
-<configure logstash>
+<configure logstash> ...
 
+#enable kibana web access
+sudo gvim /etc/kibana/kibana.yml
+------------------------------
+-#server.host: "localhost"
++server.host: 0.0.0.0
+------------------------------
+
+??????????????????????????????????????????????????????????
+sudo chmod a+w /var/log/logstash/logstash-plain.log
+sudo chmod a+w /var/lib/logstash/queue/
+sudo rm /var/lib/logstash/.lock
+?????????????????????????????????????????????????????????
+
+tail -f /var/log/logstash/logstash-plain.log
 
 start everything up and set to start on boot:
 
@@ -122,7 +138,7 @@ tail -f /var/log/logstash/logstash-plain.log
 ##########################################################################################
 # By default the Elasticsearch service doesn’t log information in the systemd journal.   #
 # To enable journalctl logging, the --quiet option must be removed from the ExecStart    #
-# command line in the elasticsearch.service file.                                        #
+# command line in the /usr/lib/systemd/system/elasticsearch.service file.                #
 ##########################################################################################
 
 When systemd logging is enabled, the logging information are available using the journalctl commands:

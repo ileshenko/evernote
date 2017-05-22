@@ -18,6 +18,7 @@ sudo /usr/share/logstash/bin/logstash-plugin install logstash-filter-translate
 
 ===============================================
 
+sudo cp -vt /etc/logstash/ qosmos_*.csv
 
 g /etc/logstash/conf.d/logstash-netflow.conf
 
@@ -40,6 +41,7 @@ output {
 }
 
 V2:
+cat <<EOT >/etc/logstash/conf.d/logstash-netflow.conf
 input {
   udp {
     port => 2096
@@ -53,29 +55,22 @@ filter {
   translate {
     field => "[netflow][application_id]"
     destination => "[netflow][application_name]"
-	dictionary_path =>"/tmp/qosmos.csv"
+    dictionary_path =>"/etc/logstash/qosmos_app.csv"
+  }
+  translate {
+    field => "[netflow][application_id]"
+    destination => "[netflow][application_cat]"
+    dictionary_path =>"/etc/logstash/qosmos_cat.csv"
   }
 }
 output {
-  translate {
-    field => "application_id"
-	dictionary_path =>"/tmp/qosmos.csv"
-  }
   stdout { codec => rubydebug }
   elasticsearch {
     index => "logstash_test-%{+YYYY.MM.dd}"
     hosts => "localhost"
   }
 }
-
-/tmp/qosmos.csv
-================
-"1000",bittorent
-"1001",icq
-"1002",yahoo messenger
-"1003",eDonkey
-"1004",Tetris
-================
+EOT
 
 sudo /usr/share/logstash/bin/logstash --path.settings /etc/logstash -f /etc/logstash/conf.d/logstash-netflow.conf
 
@@ -113,7 +108,7 @@ curl -XPUT localhost:9200/_template/logstash_eznetflow -d '{
               "first_switched": { "index": "not_analyzed", "type": "date" },
               "last_switched": { "index": "not_analyzed", "type": "date" },
               "l4_src_port": { "index": "analyzed", "type": "long" },
-              "l4_dst_port": { "index": "analyzed", "type": "long" }, 
+              "l4_dst_port": { "index": "analyzed", "type": "long" },
               "tcp_flags": { "index": "analyzed", "type": "integer" },
               "protocol": { "index": "analyzed", "type": "integer" },
               "src_tos": { "index": "analyzed", "type": "integer" },
@@ -155,7 +150,7 @@ curl -XPUT localhost:9200/_template/logstash_test -d '{
               "in_pkts": { "index": "analyzed", "type": "long" },
               "in_bytes": { "index": "analyzed", "type": "long" },
               "l4_src_port": { "index": "analyzed", "type": "long" },
-              "l4_dst_port": { "index": "analyzed", "type": "long" }, 
+              "l4_dst_port": { "index": "analyzed", "type": "long" },
               "tcp_flags": { "index": "analyzed", "type": "integer" },
               "protocol": { "index": "analyzed", "type": "integer" }
             }
