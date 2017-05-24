@@ -1,0 +1,44 @@
+#######                                                                 
+#       #    # #    # # #####   ####  #    # #    #   ##   #    # ##### 
+#       ##   # #    # # #    # #    # ##   # ##  ##  #  #  ##   #   #   
+#####   # #  # #    # # #    # #    # # #  # # ## # #    # # #  #   #   
+#       #  # # #    # # #####  #    # #  # # #    # ###### #  # #   #   
+#       #   ##  #  #  # #   #  #    # #   ## #    # #    # #   ##   #   
+####### #    #   ##   # #    #  ####  #    # #    # #    # #    #   #   
+===========================================================================
+
+1. install linux headers
+2. install offed 4.0
+
+
+
+
+git clone git://dpdk.org/dpdk
+
+edit config/common_base
+-CONFIG_RTE_LIBRTE_MLX5_PMD=n
++CONFIG_RTE_LIBRTE_MLX5_PMD=y
+
+make config T=x86_64-native-linuxapp-gcc
+make
+
+cd ~/Downloads
+
+####### ####### ####### ####### ######                                                                             
+#     # #       #       #       #     #    # #    #  ####  #####   ##   #      #        ##   ##### #  ####  #    # 
+#     # #       #       #       #     #    # ##   # #        #    #  #  #      #       #  #    #   # #    # ##   # 
+#     # #####   #####   #####   #     #    # # #  #  ####    #   #    # #      #      #    #   #   # #    # # #  # 
+#     # #       #       #       #     #    # #  # #      #   #   ###### #      #      ######   #   # #    # #  # # 
+#     # #       #       #       #     #    # #   ## #    #   #   #    # #      #      #    #   #   # #    # #   ## 
+####### #       #       ####### ######     # #    #  ####    #   #    # ###### ###### #    #   #   #  ####  #    # 
+
+========================
+bring MLNX_OFED_LINUX-4.0-2.0.0.1-debian8.3-x86_64
+
+./mlnxofedinstall --without-dkms --add-kernel-support --kernel $(uname -r) --without-fw-update --force
+Problem - Debian 8.8, not 8.3
+=========================
+
+From sources:
+wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-4.0-2.0.0.1/MLNX_OFED_SRC-debian-4.0-2.0.0.1.tgz
+sudo ./install.pl

@@ -1,4 +1,7 @@
 git clone https://github.com/ileshenko/evernote.git evergit
+
+adduser igorle sudo
+
 ln -s ~/evergit/pc_installs/debian/home_bin/ ~/bin
 
 cd ~/evergit/pc_installs/debian/dotfiles
@@ -23,9 +26,11 @@ rt chmod +s lpt_pwr
 
 install
 -------
-git vim-gtk
-gitk cscope htop cmake dos2unix tree xxdiff socat gdb build-essential
+git gitk vim-gtk
+cscope htop cmake dos2unix tree xxdiff socat gdb build-essential
 wicd adblock-plus ntp
+
+apt-get install linux-headers-$(uname -r)
 
 for pdf. Instead of acroread use evince
 apt-get install evince
