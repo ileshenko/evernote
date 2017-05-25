@@ -13,10 +13,14 @@ sudo ln -sf bash sh
 .bashrc:
 #-----------------------------------------------
 uncomment "force_color_prompt=yes"
+sed -ri 's,#(force_color_prompt=yes),\1,' ~/.bashrc
+
 add
+cat <<EOT >> ~/.bashrc
 if [ -f ~/.bashrc_igor ]; then
     .  ~/.bashrc_igor
 fi
+EOT
 #-----------------------------------------------
 
 cd evergit/pc_installs/debian/home_bin

@@ -1,0 +1,43 @@
+ssh -X user@nps-server-1
+ssh -X user@nps-server-2
+
+root/3tango
+root/3tango
+
+SERVERs:
+adduser igorle
+adduser igorle sudo
+
+edit /etc/hostname and /etc/hosts in order to set proper hostname (same as used in SSH)
+service hostname start
+
+NPS19
+(ssh-keygen -t rsa   #if you need)
+ssh-copy-id igorle@nps-server-1
+ssh-copy-id igorle@nps-server-2
+
+ssh -X igorle@nps-server-1
+ssh -X igorle@nps-server-2
+
+SERVERs:
+#installation of my environment
+
+
+S1
+sudo ifconfig ens1f0 192.168.1.1
+S2
+sudo ifconfig ens1f0 192.168.1.2
+
+
+Ss:
+sudo ifconfig ens6f1 0.0.0.0 down
+sudo ifconfig ens6f0 0.0.0.0 down
+sudo ifconfig ens5f1 0.0.0.0 down
+sudo ifconfig ens5f0 0.0.0.0 down
+sudo ifconfig ens4f1 0.0.0.0 down
+sudo ifconfig ens4f0 0.0.0.0 down
+sudo ifconfig ens3f1 0.0.0.0 down
+sudo ifconfig ens3f0 0.0.0.0 down
+sudo ifconfig ens2f1 0.0.0.0 down
+sudo ifconfig ens2f0 0.0.0.0 down
+sudo ifconfig ens1f1 0.0.0.0 down
