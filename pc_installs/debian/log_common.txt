@@ -10,7 +10,7 @@ for i in * ; do ln -v -s `pwd`/$i ~/.$i ; done
 cd /bin
 sudo ln -sf bash sh
 
-.bashrc:
+.bashrc, .gitconfig:
 #-----------------------------------------------
 uncomment "force_color_prompt=yes"
 sed -ri 's,#(force_color_prompt=yes),\1,' ~/.bashrc
@@ -21,6 +21,12 @@ if [ -f ~/.bashrc_igor ]; then
     .  ~/.bashrc_igor
 fi
 EOT
+
+cat <<EOT >> ~/.gitconfig
+[include]
+    path = .gitconfig_igor
+EOT
+
 #-----------------------------------------------
 
 cd evergit/pc_installs/debian/home_bin
