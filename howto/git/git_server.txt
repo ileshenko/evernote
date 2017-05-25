@@ -1,0 +1,31 @@
+Known servers:
+nps-dpdk
+
+Server:
+sudo apt-get install git-core
+sudo adduser git
+passwd git
+
+Client:
+
+ssh-keygen -t rsa
+ssh-copy-id git@<Server>
+
+Server
+
+1) SSH:
+================================
+
+sudo mkdir /srv/git
+sudo chown git /srv/git
+su git
+
+mkdir /srv/git/rep_test.git
+cd /srv/git/rep_test.git
+git init --bare
+
+
+Client
+git remote add origin ssh://git@remote-server/srv/git/rep_test.git
+git clone ssh://git@remote-server/srv/git/rep_test.git
+
