@@ -41,3 +41,7 @@ sudo ifconfig ens3f0 0.0.0.0 down
 sudo ifconfig ens2f1 0.0.0.0 down
 sudo ifconfig ens2f0 0.0.0.0 down
 sudo ifconfig ens1f1 0.0.0.0 down
+
+
+lsb_release -a
+Description:	Ubuntu 16.10

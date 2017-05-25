@@ -15,9 +15,13 @@
 
 git clone git://dpdk.org/dpdk
 
-edit config/common_base
--CONFIG_RTE_LIBRTE_MLX5_PMD=n
-+CONFIG_RTE_LIBRTE_MLX5_PMD=y
+edit config/common_base:
+................................................................
+sed -ri 's,(MLX5_PMD=).*,\1y,' config/common_base
+
+# -CONFIG_RTE_LIBRTE_MLX5_PMD=n
+# +CONFIG_RTE_LIBRTE_MLX5_PMD=y
+...............................................................
 
 make config T=x86_64-native-linuxapp-gcc
 make
@@ -40,5 +44,6 @@ Problem - Debian 8.8, not 8.3
 =========================
 
 From sources:
+same for debian and ubuntu 16.10 (use lsb_release -a)
 wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-4.0-2.0.0.1/MLNX_OFED_SRC-debian-4.0-2.0.0.1.tgz
 sudo ./install.pl
