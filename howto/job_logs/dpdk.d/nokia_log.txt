@@ -47,3 +47,35 @@ From sources:
 same for debian and ubuntu 16.10 (use lsb_release -a)
 wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-4.0-2.0.0.1/MLNX_OFED_SRC-debian-4.0-2.0.0.1.tgz
 sudo ./install.pl
+
+
+================================================================
+Development
+================================================================
+
+on nps-server-2
+/home/igorle/dev/dpdk-17.05
+remote (origin) ssh://git@nps-dpdk/srv/git/dpdk-17.05.git
+my branch dev/igor/nokia_poc
+Shahaf's branch crypto-dev-support
+
+TODO: support "crypto_mode_en" parameter:
+	sudo build/app/dpdk-test-crypto-perf -w 0b:00.0 -w 0b:00.1,crypto_mode_en=1
+
+RTE_SDK=/home/igorle/dev/dpdk-17.05 RTE_TARGET=build make -C drivers/crypto/mlx5/
+RTE_SDK=$(pwd) RTE_TARGET=build make -C drivers/crypto/mlx5/
+
+============================================================================================
+dev/igor/nokia_poc:
+3be44e7 igorle@mellanox.com 2017-05-30 first compilation of PMD mlx5_crypto
+1855431 igorle@mellanox.com 2017-05-29 Use mlx5 NET driver as a prototype for mlx5 Crypto driver
+c97e1a6 igorle@mellanox.com 2017-05-29 Add to Mlx5 NIC PMD driver parameter "crypto_mode_en"
+af8b79c igorle@nps-server-2.mtl.labs.mlnx 2017-05-29 TMP:change environment (not for merge)
+============================================================================================
+
+=====================================================================================
+crypto-dev-support:
+b7a773c igorle@nps-server-2.mtl.labs.mlnx 2017-05-29 TMP:change environment (not for merge)
+1e574b1 igorle@mellanox.com 2017-05-30 Fix compilation error of mlx5_crypto driver
+=====================================================================================
+

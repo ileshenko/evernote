@@ -28,6 +28,7 @@ sudo /etc/init.d/openibd restart
 ibdev2netdev
 
 sudo ./build/app/testpmd --log-level=9 -w 05:00.0 -- --port-topology=chained -i
+sudo ./build/app/testpmd --log-level=9 -w 08:00.0 -- --port-topology=chained -i
 
 >start
 >show port stats all
@@ -37,3 +38,29 @@ sudo ./build/app/testpmd --log-level=9 -w 05:00.0 -- --port-topology=chained -i
 build/app/testpmd -c7 -n3 --vdev=net_pcap0,iface=eth0 --vdev=net_pcap1,iface=eth1 -- -i --nb-cores=2 --nb-ports=2 --total-num-mbufs=2048
 
 
+======================
+sudo /etc/init.d/openibd restart        ???
+ibdev2netdev
+sudo mst status -v
+lspci | grep Mellanox
+
+======================
+sudo ./build/app/testpmd --log-level=9 -w 08:00.0,txq_inline=64,rxq_cqe_comp_en=0 -w 0b:00.1,crypto=1 -- --port-topology=chained -i
+
+RTE_SDK=$(pwd) RTE_TARGET=build make -C drivers/crypto/mlx5/
+
+./x86_64-native-linuxapp-gcc/build/app/test-crypto-perf/dpdk-test-crypto-perf -w 04:00.0 -- --devtype mlx5_0
+
+sudo gdb --args build/app/dpdk-test-crypto-perf -w 05:00.0 -- --devtype mlx5_0
+sudo build/app/dpdk-test-crypto-perf -w 05:00.0 -- --devtype mlx5_0
+sudo build/app/dpdk-test-crypto-perf --log-level=9 -w 05:00.0,crypto=1 -- --devtype mlx5_0
+
+probe
+configure
+queue_pair_setup
+
+TODO queue_pair_release implement
+make config T=...
+make install T=....
+
+sudo mst status -v
