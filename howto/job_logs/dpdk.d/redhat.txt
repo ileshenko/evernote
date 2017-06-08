@@ -1,0 +1,28 @@
+
+ssh -X root@nps-server-2
+pwd 3tango
+
+adduser igorle
+passwd igorle
+	pwd il112233
+
+visudo
+#Find the lines in the file that grant sudo access to users in the group wheel when enabled.
+#Remove the comment character (#) at the start of the second line: 
+%wheel  ALL=(ALL)       ALL
+#Save and exit
+
+usermod -aG wheel igorle
+
+................................................................
+install standard environment here
+................................................................
+install fpga stuff here
+................................................................
+
+mkdir ~/dev
+
+forget about this stupid RedHad and work from
+igorle@nps-server-1 :
+sshfs nps-server-2:/dev ~/dev_server_2
+
