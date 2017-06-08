@@ -99,6 +99,7 @@ mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8 16_MSB_OF_DMAC
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8 0
 mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 32_LSB_OF_DMAC
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 0xffffffff
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 0x12345678
 2.       To turn on the loopback option
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x0 1
 
