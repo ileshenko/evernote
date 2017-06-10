@@ -6,6 +6,12 @@ chmod +x
 
 Gerbv
 apt-get install gerbv
+
+Gerbv BUG with drill layer size (*.TXT)
+Solution: select *.TXT layer and opening the Layer->Edit file
+format dialog. Turn off auto and set 5 digit.
+
+
 http://sourceforge.net/projects/gerbv/files/gerbv/gerbv-2.6.1/
 
 gerber editor // NO NEED, This is a CAD, not gerber editor

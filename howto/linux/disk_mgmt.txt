@@ -12,3 +12,7 @@ sudo dosfsck -w -r -l -a -v -t /dev/sdb1
 ===============================
 sshfs nps-server-2:dev/ PATH
 fusermount -u PATH
+
+=================
+format usb stick:
+sudo parted -l
