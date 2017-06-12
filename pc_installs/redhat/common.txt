@@ -1,0 +1,29 @@
+
+adduser igorle
+passwd igorle
+	pwd il112233
+
+visudo
+#Find the lines in the file that grant sudo access to users in the group wheel when enabled.
+#Remove the comment character (#) at the start of the second line: 
+%wheel  ALL=(ALL)       ALL
+#Save and exit
+
+usermod -aG wheel igorle
+
+
+==============================
+As Igor L.
+
+yum install gvim
+git config --global user.name IgorLe
+
+set environment from Debian
+
+=================================
+
+mkdir ~/Download
+cd ~/Download
+wget ftp://ftp.pbone.net/mirror/www.haoli.org/pub/redhat-7.x/RPMS/i386/xxdiff-1.12-1.i386.rpm
+
+yum install 

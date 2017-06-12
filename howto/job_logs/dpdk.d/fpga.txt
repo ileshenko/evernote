@@ -1,0 +1,119 @@
+nps-server-2 as RH7.3
+
+
+red hat version:
+$> cat /etc/redhat-release
+or 
+$> cat /etc/os-release
+
+user/3tango
+
+ssh root@gen-l-vrt-nps-reboot       pwd:3tango
+=============================
+ll /auto/mswg/release/MLNX_OFED/MLNX_OFED_LINUX-4.0-2.0.0.1.6
+
+
+# scp /auto/mswg/release/MLNX_OFED/MLNX_OFED_LINUX-4.0-2.0.0.1.6/MLNX_OFED_LINUX-4.0-2.0.0.1.6-rhel7.3-x86_64-debuginfo.tgz igorle@nps-server-2:fpga/
+scp /auto/mswg/release/MLNX_OFED/MLNX_OFED_LINUX-4.0-2.0.0.1.6/MLNX_OFED_LINUX-4.0-2.0.0.1.6-rhel7.3-x86_64.iso igorle@nps-server-2:fpga/
+
+# DEB scp /auto/mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21/DEBS/mft-4.7.0-21-x86_64-deb.tgz igorle@nps-server-2:fpga/
+# it was internal !!!scp /auto/mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21/RPMS/mft-4.7.0-21-x86_64-rpm.tgz user@nps-server-2:fpga/
+scp /mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21-int/mft-4.7.0-21/RPMS/mft-4.7.0-21-x86_64-rpm.tgz igorle@nps-server-2:fpga/
+
+
+ll  /mswg/release/fw-4117/fw-4117-rel-14_19_2240/../etc/bin/fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin
+scp /mswg/release/fw-4117/fw-4117-rel-14_19_2240/../etc/bin/fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin igorle@nps-server-2:fpga/
+
+scp /swgwork/fpga_lab/ayeleth/Nokia/Nokia_Demo_loopback_smac_dmac_status_300517.bin igorle@nps-server-2:fpga/
+
+=============
+ssh -X root@nps-server-2
+nps-server-2:
+
+
+sudo mkdir /media/iso
+sudo mount -o loop /home/user/fpga/MLNX_OFED_LINUX-4.0-2.0.0.1.6-rhel7.3-x86_64.iso /media/iso
+cd /media/iso
+yum install tcl tk
+./mlnxofedinstall
+
+...
+/etc/init.d/openibd restart ???
+
+install mft-4.7.0-21
+
+reboot
+=============
+win:IE: 
+https://nps-server-2-ilo
+continue
+admin/admin
+.net
+
+===================
+ssh -X user@nps-server-2
+mst stop
+modprobe mlx_accel_tools
+mst start --with_fpga
+mst status
+# not correct versoin!!! mlxburn -d /dev/mst/mt4117_pciconf0 -i fw-ConnectX4Lx-rel-14_98_3412-MNV101511A-BCIT_Ax.bin
+# not correct versoin!!! mlxburn -d /dev/mst/mt4117_pciconf1 -i fw-ConnectX4Lx-rel-14_98_3412-MNV101511A-BCIT_Ax.bin
+
+mlxburn -d /dev/mst/mt4117_pciconf0 -i fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin
+mlxburn -d /dev/mst/mt4117_pciconf1 -i fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin
+
+You are supposed to see (under FPGA devices):
+/dev/mst/mt4117_pciconf0_fpga
+/dev/mst/mt4117_pciconf0_fpga_i2c
+/dev/mst/mt4117_pciconf0_fpga_rdma
+
+To verify everything is ok:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma query
+
+You supposed to see: User
+
+In order to verify what image is burned, please read the following registers:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000
+   you supposed to see 0x802
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900024
+   you supposed to see 0x00010001
+
+
+Burning:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b Nokia_Demo_loopback_smac_dmac_status_300517.bin
+
+once burning is done:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma load --user
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
+
+You supposed to see: User
+
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000  you supposed to see 0x802
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900024  you supposed to see 0x000b0001
+
+=============
+After boot:
+1.       To adjust the MAC of loopback traffic:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8 16_MSB_OF_DMAC
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8 0
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 32_LSB_OF_DMAC
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 0xffffffff
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 0x12345678
+2.       To turn on the loopback option
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x0 1
+
+
+~~~~~~~~~~~~~~~~~~~~~
+useful commands:
+modprobe -r mlx_accel_tools
+mst start --with_fpga
+mlxfwreset -d /dev/mst/mt4117_pciconf0 reset --level 3 -y
+
+
+
+
+
+
+???? mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b Nokia_Demo_loopback_smac_dmac_status_300517.bin --factory
+
