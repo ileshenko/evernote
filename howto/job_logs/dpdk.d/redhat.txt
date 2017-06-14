@@ -9,7 +9,9 @@ passwd igorle
 visudo
 #Find the lines in the file that grant sudo access to users in the group wheel when enabled.
 #Remove the comment character (#) at the start of the second line: 
-%wheel  ALL=(ALL)       ALL
+# %wheel  ALL=(ALL)       ALL
+%wheel        ALL=(ALL)       NOPASSWD: ALL
+
 #Save and exit
 
 usermod -aG wheel igorle

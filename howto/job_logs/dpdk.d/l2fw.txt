@@ -1,14 +1,51 @@
 
+Compilation:
+============
+make config T=x86_64-native-linuxapp-gcc
+make -j 24
 make drivers/crypto/mlx5_sub
-RTE_SDK=$(pwd) RTE_TARGET=build make -C drivers/crypto/mlx5/
 
 RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/l2fwd-crypto
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_poc
 
+Runnung:
+========
 sudo ./examples/l2fwd-crypto/build/l2fwd-crypto -w 05:00.0,crypto=1 -w 0b:00.0
 sudo ./examples/l2fwd-crypto/build/l2fwd-crypto -w 05:00.0,crypto=1 -w 0b:00.0 -l 6
+sudo ./examples/nokia_poc/build/nokia_poc -w 05:00.0,crypto=1 -w 0b:00.0 -l 6
 
+
+Combinations:
+==============
 time make -j 24 && RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/l2fwd-crypto
 
+
+
+Debug:
+======
+sudo gdb --args ./examples/l2fwd-crypto/build/l2fwd-crypto -w 05:00.0,crypto=1 -w 0b:00.0 -l 6
+cat /sys/class/net/ens1/device/infiniband/mlx5_0/ports/1/hw_counters/out_of_buffer
+
+============
+Shahaf: you can checkout mlx5_crypto_enqueue_op_burst and see on which fields it looks on
+
+Olga:
+raw_ethernet_bw -c (client) ...
+commmunity mellanox
+pkt-gen DPDK download
+
+
+===============
+shell:
+sudo tcpdump -i ens1f0 -nn -XX -S -s 0 -e
 sudo arp -s 192.168.111.11 22:33:44:55:11:22
 
-sudo gdb --args ./examples/l2fwd-crypto/build/l2fwd-crypto -w 05:00.0,crypto=1 -w 0b:00.0 -l 6
+
+
+********************************************************************************
+KNOWLEGE BASE
+********************************************************************************
+same???
+rte_ctrlmbuf_len(m), rte_pktmbuf_data_len(m), rte_pktmbuf_pkt_len(m)
+................................................................................
+********************************************************************************

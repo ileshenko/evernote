@@ -10,6 +10,20 @@ user/3tango
 
 ssh root@gen-l-vrt-nps-reboot       pwd:3tango
 =============================
+MFT
+mft-4.7.0-21 int  (from ayelet)
+scp /mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21-int/mft-4.7.0-21/RPMS/mft-4.7.0-21-x86_64-rpm.tgz igorle@nps-server-2:fpga/
+scp /mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21-int/RPMS/*x86_64.rpm igorle@nps-server-2:fpga/
+
+untar and install
+
+rpm -i mft-int-4.7.0-21.x86_64.rpm
+rpm -i mft-devmondb-4.7.0-21.x86_64.rpm
+rpm -i *.x86_64.rpm
+
+
+
+=============================
 ll /auto/mswg/release/MLNX_OFED/MLNX_OFED_LINUX-4.0-2.0.0.1.6
 
 
@@ -17,14 +31,61 @@ ll /auto/mswg/release/MLNX_OFED/MLNX_OFED_LINUX-4.0-2.0.0.1.6
 scp /auto/mswg/release/MLNX_OFED/MLNX_OFED_LINUX-4.0-2.0.0.1.6/MLNX_OFED_LINUX-4.0-2.0.0.1.6-rhel7.3-x86_64.iso igorle@nps-server-2:fpga/
 
 # DEB scp /auto/mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21/DEBS/mft-4.7.0-21-x86_64-deb.tgz igorle@nps-server-2:fpga/
-# it was internal !!!scp /auto/mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21/RPMS/mft-4.7.0-21-x86_64-rpm.tgz user@nps-server-2:fpga/
-scp /mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21-int/mft-4.7.0-21/RPMS/mft-4.7.0-21-x86_64-rpm.tgz igorle@nps-server-2:fpga/
+# it was external !!!scp /auto/mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21/RPMS/mft-4.7.0-21-x86_64-rpm.tgz user@nps-server-2:fpga/
 
 
 ll  /mswg/release/fw-4117/fw-4117-rel-14_19_2240/../etc/bin/fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin
 scp /mswg/release/fw-4117/fw-4117-rel-14_19_2240/../etc/bin/fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin igorle@nps-server-2:fpga/
 
+
+===========================
+FPGA images
+1)
 scp /swgwork/fpga_lab/ayeleth/Nokia/Nokia_Demo_loopback_smac_dmac_status_300517.bin igorle@nps-server-2:fpga/
+2) 13/06/17
+scp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2149__date_12062017_time_172150__40g-high__ku060-2/newton_ku060_40g_v2149.bin igorle@nps-server-2:fpga/
+~~~~~~~~~~~~~~~~
+burning
+~~~~~~~~
+start env:
+sudo mst stop
+sudo modprobe mlx_accel_tools
+sudo mst start --with_fpga
+
+validation before/after burn:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sudo mst status
+You are supposed to see (under FPGA devices):
+/dev/mst/mt4117_pciconf0_fpga
+/dev/mst/mt4117_pciconf0_fpga_i2c
+/dev/mst/mt4117_pciconf0_fpga_rdma
+
+To verify everything is ok:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma query
+
+You supposed to see: User
+
+
+In order to verify what image is burned, please read the following registers:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900024
+you supposed to see
+   0x802 0x00010001 (original)
+   0x802 0x000b0001 (Nokia_Demo_loopback_smac_dmac_status_300517.bin)
+   0x865 0x00010001 (newton_ku060_40g_v2149.bin)
+
+Burning:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b Nokia_Demo_loopback_smac_dmac_status_300517.bin
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2149.bin
+
+once burning is done:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma load --user
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
+
+
+
+
 
 =============
 ssh -X root@nps-server-2
@@ -40,7 +101,6 @@ yum install tcl tk
 ...
 /etc/init.d/openibd restart ???
 
-install mft-4.7.0-21
 
 reboot
 =============
@@ -61,36 +121,13 @@ mst status
 
 mlxburn -d /dev/mst/mt4117_pciconf0 -i fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin
 mlxburn -d /dev/mst/mt4117_pciconf1 -i fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin
-
-You are supposed to see (under FPGA devices):
-/dev/mst/mt4117_pciconf0_fpga
-/dev/mst/mt4117_pciconf0_fpga_i2c
-/dev/mst/mt4117_pciconf0_fpga_rdma
-
-To verify everything is ok:
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
-mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma query
-
-You supposed to see: User
-
-In order to verify what image is burned, please read the following registers:
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000
-   you supposed to see 0x802
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900024
-   you supposed to see 0x00010001
-
-
-Burning:
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b Nokia_Demo_loopback_smac_dmac_status_300517.bin
-
-once burning is done:
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma load --user
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
-
-You supposed to see: User
-
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000  you supposed to see 0x802
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900024  you supposed to see 0x000b0001
+mlxfwreset -d /dev/mst/mt4117_pciconf0 reset --level 3 -y
+mlxfwreset -d /dev/mst/mt4117_pciconf1 reset --level 3 -y
+NB: before reset we have to do
+   lsmod grep accel
+   rmmod mlx_accel_tools
+   rmmod mlx_accel_core
+   /etc/init.d/openibd restart
 
 =============
 After boot:
@@ -111,6 +148,9 @@ mst start --with_fpga
 mlxfwreset -d /dev/mst/mt4117_pciconf0 reset --level 3 -y
 
 
+devmon utility:
+sxdump
+wqdump
 
 
 
