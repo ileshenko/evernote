@@ -41,6 +41,12 @@ sudo tcpdump -i ens1f0 -nn -XX -S -s 0 -e
 sudo arp -s 192.168.111.11 22:33:44:55:11:22
 
 
+=================================
+NIC configuration
+Shahaf's Trick!!!
+.rxt.checks.ud_fast_drop_en:
+sudo mcra /dev/mst/mt4117_pciconf0 0x50a58.6:1 0
+
 
 ********************************************************************************
 KNOWLEGE BASE
