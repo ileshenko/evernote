@@ -19,3 +19,5 @@ PWD=`pwd`
 find . "/usr/include" -path "*/build" -prune -o -name "*.[chxsS]" -print > cscope.files
 cscope -b
 ctags -R --exclude="build"
+rm -f cscope.files
+
