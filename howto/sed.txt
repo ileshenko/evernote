@@ -1,0 +1,6 @@
+Sed examples
+
+sed -ri 's,(PMD_PCAP=).*,\1y,' build/.config
+
+sed -ri "s/struct priv\>/struct mlx5_cryp_priv/" *
+
