@@ -15,6 +15,9 @@ mft-4.7.0-21 int  (from ayelet)
 scp /mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21-int/mft-4.7.0-21/RPMS/mft-4.7.0-21-x86_64-rpm.tgz igorle@nps-server-2:fpga/
 scp /mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21-int/RPMS/*x86_64.rpm igorle@nps-server-2:fpga/
 
+scp /mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21-int/mft-4.7.0-21/RPMS/mft-4.7.0-21-x86_64-rpm.tgz root@10.143.37.11:/root/igorle/install
+scp /mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21-int/RPMS/*x86_64.rpm root@10.143.37.11:/root/igorle/install
+
 untar and install
 
 rpm -i mft-int-4.7.0-21.x86_64.rpm
@@ -68,20 +71,20 @@ You supposed to see: User
 
 
 In order to verify what image is burned, please read the following registers:
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900024
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900024
 you supposed to see
    0x802 0x00010001 (original)
    0x802 0x000b0001 (Nokia_Demo_loopback_smac_dmac_status_300517.bin)
    0x865 0x00010001 (newton_ku060_40g_v2149.bin)
 
 Burning:
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b Nokia_Demo_loopback_smac_dmac_status_300517.bin
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2149.bin
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b Nokia_Demo_loopback_smac_dmac_status_300517.bin
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2149.bin
 
 once burning is done:
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma load --user
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma load --user
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
 
 
 
@@ -116,8 +119,11 @@ mst stop
 modprobe mlx_accel_tools
 mst start --with_fpga
 mst status
+
 # not correct versoin!!! mlxburn -d /dev/mst/mt4117_pciconf0 -i fw-ConnectX4Lx-rel-14_98_3412-MNV101511A-BCIT_Ax.bin
 # not correct versoin!!! mlxburn -d /dev/mst/mt4117_pciconf1 -i fw-ConnectX4Lx-rel-14_98_3412-MNV101511A-BCIT_Ax.bin
+
+
 
 mlxburn -d /dev/mst/mt4117_pciconf0 -i fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin
 mlxburn -d /dev/mst/mt4117_pciconf1 -i fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-BCIT_Ax.bin
@@ -129,6 +135,19 @@ NB: before reset we have to do
    rmmod mlx_accel_core
    /etc/init.d/openibd restart
 
+
+mlxburn -d /dev/mst/mt4117_pciconf0 -q
+-I- Image type:          FS3
+-I- FW Version:          14.19.2240
+-I- FW Release Date:     24.5.2017
+-I- Product Version:     rel-14_19_2240
+-I- Description:         UID                GuidsNumber
+-I- Base GUID:           ec0d9a03002fb4ae        4
+-I- Base MAC:            0000ec0d9a2fb4ae        4
+-I- Image VSD:
+-I- Device VSD:
+-I- PSID:                MT_3040111017
+
 =============
 After boot:
 1.       To adjust the MAC of loopback traffic:
@@ -136,9 +155,12 @@ mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8 16_MSB_OF_DMAC
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8 0
 mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 32_LSB_OF_DMAC
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 0xffffffff
-sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 0x12345678
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8 0x00
 2.       To turn on the loopback option
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x0 1
+
+Disable NIC fast drop (.rxt.checks.ud_fast_drop_en)
+sudo mcra /dev/mst/mt4117_pciconf0 0x50a58.6:1 0
 
 
 ~~~~~~~~~~~~~~~~~~~~~

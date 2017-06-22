@@ -56,3 +56,7 @@ http://www.mellanox.com/downloads/MFT/mft-4.6.0-48-x86_64-deb.tgz
 install
 mst start after each reboot
 
+
+DMZ:
+10.143.37.11
+
