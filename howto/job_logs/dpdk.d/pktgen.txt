@@ -24,6 +24,7 @@ sudo ./app/build/pktgen -c 0xfffff -w 05:00.0,txq_inline=256,txqs_min_inline=4 -
 sudo ./app/build/pktgen -c 0x1f -n 3 -w 05:00.0 -- -T -P -m "[1:2].0"
 sudo ./app/build/pktgen -c 0x1f -l 0-4 -n 3 -w 05:00.0 -- -T -P -m "[1:2].0"
 sudo ./app/build/pktgen -c 0x1f -l 0-4 -n 3 -w 05:00.0 -- -T -P -m "[1:3].0" -f my_test/set_seq.cmd
+sudo ./app/build/pktgen -c 0x1f -l 0-4 -n 5 -w 05:00.0 -w 88:00.0 -- -T -P -m "[1:3].0, [2:4].1"
 
 
 commands:
@@ -53,6 +54,9 @@ sudo ./build/app/testpmd --log-level=9 -w 0b:00.0 -w 05:00.0 -- --port-topology=
 > start
 sudo ./build/app/testpmd --log-level=9 -w 0b:00.0 -w 05:00.0 -- --port-topology=chained -i --eth-peer=1,02:03:04:fa:fe:01
 TODO --eth-peer=
+
+/root/igorle/dpdk/build/app/testpmd -w 00:05.0 -w 00:06.0 -- -i -a
+show port stats all
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 HW loopback
@@ -75,3 +79,21 @@ cd linux_dpdk
 sudo ./scripts/dpdk_setup_ports.py -i
 
 apt-get install python-yaml
+
+===========================================
+make network sterile
+S1
+#ip tables deny all
+#iptables -A OUTPUT -o eth1 -j DROP
+#iptables -I OUTPUT -o eth1 -j DROP
+iptables -L OUTPUT -v
+iptables -A OUTPUT -o ens4f0 -j DROP
+iptables -A OUTPUT -o ens1f0 -j DROP
+iptables -A OUTPUT -o ens+ -j DROP
+ip6tables -L OUTPUT -v
+#ip6tables -A OUTPUT -o ens4f0 -j DROP
+#ip6tables -A OUTPUT -o ens1f0 -j DROP
+ip6tables -A OUTPUT -o ens+ -j DROP
+
+ifconfig ens1f0 0.0.0.0 down
+ifconfig ens4f0 0.0.0.0 down

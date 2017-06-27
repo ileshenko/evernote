@@ -22,6 +22,8 @@ install standard environment here
 install fpga stuff here
 ................................................................
 
+yum install numactl
+
 mkdir ~/dev
 
 forget about this stupid RedHad and work from

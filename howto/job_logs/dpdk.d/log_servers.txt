@@ -56,7 +56,35 @@ http://www.mellanox.com/downloads/MFT/mft-4.6.0-48-x86_64-deb.tgz
 install
 mst start after each reboot
 
+========================
+Server console access
+Wni IE:
+https://nps-server-2-ilo
 
-DMZ:
-10.143.37.11
+admin/admin
+
+.net
+
+
+
+DMZ (Maxim Lev):
+=======================
+SRC:
+rm -rf build/ examples/nokia_poc/build
+tar zcvf 2venodeb.tgz *
+scp 2venodeb.tgz root@10.143.37.11:/root/igorle/dpdk
+scp 2venodeb.tgz root@10.143.37.21:/root/igorle/dpdk
+
+Left
+ssh root@10.143.37.11
+
+make config T=x86_64-native-linuxapp-gcc && make -j 24 && RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_poc
+/root/igorle/dpdk/examples/nokia_poc/build/nokia_poc -w 00:06.0,crypto=1 -w 00:05.0 -c 0x1f -- --cdev_type HW --trace
+
+Rigt
+ssh root@10.143.37.21
+make config T=x86_64-native-linuxapp-gcc && make -j 24
+/root/igorle/dpdk/build/app/testpmd -w 00:05.0 -w 00:06.0 -- -i -a
+
+show port stats all
 
