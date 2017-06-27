@@ -17,7 +17,9 @@ PWD=`pwd`
 #find "$PWD/dpe" "$PWD/apps/pci_tr" -name "*.[chxsS]" -print > cscope.files
 
 find . "/usr/include" -path "*/build" -prune -o -name "*.[chxsS]" -print > cscope.files
+echo "build/include/rte_config.h" >> cscope.files
 cscope -b
 ctags -R --exclude="build"
+ctags -a "build/include/rte_config.h"
 rm -f cscope.files
 
