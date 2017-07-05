@@ -58,4 +58,18 @@ rte_ctrlmbuf_len(m), rte_pktmbuf_data_len(m), rte_pktmbuf_pkt_len(m)
 updown
 =======
 sudo ./examples/nokia_poc/build/nokia_poc --c 0x1f -w 0b:00.0 -w 05:00.0,crypto=1 -- --cdev_type HW
-sudo ./examples/nokia_poc/build/nokia_poc --c 0x1f -w 0b:00.0 -w 05:00.0,crypto=1 -w 84:00.0 -w 88:00.0,crypto=1 -- --cdev_type HW
+sudo ./examples/nokia_poc/build/nokia_poc --c 0x1f -w 0b:00.0 -w 05:00.0,crypto=1 -w 84:00.0 -w 88:00.0,crypto=1 -- \
+  --cdev_type HW -A 0b:00.0 -B 05:00.0 -C 88:00.0 -D 84:00.0
+
+sudo ./examples/nokia_poc/build/nokia_poc -c 0xfff -w 0b:00.0 -w 05:00.0,crypto=1 -w 84:00.0 -w 88:00.0,crypto=1 --  \
+  --cdev_type HW -A 0b:00.0 -B 05:00.0 -C 88:00.0 -D 84:00.0 --key_index 66 --rxqs_nb 4
+
+
+
+#########################################################################################
+loopback
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/l2fwd
+sudo ./examples/l2fwd/build/l2fwd --c 0x1f -w 0b:00.0 -w 84:00.0 -- -p 0x3 --no-mac-updating
+sudo ./examples/nokia_loopback/build/nokia_loopback --c 0x1f -w 0b:00.0 -w 84:00.0 -- -p 0x3 --no-mac-updating -E 0b:00.0 -F 84:00.0
+
+#########################################################################################

@@ -47,6 +47,8 @@ FPGA images
 scp /swgwork/fpga_lab/ayeleth/Nokia/Nokia_Demo_loopback_smac_dmac_status_300517.bin igorle@nps-server-2:fpga/
 2) 13/06/17
 scp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2149__date_12062017_time_172150__40g-high__ku060-2/newton_ku060_40g_v2149.bin igorle@nps-server-2:fpga/
+3) 03/07/17
+scp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2256__date_03072017_time_090230__40g-high__ku060-2/newton_ku060_40g_v2256.bin igorle@nps-server-2:fpga/
 ~~~~~~~~~~~~~~~~
 burning
 ~~~~~~~~
@@ -82,10 +84,15 @@ Burning:
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b Nokia_Demo_loopback_smac_dmac_status_300517.bin
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2149.bin
 
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2256.bin
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma b newton_ku060_40g_v2256.bin
+
 once burning is done:
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma load --user
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
 
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma load --user
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma query
 
 
 
@@ -169,12 +176,19 @@ Disable NIC fast drop (.rxt.checks.ud_fast_drop_en)
 sudo mcra /dev/mst/mt4117_pciconf0 0x50a58.6:1 0
 sudo mcra /dev/mst/mt4117_pciconf1 0x50a58.6:1 0
 
+new FPGA - dummy mode:
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x18 0
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x18 0
+
+
 
 ~~~~~~~~~~~~~~~~~~~~~
 useful commands:
 modprobe -r mlx_accel_tools
 mst start --with_fpga
 mlxfwreset -d /dev/mst/mt4117_pciconf0 reset --level 3 -y
+
+tcpdump -i ens2f0 -nn -XX -S -s 0 -e --direction in
 
 
 devmon utility:
