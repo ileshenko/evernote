@@ -38,7 +38,7 @@ install
 -------
 git gitk vim-gtk
 cscope htop cmake dos2unix tree xxdiff socat gdb build-essential
-wicd adblock-plus ntp
+wicd adblock-plus ntp tmux
 
 apt-get install linux-headers-$(uname -r)
 

@@ -1,0 +1,112 @@
+One server FPGA200 10.7.162.200 with two Innova cards and one dual port CX4 card.
+Connected both ports to FPGA201 10.7.162.201 which has a dual port CX4 card.
+
+pktgen:
+ssh -X root@fpga201
+
+app:
+ssh -X root@fpga200
+
+LOG
+=========================
+[root@fpga201 ~]# cat /etc/os-release 
+NAME="Red Hat Enterprise Linux Server"
+VERSION="7.3 (Maipo)"
+=========================
+
+yum install gvim
+yum install libpcap-devel
+
+mkdir -p /mnt/huge
+
+mkdir dev
+cd /root/dev/
+
+git config --global alias.lp "log --date=short --pretty=format:'%C(yellow)%h%Creset %ae %Cgreen%ad%Creset%C(cyan)%d%Creset %s'"
+
+ll /auto/mswg/release/MLNX_OFED/MLNX_OFED_LINUX-4.0-2.0.0.1.6
+cp /auto/mswg/release/MLNX_OFED/MLNX_OFED_LINUX-4.0-2.0.0.1.6//MLNX_OFED_LINUX-4.0-2.0.0.1.6-rhel7.3-x86_64.iso /root/dev
+mkdir /media/iso
+mount -o loop /root/dev/MLNX_OFED_LINUX-4.0-2.0.0.1.6-rhel7.3-x86_64.iso /media/iso
+cd /media/iso
+./mlnxofedinstall
+/etc/init.d/openibd restart
+
+
+/mswg/release/mft/mft-4.7.0/mft-4.7.0-21/linux/mft-4.7.0-21-int/install.sh
+
+
+git clone ssh://git@nps-dpdk/srv/git/dpdk-17.05.git
+cd dpdk-17.05/
+git checkout crypto-dev-support
+make config T=x86_64-native-linuxapp-gcc
+make -j 24
+
+
+
+pktgen install:
+===============
+cd /root/dev/
+git clone git://dpdk.org/apps/pktgen-dpdk
+
+RTE_SDK=/root/dev/dpdk-17.05 RTE_TARGET=build make
+RTE_SDK=/root/dev/dpdk-17.05 RTE_TARGET=build tools/setup.sh
+
+
+pktgen work:
+============
+ifconfig ens2f0 0.0.0.0 down
+ifconfig ens2f1 0.0.0.0 down
+cd /root/dev/pktgen-dpdk
+
+./app/build/pktgen -c 0x1f -l 0-4 -n 5 -w 02:00.0 -w 02:00.1 -- -T -P -m "[1:3].0, [2:4].1"
+
+set all rate 10
+set all size 128
+set all proto udp
+set all count 1
+set all count 0
+
+
+
+app
+=======
+mst stop
+modprobe mlx_accel_tools
+mst start --with_fpga
+
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_poc
+
+./examples/nokia_poc/build/nokia_poc -c 0xfff -w 02:00.0 -w 02:00.1 -w 01:00.0,crypto=1 -w 81:00.0,crypto=1 -- \
+  --cdev_type HW -A 02:00.0 -B 01:00.0 -C 81:00.0 -D 02:00.1 --key_index 66 --trace -T 600
+
+
+
+============
+mst status -v
+
+every reboot:
+=============
+mount -t hugetlbfs nodev /mnt/huge
+echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+echo 2048 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+
+
+
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 0xffffffff
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8 0x00
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x4 0xffffffff
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x8 0x00
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x0 1
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x0 1
+
+mcra /dev/mst/mt4117_pciconf0 0x50a58.6:1 0
+mcra /dev/mst/mt4117_pciconf1 0x50a58.6:1 0
+
+
+validations:
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga r 0
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga r 0
+
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma r 0x900000
