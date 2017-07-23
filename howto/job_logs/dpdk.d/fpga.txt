@@ -193,6 +193,11 @@ sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x18 0
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x18 0
 
 
+RESET FPGA:
+=================
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x900400 1
+mst start --with_fpga
+
 
 ~~~~~~~~~~~~~~~~~~~~~
 useful commands:
@@ -217,4 +222,43 @@ QOS
 
 ethtool -a ens1 - QOS on off (check only)
 
+============Key Write
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga r 0x104
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga r 0x100
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga r 0x104
 
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x110 0xe5bd3ea0
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x114 0xeb55ade8
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x118 0x66c6ac58
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x11c 0xbd54302a
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x100 0xc0400000
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga r 0x104
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x110 0xd4552a8f
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x114 0xd6e61cc8
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x118 0x1a200914
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x11c 0x1a29c10b
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x100 0xc0600000
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga r 0x104
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x110 0xdb84b4fb
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x114 0xccda563b
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x118 0x66227bfe
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x11c 0x456f0f77
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x100 0xc0800000
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga r 0x104
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x110 0xe13fed21
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x114 0xb46e4e7e
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x118 0xc31253b2
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x11c 0xbb17b3e0
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x100 0xc0a00000
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga r 0x104
+
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x100 0x0
+
+==============================
+
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_zuc_test
+sudo ./examples/nokia_zuc_test/build/nokia_zuc_test -w 05:00.0,crypto=1 -w 88:00.0,crypto=1 -- --test-file examples/nokia_zuc_test/spec_test.data
+
+
+gcc -o examples/nokia_zuc_test/build/key_loader examples/nokia_zuc_test/key_loader.c
+sudo examples/nokia_zuc_test/build/key_loader --test-file examples/nokia_zuc_test/spec_test.data
