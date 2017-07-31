@@ -1,0 +1,30 @@
+git remote add origin ssh://git@nps-dpdk/srv/git/libsso_zuc.git
+
+sudo yum install yasm
+
+make
+rm build/*.so
+
+DPDK
+l2fw-crypto
+-------------
+LIBSSO_ZUC_PATH=$(pwd)/../libsso_zuc/zuc make
+LIBSSO_ZUC_PATH=$(pwd)/../libsso_zuc/zuc RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/l2fwd-crypto
+
+sudo ./examples/l2fwd-crypto/build/l2fwd-crypto -w 0b:00.0 -l 6 -n 4 --vdev="crypto_zuc,socket_id=1,max_nb_sessions=128" -- --cipher_algo=zuc-eea3 --chain=CIPHER_ONLY
+
+sudo ./examples/l2fwd-crypto/build/l2fwd-crypto -w 0b:00.0 -w 84:00.0 -n 4 --vdev="crypto_zuc0,socket_id=1,max_nb_sessions=128" --vdev="crypto_zuc1,socket_id=1,max_nb_sessions=128" -- --cipher_algo=zuc-eea3 --chain=CIPHER_ONLY
+
+
+nokia
+-------
+LIBSSO_ZUC_PATH=$(pwd)/../libsso_zuc/zuc make
+LIBSSO_ZUC_PATH=$(pwd)/../libsso_zuc/zuc RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_poc
+
+sudo ./examples/nokia_poc/build/nokia_poc -w 0b:00.0 -w 84:00.0 \
+-w 05:00.0,crypto=1 -w 84:00.0 -w 88:00.0,crypto=1 \
+--vdev="crypto_zuc0,socket_id=0,max_nb_sessions=128" --vdev="crypto_zuc1,socket_id=0,max_nb_sessions=128" -- \
+--cdev_type HW -A 0b:00.0 -B 05:00.0 -C 88:00.0 -D 84:00.0
+
+sudo ./examples/nokia_poc/build/nokia_poc  -w 0b:00.0 -w 05:00.0,crypto=1 -w 84:00.0 -w 88:00.0,crypto=1 -- \
+--cdev_type HW -A 0b:00.0 -B 05:00.0 -C 88:00.0 -D 84:00.0 --eea3_count 0x12345678 --eea3_bearer 1a --rxqs_nb 3

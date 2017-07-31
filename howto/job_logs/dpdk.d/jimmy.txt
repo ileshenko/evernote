@@ -9,7 +9,7 @@ ssh -X root@fpga200
 
 LOG
 =========================
-[root@fpga201 ~]# cat /etc/os-release 
+[root@fpga201 ~]# cat /etc/os-release
 NAME="Red Hat Enterprise Linux Server"
 VERSION="7.3 (Maipo)"
 =========================

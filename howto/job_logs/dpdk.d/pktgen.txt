@@ -41,6 +41,7 @@ RSS:
 enable all range
 range all src port 1000 1000 1024 1
 range all size 128 128 128 0
+range all size 1500 1500 1500 0
 
 enable 0 capture
 disable all capture
@@ -104,5 +105,5 @@ ip6tables -L OUTPUT -v
 #ip6tables -A OUTPUT -o ens1f0 -j DROP
 ip6tables -A OUTPUT -o ens+ -j DROP
 
-ifconfig ens1f0 0.0.0.0 down
-ifconfig ens4f0 0.0.0.0 down
+ifconfig ens1f0 0.0.0.0 down ; ifconfig ens4f0 0.0.0.0 down
+ifconfig ens1f0 0.0.0.0 up ; ifconfig ens4f0 0.0.0.0 up

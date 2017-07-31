@@ -50,6 +50,12 @@ scp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2149__date_12062017_time_172150__40g
 3) 11/07/17
 scp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2278__date_10072017_time_151751__40g-high__ku060-2/newton_ku060_40g_v2278.bin igorle@nps-server-2:fpga/
 scp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2278__date_10072017_time_151751__40g-high__ku060-2/fpga.adb igorle@nps-server-2:fpga/
+4) 25/07/17
+cp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2294__date_19072017_time_010638__40g-high__ku060-2/newton_ku060_40g_v2294.bin .
+cp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2294__date_19072017_time_010638__40g-high__ku060-2/fpga.adb newton_ku060_40g_v2294.adb
+5) 30/07/17
+cp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2310__date_28072017_time_105202__40g-high__ku060-2/newton_ku060_40g_v2310.bin .
+cp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2310__date_28072017_time_105202__40g-high__ku060-2/fpga.adb newton_ku060_40g_v2310.adb
 
 ~~~~~~~~~~~~~~~~
 burning
@@ -61,35 +67,37 @@ sudo mst start --with_fpga
 
 validation before/after burn:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sudo mst status
+sudo mst status -v
 You are supposed to see (under FPGA devices):
 /dev/mst/mt4117_pciconf0_fpga
 /dev/mst/mt4117_pciconf0_fpga_i2c
 /dev/mst/mt4117_pciconf0_fpga_rdma
 
 To verify everything is ok:
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
-mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma query
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma query
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma query
 
 You supposed to see: User
 
 
 In order to verify what image is burned, please read the following registers:
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000
-sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900024
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma r 0x900000
 you supposed to see
    0x802 0x00010001 (original)
    0x802 0x000b0001 (Nokia_Demo_loopback_smac_dmac_status_300517.bin)
    0x865 0x00010001 (newton_ku060_40g_v2149.bin) - stable dummy loopback
    0x8d8 (newton_ku060_40g_v2264.bin) zuc image
    0x8e6 (newton_ku060_40g_v2278.bin) zuc image
+   0x8f6 (newton_ku060_40g_v2294.bin) zuc image
+   0x906 (newton_ku060_40g_v2310.bin) zuc image
 
 Burning:
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b Nokia_Demo_loopback_smac_dmac_status_300517.bin
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2149.bin
 
-sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2278.bin
-sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma b newton_ku060_40g_v2278.bin
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2310.bin
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma b newton_ku060_40g_v2310.bin
 
 once burning is done:
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma load --user
@@ -126,10 +134,10 @@ admin/admin
 
 ===================
 ssh -X user@nps-server-2
-mst stop
-modprobe mlx_accel_tools
-mst start --with_fpga
-mst status
+sudo mst stop
+sudo modprobe mlx_accel_tools
+sudo mst start --with_fpga
+sudo mst status -v
 
 # not correct versoin!!! mlxburn -d /dev/mst/mt4117_pciconf0 -i fw-ConnectX4Lx-rel-14_98_3412-MNV101511A-BCIT_Ax.bin
 # not correct versoin!!! mlxburn -d /dev/mst/mt4117_pciconf1 -i fw-ConnectX4Lx-rel-14_98_3412-MNV101511A-BCIT_Ax.bin
@@ -141,7 +149,7 @@ mlxburn -d /dev/mst/mt4117_pciconf1 -i fw-ConnectX4Lx-rel-14_19_2240-MNV101511A-
 mlxfwreset -d /dev/mst/mt4117_pciconf0 reset --level 3 -y
 mlxfwreset -d /dev/mst/mt4117_pciconf1 reset --level 3 -y
 NB: before reset we have to do
-   lsmod grep accel
+   lsmod | grep accel
    rmmod mlx_accel_tools
    rmmod mlx_accel_core
    /etc/init.d/openibd restart
@@ -172,7 +180,7 @@ sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4       0xFFFFFFFF ; # write 
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8       0x0        ; # write DMAC low
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x18      0x1        ; # select Nokia's EEA3 encription engine
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x984000  0x2bc      ; # set Xoff TH (default 864:0x360)
-sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x984004  0xc8       ;0xc8 # set Xon TH (default 300:0x12c)
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x984004  0xc8       ; # set Xon TH (default 300:0x12c)
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x0       0x1        ; # enable loopback and crypto
 # config FPGA 1 #
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x0       0x0        ; # disable loopback and crypto
@@ -181,8 +189,7 @@ sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x8       0x0        ; # write 
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x18      0x1        ; # select Nokia's EEA3 encription engine
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x984000  0x2bc      ; # set Xoff TH
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x984004  0xc8       ; # set Xon TH
-sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x0       0x1        ; # enable loopback and crypto
-
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x0       0x1        ; # enable loopback and crypto94
 
 Disable NIC fast drop (.rxt.checks.ud_fast_drop_en)
 sudo mcra /dev/mst/mt4117_pciconf0 0x50a58.6:1 0

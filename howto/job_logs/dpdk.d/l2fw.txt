@@ -65,6 +65,11 @@ sudo ./examples/nokia_poc/build/nokia_poc --c 0x1f -w 0b:00.0 -w 05:00.0,crypto=
 sudo ./examples/nokia_poc/build/nokia_poc -c 0xfff -w 0b:00.0 -w 05:00.0,crypto=1 -w 84:00.0 -w 88:00.0,crypto=1 --  \
   --cdev_type HW -A 0b:00.0 -B 05:00.0 -C 88:00.0 -D 84:00.0 --key_index 66 --rxqs_nb 4
 
+sudo STATS_CMD="ssh root@nps-server-2 /root/inova_stats.sh" \
+./examples/nokia_poc/build/nokia_poc -l 0,1,2,3,10,11,12 --socket-mem 2048,2048 \
+-w 0b:00.0 -w 05:00.0,crypto=1 -w 84:00.0 -w 88:00.0,crypto=1 -- \
+--cdev_type HW -A 0b:00.0 -B 05:00.0 -C 88:00.0 -D 84:00.0 --eea3_count 0x12345678 --eea3_bearer 1a --rxqs_nb 3
+
 
 
 #########################################################################################
