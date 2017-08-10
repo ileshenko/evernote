@@ -110,3 +110,139 @@ mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga r 0
 
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0x900000
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma r 0x900000
+
+
+
+
+
+
+
+===================================================================================================
+
+
+Maxim
+virt-manager
+virsh list --all
+==========================================================================================
+maxim_setup:
+yum install -y tmux
+yum install -y google-droid-*-fonts
+
+bring my .tmux.conf .vimrc .givmrc .gitconfig .gitconfig_igor
+
+
+
+tmux attach -t nokia_env
+
+
+
+venodeb
+-------
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_poc
+./examples/nokia_poc/build/nokia_poc -w 00:09.0 -w 00:0a.0,crypto=1 -w 00:0c.0 -w 00:0b.0,crypto=1 -- -A 00:09.0 -B 00:0a.0 -C 00:0b.0 -D 00:0c.0 --rxqs_nb 2
+
+null-vm:
+---------
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_loopback
+./examples/nokia_loopback/build/nokia_loopback -w 00:0e.0 -w 00:0f.0 -- -E 00:0e.0 -F 00:0f.0 --rxqs_nb 2
+
+
+
+pktgen*:
+--------
+make:
+~~~~~
+mkdir dev
+cd dev
+git clone git://dpdk.org/apps/pktgen-dpdk
+git checkout pktgen-3.3.8
+untar...
+
+make config T=x86_64-native-linuxapp-gcc
+make -j 16
+RTE_SDK=/root/dev/dpdk-17.05/ RTE_TARGET=build make
+
+
+reboot:
+~~~~~~~
+mount -t hugetlbfs nodev /mnt/huge
+echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+
+run:
+~~~~
+./app/build/pktgen -c 0x1f -l 0-4 -n 5 -w 82:00.0 -- -T -P -m "[1:3].0"
+
+ifconfig enp130s0 0.0.0.0 down
+
+
+
+set all rate 25
+set all size 256
+set all proto udp
+enable all range
+range all size 256 256 256 0
+
+#set all src mac 7c:fe:90:75:3c:e8
+
+
+pktgen1:
+--------
+set all dst mac e4:11:22:33:44:70
+range all dst mac e4:11:22:33:44:70 e4:11:22:33:44:70 e4:11:22:33:44:70 00:00:00:00:00:00
+
+
+pktgen2:
+--------
+set all dst mac e4:11:22:33:44:80
+
+
+
+
+==================================================================
+Maxim instructions:
+-------------------
+DUT: 10.143.34.175
+user:root
+pass:tieto11
+
+ILO: 10.7.104.221
+user:root
+pass:3tango11
+
+Pktgen1: 10.143.34.172
+Pktgen2: 10.143.34.173
+user: root
+pass: tieto11
+
+venodeb: 10.143.34.176
+user: root
+pass: tieto11
+
+00:09.0 ConnectX-4 Lx Virtual Function -
+00:0a.0 ConnectX-4 Lx Virtual Function - crypto
+00:0b.0 ConnectX-4 Lx Virtual Function - crypto
+00:0c.0 ConnectX-4 Lx Virtual Function -
+
+null-vm: 10.143.34.177
+user: root
+pass: tieto11
+
+00:0e.0 ConnectX-4 Lx Virtual Function -
+00:0f.0 ConnectX-4 Lx Virtual Function -
+
+mkdir -p /mnt/huge
+mount -t hugetlbfs nodev /mnt/huge
+echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+
+
+Maxim History:
+--------------
+
+./examples/nokia_poc/build/nokia_poc -w 00:09.0 -w 00:0a.0,crypto=1 -w 00:0c.0 -w 00:0b.0,crypto=1 -- -A 00:09.0 -B 00:0a.0 -C 00:0b.0 -D 00:0c.0
+
+
+./examples/nokia_loopback/build/nokia_loopback -w 00:0e.0 -w 00:0f.0 -- -E 00:0e.0 -F 00:0f.0
+
+
+tcpdump -nei enp130s0
+raw_ethernet_bw --client -E e4:11:22:33:44:80 -B 7c:fe:90:75:3c:e8 --dest_port 1000 --source_port 1000 --source_ip 11.11.11.11 --dest_ip 22.22.22.22 -s 128 -n 10

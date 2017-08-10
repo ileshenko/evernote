@@ -56,6 +56,9 @@ cp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2294__date_19072017_time_010638__40g-
 5) 30/07/17
 cp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2310__date_28072017_time_105202__40g-high__ku060-2/newton_ku060_40g_v2310.bin .
 cp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2310__date_28072017_time_105202__40g-high__ku060-2/fpga.adb newton_ku060_40g_v2310.adb
+6) 06/08/17
+cp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2368__date_02082017_time_231700__40g-high__ku060-2/newton_ku060_40g_v2368.bin .
+cp /swgwork/FPGA/bu/newton_x1/exp_lb/image_2368__date_02082017_time_231700__40g-high__ku060-2/fpga.adb newton_ku060_40g_v2368.adb
 
 ~~~~~~~~~~~~~~~~
 burning
@@ -96,8 +99,8 @@ Burning:
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b Nokia_Demo_loopback_smac_dmac_status_300517.bin
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2149.bin
 
-sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2310.bin
-sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma b newton_ku060_40g_v2310.bin
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma b newton_ku060_40g_v2368.bin
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma b newton_ku060_40g_v2368.bin
 
 once burning is done:
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma load --user
