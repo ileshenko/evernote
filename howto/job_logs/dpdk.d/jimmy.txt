@@ -92,17 +92,23 @@ echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepag
 echo 2048 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
 
 
-
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4 0xffffffff
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8 0x00
-mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x4 0xffffffff
-mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x8 0x00
-mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x0 1
-mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x0 1
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x0       0x0
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4       0xFFFFFFFF
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x8       0x0
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x18      0x1
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x984000  0x2bc
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x984004  0xc8
+mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x0       0x1
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x0       0x0
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x4       0xFFFFFFFF
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x8       0x0
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x18      0x1
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x984000  0x2bc
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x984004  0xc8
+mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga w 0x0       0x1
 
 mcra /dev/mst/mt4117_pciconf0 0x50a58.6:1 0
 mcra /dev/mst/mt4117_pciconf1 0x50a58.6:1 0
-
 
 validations:
 mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga r 0
@@ -114,7 +120,14 @@ sudo mlx_fpga -d /dev/mst/mt4117_pciconf1_fpga_rdma r 0x900000
 
 
 
-
+=========================================================
+GRUB
+check version:
+grub[2?]-install --version
+for grub2
+vim /etc/default/grub
+grub2-mkconfig -o /boot/grub2/grub.cfg
+for grub edit /boot/grub/grub.conf
 
 
 ===================================================================================================
@@ -131,25 +144,42 @@ yum install -y google-droid-*-fonts
 bring my .tmux.conf .vimrc .givmrc .gitconfig .gitconfig_igor
 
 
-
+DUT
+---
 tmux attach -t nokia_env
 
 
 
 venodeb
 -------
+ssh 10.143.34.176
+cd dev/dpdk-17.05/
+ifconfig eth1 0.0.0.0 down ; ifconfig eth2 0.0.0.0 down ; ifconfig eth3 0.0.0.0 down ; ifconfig eth4 0.0.0.0 down
+echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+
+
 RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_poc
-./examples/nokia_poc/build/nokia_poc -w 00:09.0 -w 00:0a.0,crypto=1 -w 00:0c.0 -w 00:0b.0,crypto=1 -- -A 00:09.0 -B 00:0a.0 -C 00:0b.0 -D 00:0c.0 --rxqs_nb 2
+./examples/nokia_poc/build/nokia_poc -w 00:09.0 -w 00:0a.0,crypto=1 -w 00:0c.0 -w 00:0b.0,crypto=1 -- -A 00:09.0 -B 00:0a.0 -C 00:0b.0 -D 00:0c.0 --rxqs_nb 2 -T 1
+
 
 null-vm:
 ---------
+ssh 10.143.34.177
+cd dev/dpdk-17.05/
+ifconfig eth1 0.0.0.0 down ; ifconfig eth2 0.0.0.0 down
+echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+
+
 RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_loopback
-./examples/nokia_loopback/build/nokia_loopback -w 00:0e.0 -w 00:0f.0 -- -E 00:0e.0 -F 00:0f.0 --rxqs_nb 2
+./examples/nokia_loopback/build/nokia_loopback -w 00:0e.0 -w 00:0f.0 -- -E 00:0e.0 -F 00:0f.0 --rxqs_nb 1 -T 1
 
 
 
 pktgen*:
 --------
+ssh 10.143.34.172
+ssh 10.143.34.173
+
 make:
 ~~~~~
 mkdir dev
@@ -165,6 +195,7 @@ RTE_SDK=/root/dev/dpdk-17.05/ RTE_TARGET=build make
 
 reboot:
 ~~~~~~~
+cd dev/pktgen-dpdk/
 mount -t hugetlbfs nodev /mnt/huge
 echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 
@@ -187,13 +218,16 @@ range all size 256 256 256 0
 
 pktgen1:
 --------
+ssh 10.143.34.172
 set all dst mac e4:11:22:33:44:70
 range all dst mac e4:11:22:33:44:70 e4:11:22:33:44:70 e4:11:22:33:44:70 00:00:00:00:00:00
 
 
 pktgen2:
 --------
+ssh 10.143.34.173
 set all dst mac e4:11:22:33:44:80
+range all dst mac e4:11:22:33:44:80 e4:11:22:33:44:80 e4:11:22:33:44:80 00:00:00:00:00:00
 
 
 

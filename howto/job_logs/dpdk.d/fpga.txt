@@ -173,10 +173,9 @@ mlxburn -d /dev/mst/mt4117_pciconf0 -q
 =============
 After boot:
 1) load driver
-modprobe -r mlx_accel_tools
-mst start --with_fpga
+sudo modprobe -r mlx_accel_tools
 
-mst start --with_fpga                                              # load FPGA's FW
+sudo mst start --with_fpga                                              # load FPGA's FW
 # config FPGA 0 #
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x0       0x0        ; # disable loopback and crypto
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga w 0x4       0xFFFFFFFF ; # write DMAC high
