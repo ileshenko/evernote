@@ -33,6 +33,7 @@ sudo ./examples/nokia_poc/build/nokia_poc  -w 0b:00.0 -w 05:00.0,crypto=1 -w 84:
 
 LIBSSO_ZUC_PATH=$(pwd)/../libsso_zuc/zuc RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_zuc_test
 sudo ./examples/nokia_zuc_test/build/nokia_zuc_test \
+-w 05:00.0,crypto=1 -w 88:00.0,crypto=1 \
 --vdev="crypto_zuc0,socket_id=0,max_nb_sessions=128" --vdev="crypto_zuc1,socket_id=0,max_nb_sessions=128" -- \
 --test-file examples/nokia_zuc_test/spec_test.data
 

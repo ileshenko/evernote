@@ -161,6 +161,10 @@ echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepag
 RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_poc
 ./examples/nokia_poc/build/nokia_poc -w 00:09.0 -w 00:0a.0,crypto=1 -w 00:0c.0 -w 00:0b.0,crypto=1 -- -A 00:09.0 -B 00:0a.0 -C 00:0b.0 -D 00:0c.0 --rxqs_nb 2 -T 1
 
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/nokia_zuc_test
+./examples/nokia_zuc_test/build/nokia_zuc_test \
+-w 00:09.0,crypto=1 -w 00:0a.0,crypto=1 -w 00:0c.0,crypto=1 -w 00:0b.0,crypto=1 -- \
+--test-file examples/nokia_zuc_test/spec_test.data
 
 null-vm:
 ---------

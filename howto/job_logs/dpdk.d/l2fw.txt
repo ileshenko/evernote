@@ -76,14 +76,12 @@ sudo STATS_CMD="ssh root@nps-server-2 /root/inova_stats.sh" \
 loopback
 RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/l2fwd
 sudo ./examples/l2fwd/build/l2fwd --c 0x1f -w 0b:00.0 -w 84:00.0 -- -p 0x3 --no-mac-updating
-sudo ./examples/nokia_loopback/build/nokia_loopback --c 0x1f -w 0b:00.0 -w 84:00.0 -- -p 0x3 --no-mac-updating -E 0b:00.0 -F 84:00.0
+sudo ./examples/nokia_loopback/build/nokia_loopback --c 0x1f -w 0b:00.0 -w 84:00.0 -- -E 0b:00.0 -F 84:00.0
 
 #########################################################################################
 
 Natali toolkits:
 ================
-/etc/fstab add
-10.4.0.102:/vol/swgwork /swgwork nfs defaults 0 0
 cd /swgwork/performance/ToolKit/CPU/pcm-2.11
 
 sudo perf top -C2
