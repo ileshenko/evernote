@@ -1,0 +1,6 @@
+From:
+https://www.lowendtalk.com/discussion/23672/install-softether-vpn-on-debian-7-l2tp
+
+apt-get install build-essential g++ gcc make nano
+
+wget http://files.rmlh.me/software/softether64/softether.tar.gz
