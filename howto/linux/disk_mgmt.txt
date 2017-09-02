@@ -16,3 +16,12 @@ fusermount -u PATH
 =================
 format usb stick:
 sudo parted -l
+sudo fdisk /dev/sdb
+TODO: compare, understand, edit:
+or sudo mkfs.vfat /dev/sdb1 # for fat32 ???
+or sudo mkdosfs -F 32 -I /dev/sdb1
+
+====================
+mount usb stick:
+run caja (from system menu)
+click on device
