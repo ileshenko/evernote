@@ -1,0 +1,19 @@
+sudo yum install gvim tree
+
+
+Create /home_local/igorle
+
+
+=================
+xxdiff:
+-------
+from https://rpmfind.net/linux/rpm2html/search.php?query=xxdiff
+wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/Everything/source/tree/Packages/x/xxdiff-4.0.1-2.fc26.src.rpm
+
+Rebuld it for CentOS according to instructions: https://wiki.centos.org/HowTos/RebuildSRPM
+
+rpmbuild --rebuild xxdiff-4.0.1-2.fc26.src.rpm
+ll ~/rpmbuild/RPMS/x86_64/
+sudo rpm -Uvh ~/rpmbuild/RPMS/x86_64/xxdiff-4.0.1-2.el7.centos.x86_64.rpm
+=================================
+
