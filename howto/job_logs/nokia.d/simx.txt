@@ -1,0 +1,31 @@
+install on nps-server-2
+
+sudo yum install libfdt libseccomp spice-server spice-protocol nettle usbredir libnl3
+
+Sometimes, libfdt doesn't exist in the yum repository, so one should do it manually:
+From the URL http://rpm.pbone.net/index.php3?stat=3&search=libfdt&srodzaj=3
+download the RPM: libfdt-1.4.1-2.fc22.x86_64.rpm
+or
+Install it from /mswg/projects/simx/extra:
+# rpm -ihv /mswg/projects/simx/extra/libfdt-1.4.1-2.fc22.x86_64.rpm
+
+
+sudo yum install virt-manager
+
+stable:
+/mswg/projects/simx.o/last_stable/install.sh
+
+latest(not tested):
+/mswg/release/simx/latest/install.sh
+
+/opt/simx/bin/manage_virt_manager_device_support.py add
+
+brctl add simabr
+ifconfig simabr 192.168.42.1/24 up
+
+#Create VM
+/.autodirect/GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.3_x86_64_virt_guest
+
+virsh list --all
+virt-manager
+

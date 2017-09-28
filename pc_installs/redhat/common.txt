@@ -15,15 +15,23 @@ usermod -aG wheel igorle
 ==============================
 As Igor L.
 
-yum install gvim
+yum install gvim tmux
 git config --global user.name IgorLe
 
 set environment from Debian
 
 =================================
-
+get xxdiff from sources:
+------------------------
 mkdir ~/Download
 cd ~/Download
-wget ftp://ftp.pbone.net/mirror/www.haoli.org/pub/redhat-7.x/RPMS/i386/xxdiff-1.12-1.i386.rpm
+
+from https://rpmfind.net/linux/rpm2html/search.php?query=xxdiff
+wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/Everything/source/tree/Packages/x/xxdiff-4.0.1-2.fc26.src.rpm
+rpmbuild --rebuild xxdiff-4.0.1-2.fc26.src.rpm
+
+ll ~/rpmbuild/RPMS/x86_64/
+sudo rpm -Uvh ~/rpmbuild/RPMS/x86_64/xxdiff-4.0.1-2.el7.x86_64.rpm
+
 
 yum install 

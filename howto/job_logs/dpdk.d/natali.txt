@@ -2,7 +2,9 @@ ToAsk
 * 1) how to create swgwork?
  see /etc/fstab -> add
  10.4.0.102:/vol/swgwork /swgwork nfs defaults 0 0
+ 10.128.0.102:/vol/mswg/mswg /mswg nfs defaults 0 0
  mkdir /swgwork
+ mkdir /mswg
  mount -a 
 
 2) example of Mellanox linux server with root permisions
