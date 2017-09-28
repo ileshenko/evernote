@@ -20,12 +20,57 @@ latest(not tested):
 
 /opt/simx/bin/manage_virt_manager_device_support.py add
 
-brctl add simabr
+#Edit the file /etc/libvirt/qemu.conf and add the following text:
+cgroup_device_acl = [
+    "/dev/null", "/dev/full", "/dev/zero",
+    "/dev/random", "/dev/urandom",
+    "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
+    "/dev/rtc","/dev/hpet", "/dev/vfio/vfio",
+    "/dev/net/tun"
+]
+
+gvim /opt/simx/cfg/simx-qemu.cfg
+  uncomment and edit (set your values)
+  eth_virt = true
+  num_of_function = 0x1
+  permanent_address = 52:53:54:55:00:41 (for device_0 at least) TODO - 0x0 ?
+
+
+brctl addbr simabr
 ifconfig simabr 192.168.42.1/24 up
+/opt/simx/bin/bridge-start.sh simabr tap105
+/opt/simx/bin/bridge-start.sh simabr tap106
 
 #Create VM
 /.autodirect/GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.3_x86_64_virt_guest
 
 virsh list --all
+
+/opt/simx/bin/manage_vm_simx_support.py -n <VM name> --sriov
+
+virsh edit <VM name>
+	%s/tap99/tap105 ... 106 ..
+	%s/connectx4/connectx5
+
+
 virt-manager
+ - remove IDE Disk
+ - remove Controller IDE
+ - add storage, select custom , SATA
+
+
+#restart libvirtd
+systemctl restart libvirtd
+
+
+==============================
+VM:
+sudo yum -y install gvim
+cat /sys/class/net/enp4s0/device/sriov_totalvfs  #SHould be 1
+echo 1 > /sys/class/net/enp4s0/device/sriov_numvfs
+
+ifconfig -a (you will see enp4s2f1 for VF)
+
+ifconfig enp4s2f1 192.168.42.5
+ifconfig enp4s2f1 192.168.42.6
 
