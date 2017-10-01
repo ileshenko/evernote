@@ -64,13 +64,58 @@ systemctl restart libvirtd
 
 
 ==============================
+Message of the day
+use http://patorjk.com/software/taag/#p=display&f=Slant%20Relief&t=2%20005
+Font Slant Relief
+create /etc/profile.d/mtod.sh (cat /etc/mtod.tail)
+==============================
 VM:
 sudo yum -y install gvim
 cat /sys/class/net/enp4s0/device/sriov_totalvfs  #SHould be 1
 echo 1 > /sys/class/net/enp4s0/device/sriov_numvfs
 
+~~~~~~~
+edit /etc/rc.local
+add "echo 1 > /sys/class/net/enp4s0/device/sriov_numvfs"
+make it executable "sudo chmod +x /etc/rc.d/rc.local"
+~~~~~~~
+
 ifconfig -a (you will see enp4s2f1 for VF)
 
 ifconfig enp4s2f1 192.168.42.5
 ifconfig enp4s2f1 192.168.42.6
+
+~~~~~~~~~~~
+#list VF's associated with PF
+
+ip link show dev enp4s0
+
+#assign static MAC to VF, where 'enp4s0' is a PF and 'vf 0' is VF no. 0,
+# repeat that for every VF while #incrementing number after 'vf'
+
+sudo ip link set enp4s0 vf 0 mac e4:11:22:33:4?:50
+
+#list PF's and VF's
+???   ll -h /sys/class/nenmtui
+#start interface
+service NetworkManager start
+chkconfig NetworkManager on
+#configure interface
+nmtui
+
+#edit
+/etc/sysconfig/network-scripts/ifcfg-enp4s2f1
+HWADDR=E4:11:22:33:4?:50
+DEFROUTE=no
+ONBOOT=yes
+IPADDR=192.168.42.?
+PREFIX=24
+
+
+#tests
+arp
+arping 20.0.0.11
+#ping by using specific interface
+ping -I enp4s2f1 20.0.0.11
+
 
