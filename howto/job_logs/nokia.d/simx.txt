@@ -67,7 +67,7 @@ systemctl restart libvirtd
 Message of the day
 use http://patorjk.com/software/taag/#p=display&f=Slant%20Relief&t=2%20005
 Font Slant Relief
-create /etc/profile.d/mtod.sh (cat /etc/mtod.tail)
+create /etc/profile.d/motd.sh (#!/bin/bash \ncat /etc/motd.tail)
 ==============================
 VM:
 sudo yum -y install gvim

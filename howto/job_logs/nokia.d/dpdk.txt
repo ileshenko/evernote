@@ -1,0 +1,1 @@
+sudo build=MLNX_OFED_LINUX-4.2-0.1.6.0 /mswg/release/MLNX_OFED/mlnx_ofed_install --dpdk --upstream-libs
