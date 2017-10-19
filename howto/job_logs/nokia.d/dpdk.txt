@@ -1,1 +1,78 @@
+Installation
+sudo build=MLNX_OFED_LINUX-4.1-4.1.2.3 /mswg/release/MLNX_OFED/mlnx_ofed_install
 sudo build=MLNX_OFED_LINUX-4.2-0.1.6.0 /mswg/release/MLNX_OFED/mlnx_ofed_install --dpdk --upstream-libs
+
+ofed_info -s
+
+edit /etc/rc.local:
+add "echo 2048 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages"
+
+================
+From Vadim
+sudo mkdir /local_home
+sudo mkdir /local_home/igorle
+sudo chown igorle /local_home/igorle
+sudo chgrp mtl  /local_home/igorle
+cd local_home/igorle
+
+
+wget http://fast.dpdk.org/rel/dpdk-17.08.tar.xz
+sudo mkdir /mnt/huge
+
+sudo vim /etc/fstab    add
+nodev /mnt/huge hugetlbfs defaults 0 0
+
+Run (and add to rc.local): 
+sudo mount -t hugetlbfs /mnt/huge
+echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+
+make config T=x86_64-native-linuxapp-gcc
+########################################### sed -ri 's,(PMD_PCAP=).*,\1y,' build/.config
+sed -ri 's,(LIBRTE_MLX.*=)n,\1y,' config/common_base
+
+time make -j 8
+
+VmA
+sudo ./build/app/testpmd  -c 0x3 -n 4 -w 04:00.0 --socket-mem=1024 -- --port-numa-config=0,0 --socket-num=0 --burst=64 --txd=512 --rxd=512 --mbcache=512 --rxq=1 --txq=1 --nb-cores=1 -i -a --forward-mode=macswap --port-topology=chained
+
+VmB
+sudo ./build/app/testpmd  -l 0-1 -n 4 -w 04:00.0 -- -i --port-topology=chained --eth-peer=0,e4:11:22:33:47:50
+
+
+
+VmA
+sudo ./build/app/testpmd  -c 0x3 -n 4 -w 04:02.1 --socket-mem=1024 -- --port-numa-config=0,0 --socket-num=0 --burst=64 --txd=512 --rxd=512 --mbcache=512 --rxq=1 --txq=1 --nb-cores=1 -i -a --forward-mode=macswap --port-topology=chained
+
+VmB
+sudo ./build/app/testpmd  -l 0-1 -n 4 -w 04:02.1 -- -i --port-topology=chained --eth-peer=0,e4:AA:22:33:47:50
+
+================
+From Slava
+#testpmd test infrastructure connectivity over DPDK
+Run this on simulator machine:
+./build/app/testpmd -c 0x3 -n 4 -w 04:00.0 --socket-mem=1024 -- --port-numa-config=0,0 --socket-num=0 --burst=64 --txd=512 --rxd=512 --mbcache=512 --rxq=1 --txq=1 --nb-cores=1 -i -a --forward-mode=macswap --port-topology=chained
+
+Run this on TG machine: ~slavar/development/dpdk/dpdk-17.08/build/app/testpmd -l 0-3 -n 4 -w 04:00.0 -- -i --port-topology=chained --eth-peer=0,e4:11:22:33:44:50
+
+check received packets with 'show port stats all'
+Then run 'set fwd io' command followed by 'start tx_first
+
+sudo build/app/testpmd -l 0-3 -n 4 -- -i --eth-peer=0,e4:11:22:33:44:61
+sudo build/app/testpmd -l 0-3 -n 4 -w 04:02.1 -- -i --port-topology=chained
+Show port stats all
+show port info all
+show config fwd
+
+===========
+
+
+
+
+005:
+sudo ./build/app/testpmd -w 04:02.1 -- --forward-mode=macswap --port-topology=chained -i --eth-peer=0,e4:11:22:33:46:50
+
+006:
+sudo ./build/app/testpmd -w 04:02.1 -- --forward-mode=macswap --port-topology=chained -i 
+
+sudo ./build/app/testpmd -c 0x3 -n 4 -w 04:02.1 --socket-mem=1024 -- --port-numa-config=0,0 --socket-num=0 --burst=64 --txd=512 --rxd=512 --mbcache=512 --rxq=1 --txq=1 --nb-cores=1 -i -a --forward-mode=macswap --port-topology=chained
+

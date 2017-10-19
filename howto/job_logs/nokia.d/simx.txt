@@ -12,11 +12,7 @@ Install it from /mswg/projects/simx/extra:
 
 sudo yum install virt-manager
 
-stable:
-/mswg/projects/simx.o/last_stable/install.sh
-
-latest(not tested):
-/mswg/release/simx/latest/install.sh
+/auto/sw/projects/simx/simx-2.9/simx-2.9-2821/install.sh
 
 /opt/simx/bin/manage_virt_manager_device_support.py add
 
@@ -33,16 +29,17 @@ gvim /opt/simx/cfg/simx-qemu.cfg
   uncomment and edit (set your values)
   eth_virt = true
   num_of_function = 0x1
-  permanent_address = 52:53:54:55:00:41 (for device_0 at least) TODO - 0x0 ?
+  permanent_address = 52:53:54:55:00:41 (for device_0 at least) TODO - 0x0 ????
 
 
 brctl addbr simabr
 ifconfig simabr 192.168.42.1/24 up
 /opt/simx/bin/bridge-start.sh simabr tap105
 /opt/simx/bin/bridge-start.sh simabr tap106
+add this to /etc/rc.local
 
 #Create VM
-/.autodirect/GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.3_x86_64_virt_guest
+/GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.3_x86_64_virt_guest
 
 virsh list --all
 
@@ -51,13 +48,17 @@ virsh list --all
 virsh edit <VM name>
 	%s/tap99/tap105 ... 106 ..
 	%s/connectx4/connectx5
+add "mac=e4:11:22:33:4?:50" (45 for tap105, 46 for tap106...): for example
+    <qemu:arg value='connectx5,netdev=tap105,mac=e4:11:22:33:45:50,bus=pcie_port.1'/>
+
 
 
 virt-manager
  - remove IDE Disk
  - remove Controller IDE
  - add storage, select custom , SATA
-
+ - cpus:8
+ - memory 8192
 
 #restart libvirtd
 systemctl restart libvirtd
@@ -71,20 +72,72 @@ create /etc/profile.d/motd.sh (#!/bin/bash \ncat /etc/motd.tail)
 ==============================
 VM:
 sudo yum -y install gvim
+sudo rpm -Uvh ~/rpmbuild/RPMS/x86_64/xxdiff-4.0.1-2.el7.x86_64.rpm
+
 cat /sys/class/net/enp4s0/device/sriov_totalvfs  #SHould be 1
 echo 1 > /sys/class/net/enp4s0/device/sriov_numvfs
 
 ~~~~~~~
 edit /etc/rc.local
-add "echo 1 > /sys/class/net/enp4s0/device/sriov_numvfs"
+===Beg
+echo 1 > /sys/class/net/enp4s0/device/sriov_numvfs
+ifconfig enp4s0 down
+ifconfig enp4s2f1 down
+ifconfig enp4s0   hw ether e4:11:22:33:4?:50
+ifconfig enp4s2f1 hw ether e4:aa:22:33:4?:50
+ifconfig enp4s0 up
+ifconfig enp4s2f1 up
+
+service network restart
+
+echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+===End
+
 make it executable "sudo chmod +x /etc/rc.d/rc.local"
+
 ~~~~~~~
 
-ifconfig -a (you will see enp4s2f1 for VF)
+sudo vim /etc/sysconfig/network-scripts/ifcfg-enp4s0 and fill it with
+=== Beg
+HWADDR=E4:11:22:33:4?:50
+TYPE=Ethernet
+BOOTPROTO=none
+IPADDR=192.168.42.?
+PREFIX=24
+DEFROUTE=no
+IPV4_FAILURE_FATAL=no
+IPV6INIT=yes
+IPV6_AUTOCONF=yes
+IPV6_DEFROUTE=yes
+IPV6_PEERDNS=yes
+IPV6_PEERROUTES=yes
+IPV6_FAILURE_FATAL=no
+IPV6_ADDR_GEN_MODE=stable-privacy
+NAME=enp4s0
+ONBOOT=yes
+AUTOCONNECT_PRIORITY=-999
+=== End
 
-ifconfig enp4s2f1 192.168.42.5
-ifconfig enp4s2f1 192.168.42.6
-
+sudo vim /etc/sysconfig/network-scripts/ifcfg-enp4s2f1 and fill it with
+===Beg
+HWADDR=e4:aa:22:33:4?:50
+TYPE=Ethernet
+BOOTPROTO=none
+IPADDR=192.168.81.?
+PREFIX=24
+DEFROUTE=no
+IPV4_FAILURE_FATAL=no
+IPV6INIT=yes
+IPV6_AUTOCONF=yes
+IPV6_DEFROUTE=yes
+IPV6_PEERDNS=yes
+IPV6_PEERROUTES=yes
+IPV6_FAILURE_FATAL=no
+IPV6_ADDR_GEN_MODE=stable-privacy
+NAME=enp4s2f1
+ONBOOT=yes
+AUTOCONNECT_PRIORITY=-999
+===End
 ~~~~~~~~~~~
 #list VF's associated with PF
 

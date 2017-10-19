@@ -10,3 +10,5 @@ $ sudo make install
 create edit /etc/ld.so.conf.d/protobuf.conf (/usr/local/lib ??? /usr/lib)
 $ sudo ldconfig # refresh shared library cache.
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sudo yum install protobuf-c-devel.x86_64

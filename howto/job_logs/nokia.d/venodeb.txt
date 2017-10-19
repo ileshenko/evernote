@@ -1,0 +1,3 @@
+
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/mwc_venodeb
+sudo ./examples/mwc_venodeb/build/venodeb -w 04:02.1
