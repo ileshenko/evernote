@@ -1,5 +1,4 @@
 git clone https://github.com/google/protobuf.git
-git clone https://github.com/protobuf-c/protobuf-c.git
 
 protobuf compilation:
 ./autogen.sh
@@ -7,8 +6,23 @@ protobuf compilation:
 make
 $ make check
 $ sudo make install
-create edit /etc/ld.so.conf.d/protobuf.conf (/usr/local/lib ??? /usr/lib)
+create edit /etc/ld.so.conf.d/protobuf.conf (/usr/local/lib ??? /usr/lib):
+echo /usr/lib > /etc/ld.so.conf.d/protobuf.conf
 $ sudo ldconfig # refresh shared library cache.
+
+git clone https://github.com/protobuf-c/protobuf-c.git
+./autogen.sh
+PKG_CONFIG_PATH=/usr/lib/pkgconfig/ ./configure --prefix=/usr
+make -j
+sudo make install
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sudo yum install protobuf-c-devel.x86_64
+
+
+========================================
+protoc --c_out=. simulator_io.proto
+
+
+watch -c "nc nps-server-2-006 2043"
+watch -c "socat tcp-connect:<sbu_host>:2043 stdout" 

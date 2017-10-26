@@ -1,3 +1,12 @@
 
-RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/mwc_venodeb
-sudo ./examples/mwc_venodeb/build/venodeb -w 04:02.1
+git config --local user.email igorle@nps-server-2-008
+git commit --amend --reset-author
+
+make config T=x86_64-native-linuxapp-gcc
+make -j
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/mwc_vnb
+sudo ./examples/mwc_vnb/build/mwc_vnb -w 04:02.1 -- -T 10
+
+
+RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/mwc_pg
+sudo ./examples/mwc_pg/build/mwc_pg -w 04:02.1 -- --eth-peer=e4:aa:22:33:48:50 --trace
