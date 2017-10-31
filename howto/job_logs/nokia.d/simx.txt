@@ -40,12 +40,15 @@ add this to /etc/rc.local
 
 #Create VM
 /GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.3_x86_64_virt_guest
+/GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.4_x86_64_virt_guest
+
 
 virsh list --all
 
 /opt/simx/bin/manage_vm_simx_support.py -n <VM name> --sriov
 
 virsh edit <VM name>
+??? Suddently gvim does noe work anymore. Use EDITOR=vim virsh edit <VM name>
 	%s/tap99/tap105 ... 106 ..
 	%s/connectx4/connectx5
 add "mac=e4:11:22:33:4?:50" (45 for tap105, 46 for tap106...): for example
@@ -69,6 +72,12 @@ Message of the day
 use http://patorjk.com/software/taag/#p=display&f=Slant%20Relief&t=2%20005
 Font Slant Relief
 create /etc/profile.d/motd.sh (#!/bin/bash \ncat /etc/motd.tail)
+cat << EOF > ~/motd.sh
+#!/bin/bash
+cat /etc/motd.tail
+EOF
+sudo mv motd.sh /etc/profile.d/motd.sh
+
 ==============================
 VM:
 sudo yum -y install gvim
@@ -170,5 +179,18 @@ arp
 arping 20.0.0.11
 #ping by using specific interface
 ping -I enp4s2f1 20.0.0.11
+
+=============================
+Slava's kernel installation:
+ll ~slavar/development/rpmbuild/RPMS/x86_64/*
+
+sudo rpm -ivh ~slavar/development/rpmbuild/RPMS/x86_64/*.rpm
+gvim /boot/grub/menu.lst
+see /boot for references
+
+edit /boot/grub/menu.lst
+
+
+
 
 

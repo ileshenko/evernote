@@ -10,3 +10,13 @@ sudo ./examples/mwc_vnb/build/mwc_vnb -w 04:02.1 -- -T 10
 
 RTE_SDK=$(pwd) RTE_TARGET=build make -C examples/mwc_pg
 sudo ./examples/mwc_pg/build/mwc_pg -w 04:02.1 -- --eth-peer=e4:aa:22:33:48:50 --trace
+
+
+==============================
+Shahaf stuff:
+$ cd /tmp
+$ wget scapy.net/scapy-latest.zip
+$ unzip scapy-latest.zip
+$ cd scapy-*
+$ sudo python setup.py install
+
