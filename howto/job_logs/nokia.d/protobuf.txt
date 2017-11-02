@@ -1,9 +1,11 @@
 git clone https://github.com/google/protobuf.git
+#git checkout ee8a091
+git checkout v3.4.1
 
 protobuf compilation:
 ./autogen.sh
 ./configure --prefix=/usr
-make
+make -j
 $ make check
 $ sudo make install
 create edit /etc/ld.so.conf.d/protobuf.conf (/usr/local/lib ??? /usr/lib):
@@ -23,6 +25,8 @@ sudo yum install protobuf-c-devel.x86_64
 ========================================
 protoc --c_out=. simulator_io.proto
 
+
+git clone ssh://git@nps-dpdk/srv/git/sbu_emu.git
 
 watch -c "nc nps-server-2-006 2043"
 watch -c "socat tcp-connect:<sbu_host>:2043 stdout" 

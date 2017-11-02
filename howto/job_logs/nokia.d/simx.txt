@@ -51,9 +51,12 @@ virsh edit <VM name>
 ??? Suddently gvim does noe work anymore. Use EDITOR=vim virsh edit <VM name>
 	%s/tap99/tap105 ... 106 ..
 	%s/connectx4/connectx5
+	%s/bus=pcie_port\.1/mac=e4:11:22:33:4?:50,bus=pcie_port.1
 add "mac=e4:11:22:33:4?:50" (45 for tap105, 46 for tap106...): for example
     <qemu:arg value='connectx5,netdev=tap105,mac=e4:11:22:33:45:50,bus=pcie_port.1'/>
 
+simx from slava:
+    <emulator>/swgwork/elijahs/nokia/for_slava/simx/x86_64-softmmu/qemu-system-x86_64</emulator>
 
 
 virt-manager
@@ -62,6 +65,7 @@ virt-manager
  - add storage, select custom , SATA
  - cpus:8
  - memory 8192
+ - boot options - disable autostart
 
 #restart libvirtd
 systemctl restart libvirtd
@@ -72,22 +76,29 @@ Message of the day
 use http://patorjk.com/software/taag/#p=display&f=Slant%20Relief&t=2%20005
 Font Slant Relief
 create /etc/profile.d/motd.sh (#!/bin/bash \ncat /etc/motd.tail)
-cat << EOF > ~/motd.sh
+sudo cat << EOF > ~/motd.sh
 #!/bin/bash
 cat /etc/motd.tail
 EOF
-sudo mv motd.sh /etc/profile.d/motd.sh
+sudo cp motd.sh /etc/profile.d/motd.sh
+rm -f motd.sh
+sudo cp tmp/motd.tail.xxx /etc/motd.tail
 
 ==============================
 VM:
 sudo yum -y install gvim
 sudo rpm -Uvh ~/rpmbuild/RPMS/x86_64/xxdiff-4.0.1-2.el7.x86_64.rpm
 
+sudo mkdir -p /local_home/igorle
+sudo chown igorle /local_home/igorle
+sudo chgrp mtl /local_home/igorle
+==========================
+
 cat /sys/class/net/enp4s0/device/sriov_totalvfs  #SHould be 1
 echo 1 > /sys/class/net/enp4s0/device/sriov_numvfs
 
 ~~~~~~~
-edit /etc/rc.local
+sudo vim /etc/rc.local
 ===Beg
 echo 1 > /sys/class/net/enp4s0/device/sriov_numvfs
 ifconfig enp4s0 down
@@ -148,6 +159,7 @@ ONBOOT=yes
 AUTOCONNECT_PRIORITY=-999
 ===End
 ~~~~~~~~~~~
+
 #list VF's associated with PF
 
 ip link show dev enp4s0
