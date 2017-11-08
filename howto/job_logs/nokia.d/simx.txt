@@ -12,7 +12,7 @@ Install it from /mswg/projects/simx/extra:
 
 sudo yum install virt-manager
 
-/auto/sw/projects/simx/simx-2.9/simx-2.9-2821/install.sh
+/mswg/projects/simx/latest/install.sh --package=nic
 
 /opt/simx/bin/manage_virt_manager_device_support.py add
 
@@ -27,9 +27,7 @@ cgroup_device_acl = [
 
 gvim /opt/simx/cfg/simx-qemu.cfg
   uncomment and edit (set your values)
-  eth_virt = true
   num_of_function = 0x1
-  permanent_address = 52:53:54:55:00:41 (for device_0 at least) TODO - 0x0 ????
 
 
 brctl addbr simabr
@@ -113,7 +111,7 @@ service network restart
 echo 2048 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 ===End
 
-make it executable "sudo chmod +x /etc/rc.d/rc.local"
+sudo chmod +x /etc/rc.d/rc.local
 
 ~~~~~~~
 
@@ -193,7 +191,7 @@ arping 20.0.0.11
 ping -I enp4s2f1 20.0.0.11
 
 =============================
-Slava's kernel installation:
+Slava's kernel installation (hypervisor only):
 ll ~slavar/development/rpmbuild/RPMS/x86_64/*
 
 sudo rpm -ivh ~slavar/development/rpmbuild/RPMS/x86_64/*.rpm
@@ -202,7 +200,30 @@ see /boot for references
 
 edit /boot/grub/menu.lst
 
+================
+Elijah integration:
 
 
 
+cp /opt/simx/cfg/simx-qemu.cfg /opt/simx/cfg/simx-fpga-qemu.cfg
 
+EDITOR=vim virsh edit <VM name>
+for vnodeb
+	%s/connectx5/connectx4lx
+#    <qemu:arg value='connectx4lx,netdev=tap105,mac=e4:11:22:33:45:50,bus=pcie_port.1'/>
+	%s/simx-qemu.cfg/simx-fpga-qemu.cfg
+#    <qemu:env name='MLX5_CONFIG_FILE' value='/opt/simx/cfg/simx-fpga-qemu.cfg'/>
+
+gvim /opt/simx/cfg/simx-fpga-qemu.cfg
+fpga = true
+innova_id = 0x2
+fpga_scripts_path = "/opt/simx/bin/"
+user_script_name = "mlx5_nokia"
+
+gvim /opt/simx/bin/mlx5_nokia.py
+edit host
+
+
+yum install scapy
+yum install python2-pip.noarch
+pip install protobuf
