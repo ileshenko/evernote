@@ -31,3 +31,8 @@ dpkg -i skype-install.deb
 Errors were encountered while processing...
 For fix:
 apt-get -f install
+===================================
+Starting November 2017
+
+Download skypeforlinux-64.deb from Skype site
+dpkg -i skypeforlinux-64.deb
