@@ -1,0 +1,86 @@
+
+yum install openvpn
+yum install ipsec-tools
+yum install iproute-devel.x86_64
+
+007:
+sudo ip tunnel add vti1 mode vti local 10.80.90.65 remote 192.168.81.5
+
+======================
+Clean IPSEC
+
+sudo insmod build/kmod/rte_kni.ko
+
+sudo ./examples/mwc_vnb/build/mwc_vnb --vdev=net_kni0 -- -T 10 --frules=
+sudo ./examples/mwc_pg/build/mwc_pg   --vdev=net_kni0 -- --eth-peer=52:54:00:2f:bc:e0 --trace
+
+
+ifconfig eth1 192.168.2.9/24 up
+ip addr add 192.168.2.9/24 dev ens1
+ip addr add 192.168.8.4/24 dev ens1
+ip route add 192.168.3.0/24 via 192.168.2.10
+echo 1 > /proc/sys/net/ipv4/ip_forward
+======================
+
+Firewall:
+iptables -L #show all rules
+ip r
+sysctl net.ipv4.ip_forward
+
+
+=======================
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/4/html/Security_Guide/s1-ipsec-host2host.html
+
+Boris: look for VTI interface
+Boris: look for KNI interface
+
+https://openvpn.net/index.php/open-source/documentation/miscellaneous/78-static-key-mini-howto.html
+
+https://www.chelsio.com/wp-content/uploads/resources/t6-100g-ipsec-linux.pdf
+
+for i in `seq 1 8`
+do
+local_ip=$i.0.0.1
+remote_ip=$i.0.0.2
+ip xfrm state add src $local_ip dst $remote_ip proto esp spi 0x53fa1fdd reqid 16386 mode transport aead "rfc4106(gcm(aes))" 0x010203047aeaca3f87d060a12f4a4487d5a5c335 96 sel src 0.0.0.0/0 dst 0.0.0.0/0
+ip xfrm state add src $remote_ip dst $local_ip proto esp spi 0x53fa1fde reqid
+16385 mode transport aead "rfc4106(gcm(aes))"
+0x010203047aeaca3f87d060a12f4a4487d5a5c335 96 sel src 0.0.0.0/0 dst 0.0.0.0/0
+Copyright 2017. Chelsio Communications Inc. All rights reserved. 4
+ip xfrm policy add src $local_ip dst $remote_ip dir out tmpl src $local_ip dst
+$remote_ip proto esp reqid 16386 mode transport
+ip xfrm policy add src $local_ip dst $remote_ip dir fwd tmpl src $local_ip dst
+$remote_ip proto esp reqid 16385 mode transport
+ip xfrm policy add src $local_ip dst $remote_ip dir in tmpl src $local_ip dst
+$remote_ip proto esp reqid 16385 mode transport
+done
+
+
+ip xfrm state add src $local_ip dst $remote_ip proto esp spi 0x53fa1fdd reqid 16386 mode transport aead "rfc4106(gcm(aes))" 0x010203047aeaca3f87d060a12f4a4487d5a5c335 96 sel src 0.0.0.0/0 dst 0.0.0.0/0
+
+
+from /opt/simx/bin/bridge-start.sh
+bridge=$1
+interface=$2
+
+
+ip tuntap add tap42 mode tap
+
+ip link set dev tap42 up
+
+ifconfig tap42 192.168.69.69 up
+
+${IFCONFIG} ${interface} 0.0.0.0 up
+if [ $? -ne 0 ]; then
+	echo "Error, failed to configure the tap device '${interface}'"
+	exit 1
+fi
+
+
+${BRCTL} addif ${bridge} ${interface}
+if [ $? -ne 0 ]; then
+	echo "Error, failed to add the tap device '${interface}' to the bridge '${bridge}'"
+	exit 1
+fi
+
+

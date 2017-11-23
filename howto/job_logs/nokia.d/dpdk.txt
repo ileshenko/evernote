@@ -3,6 +3,7 @@ sudo build=MLNX_OFED_LINUX-4.1-4.1.2.3 /mswg/release/MLNX_OFED/mlnx_ofed_install
 sudo build=MLNX_OFED_LINUX-4.2-0.1.6.0 /mswg/release/MLNX_OFED/mlnx_ofed_install --dpdk --upstream-libs
 sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2 /mswg/release/MLNX_OFED/mlnx_ofed_install --dpdk --upstream-libs
 ofed_info -s
+sudo /mswg/release/mft/last_stable/install.sh
 
 edit /etc/rc.local:
 add "echo 2048 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages"

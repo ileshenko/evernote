@@ -30,3 +30,10 @@ git clone ssh://git@nps-dpdk/srv/git/sbu_emu.git
 
 watch -c "nc nps-server-2-006 2043"
 watch -c "socat tcp-connect:<sbu_host>:2043 stdout" 
+
+
+sudo mst restart --with_fpga
+sudo mst status
+sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0
+
+

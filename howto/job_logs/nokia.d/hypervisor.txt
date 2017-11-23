@@ -1,0 +1,85 @@
+
+sudo yum install libfdt libseccomp spice-server spice-protocol nettle usbredir libnl3
+
+Sometimes, libfdt doesn't exist in the yum repository, so one should do it manually:
+From the URL http://rpm.pbone.net/index.php3?stat=3&search=libfdt&srodzaj=3
+download the RPM: libfdt-1.4.1-2.fc22.x86_64.rpm
+or
+Install it from /mswg/projects/simx/extra:
+# rpm -ihv /mswg/projects/simx/extra/libfdt-1.4.1-2.fc22.x86_64.rpm
+
+sudo yum install virt-manager
+
+#Create VM
+/GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.3_x86_64_virt_guest
+/GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.4_x86_64_virt_guest
+
+
+virsh list --all
+
+
+Rename foo to bar:
+virsh domrename foo bar
+
+
+==========================
+Create bridge:
+yum install bridge-utils
+ 
+vim /etc/sysconfig/network-scripts/ifcfg-br1
+NAME="br1"
+DEVICE="br1"
+ONBOOT=yes
+BOOTPROTO=none
+TYPE="BRIDGE"
+ 
+vim /etc/sysconfig/network-scripts/ifcfg-eno2
+NAME="eno2"
+DEVICE="eno2"
+ONBOOT=yes
+NETBOOT=yes
+IPV6INIT=no
+BOOTPROTO=none
+TYPE=Ethernet
+BRIDGE=br1
+ 
+brctl addbr br1
+brctl addif br1 eno2
+ 
+systemctl restart network
+=============================
+
+vim /etc/sysconfig/network-scripts/ifcfg-br2
+NAME="br2"
+DEVICE="br2"
+ONBOOT=yes
+BOOTPROTO=none
+TYPE="BRIDGE"
+
+
+brctl addbr br2
+
+
+==============================
+VM:
+sudo yum -y install gvim
+sudo rpm -Uvh ~/rpmbuild/RPMS/x86_64/xxdiff-4.0.1-2.el7.x86_64.rpm
+
+sudo mkdir -p /local_home/igorle
+sudo chown igorle /local_home/igorle
+sudo chgrp mtl /local_home/igorle
+
+==============================
+Message of the day
+use http://patorjk.com/software/taag/#p=display&f=Slant%20Relief&t=2%20005
+Font Slant Relief
+create /etc/profile.d/motd.sh (#!/bin/bash \ncat /etc/motd.tail)
+cat << EOF > ~/motd.sh
+#!/bin/bash
+cat /etc/motd.tail
+EOF
+sudo cp motd.sh /etc/profile.d/motd.sh
+rm -f motd.sh
+sudo cp tmp/motd.tail.xxx /etc/motd.tail
+
+
