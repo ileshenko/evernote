@@ -37,3 +37,30 @@ sudo mst status
 sudo mlx_fpga -d /dev/mst/mt4117_pciconf0_fpga_rdma r 0
 
 
+
+
+
+=====================================================
+DEREK
+
+Vivado:
+/swgwork/fpga_lab/utils/xilinx_lab_install.sh 
+source /opt/Xilinx/Vivado_Lab/2017.3/settings64.sh
+
+unzip rel_Interim_Phase_1_M2a_2017_11_23.zip -d derek_1
+edit bin/toolsetup.sh:
+-#!/usr/local/bin/bash
++#!/bin/bash
+chmod +x bin/toolsetup.sh
+./bin/toolsetup.sh
+
+TODO - protobuf compilation
+
+cd proj/sw_sim
+make PLATFORM=../x86.mak
+
+LD_LIBRARY_PATH=$(pwd)/proj/build_x86/usr/lib/:$(pwd)/ToolTree/lib/ \
+SBU_SIM_PORT_NUM=2042 \
+SBU_SIM_IP_ADDR=nps-server-2-006 \
+./proj/build_x86/usr/bin/host_sock_demo
+

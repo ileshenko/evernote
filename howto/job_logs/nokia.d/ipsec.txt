@@ -1,3 +1,93 @@
+*******************************
+* nps-server-2-011 (IPSEC GW) *
+*******************************
+
+/etc/sysconfig/network-scripts/ifcfg-eth[12]:
+NAME="eth[12]"
+HWADDR="e4:00:22:33:[45]b:50"
+IPADDR=192.168.[2|33].11
+PREFIX=24
+DEFROUTE=no
+ONBOOT=yes
+NETBOOT=no
+IPV6INIT=no
+BOOTPROTO=none
+TYPE=Ethernet
+
+/etc/sysconfig/network-scripts/ifcfg-eth2.42:
+DEVICE=eth2.42
+BOOTPROTO=none
+ONBOOT=yes
+IPADDR=192.168.3.11
+PREFIX=24
+NETWORK=192.168.3.0
+VLAN=yes
+
+etc/rc.local:
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+sudo arp -s 192.168.3.66 e4:00:22:33:4a:50
+
+netstat -s | head
+
+VLAN
+----
+modinfo 8021q
+ip link add link eth2 name eth2.22 type vlan id 22
+
+
+HALF NUNNEL
+-----------
+watch -d cat /proc/net/xfrm_stat
+
+//esp only
+tcpdump -i br2 ip proto 50
+
+//NULL codec
+sudo ip xfrm state flush
+sudo ip xfrm policy flush
+#sudo ip xfrm state add src  192.168.3.11 dst 192.168.3.81 proto esp spi 0x1981 reqid 0x1981 mode tunnel auth digest_null "" enc cipher_null ""
+sudo ip xfrm state add src  192.168.3.11 dst 192.168.3.81 proto esp spi 0x1981 reqid 0x1981 mode tunnel aead 'rfc4106(gcm(aes))' "0xdeadbeefdeadfacedeadcodecafebabebabadeda" 128
+sudo ip xfrm policy add src 192.168.2.9/24 dst 192.168.3.81/24 dir out tmpl src 192.168.3.11 dst 192.168.3.81 proto esp reqid 0x1981 mode tunnel
+
+#sudo ip xfrm state  add src 192.168.3.81 dst 192.168.3.11 proto esp spi 0x1981 reqid 0x1966 mode tunnel auth digest_null "" enc cipher_null ""
+sudo ip xfrm state  add src 192.168.3.81 dst 192.168.3.11 proto esp spi 0x1981 reqid 0x1966 mode tunnel aead 'rfc4106(gcm(aes))' "0xdeadbeefdeadfacedeadcodecafebabebabadeda" 128
+sudo ip xfrm policy add src 192.168.3.81/24 dst 192.168.2.9/24 dir fwd  tmpl src 192.168.3.81 dst 192.168.3.11 proto esp reqid 0x1966 mode tunnel
+
+#aead 'rfc4106(gcm(aes))' "0xdeadbeefdeadfacedeadcodecafebabebabadeda" 128
+
+
+sudo ip xfrm state
+sudo ip xfrm policy
+
+
+
+*******************************
+*  nps-server-2-009 (vNodeA)  *
+*******************************
+
+sudo modprobe uio_pci_generic
+sudo insmod build/kmod/igb_uio.ko
+sudo ifconfig eth1 0.0.0.0 down
+
+sudo usertools/dpdk-devbind.py -u 00:06.0
+
+sed -ri 's,(LIBRTE_MLX.*=)y,\1n,' config/common_base
+
+sudo ./examples/mwc_pg/build/mwc_pg -w 00:06.0 -- --eth-peer=e4:00:22:33:4b:50 --trace
+
+*******************************
+*  nps-server-2-010 (vNodeB)  *
+*******************************
+
+sed -ri 's,(LIBRTE_MLX.*=)y,\1n,' config/common_base
+
+sudo ./examples/mwc_vnb/build/mwc_vnb -w 00:06.0 -- -T 10 --frules=
+
+sudo ip link add link eth1 name eth1.22 type vlan id 22
+sudo ifconfig eth1.22 192.168.22.10
+
+==============================
 
 yum install openvpn
 yum install ipsec-tools
