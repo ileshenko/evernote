@@ -2,6 +2,8 @@ Installation
 sudo build=MLNX_OFED_LINUX-4.1-4.1.2.3 /mswg/release/MLNX_OFED/mlnx_ofed_install
 sudo build=MLNX_OFED_LINUX-4.2-0.1.6.0 /mswg/release/MLNX_OFED/mlnx_ofed_install --dpdk --upstream-libs
 sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2 /mswg/release/MLNX_OFED/mlnx_ofed_install --dpdk --upstream-libs
+For kernel 4.13
+sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2 /mswg/release/MLNX_OFED/mlnx_ofed_install --dpdk --upstream-libs --add-kernel-support
 ofed_info -s
 sudo /mswg/release/mft/last_stable/install.sh
 

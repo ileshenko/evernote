@@ -46,12 +46,12 @@ tcpdump -i br2 ip proto 50
 //NULL codec
 sudo ip xfrm state flush
 sudo ip xfrm policy flush
-#sudo ip xfrm state add src  192.168.3.11 dst 192.168.3.81 proto esp spi 0x1981 reqid 0x1981 mode tunnel auth digest_null "" enc cipher_null ""
-sudo ip xfrm state add src  192.168.3.11 dst 192.168.3.81 proto esp spi 0x1981 reqid 0x1981 mode tunnel aead 'rfc4106(gcm(aes))' "0xdeadbeefdeadfacedeadcodecafebabebabadeda" 128
+sudo ip xfrm state add src  192.168.3.11 dst 192.168.3.81 proto esp spi 0x1981 reqid 0x1981 mode tunnel auth digest_null "" enc cipher_null ""
+#sudo ip xfrm state add src  192.168.3.11 dst 192.168.3.81 proto esp spi 0x1981 reqid 0x1981 mode tunnel aead 'rfc4106(gcm(aes))' "0xdeadbeefdeadfacedeadc0decafebabebabadeda" 128
 sudo ip xfrm policy add src 192.168.2.9/24 dst 192.168.3.81/24 dir out tmpl src 192.168.3.11 dst 192.168.3.81 proto esp reqid 0x1981 mode tunnel
 
-#sudo ip xfrm state  add src 192.168.3.81 dst 192.168.3.11 proto esp spi 0x1981 reqid 0x1966 mode tunnel auth digest_null "" enc cipher_null ""
-sudo ip xfrm state  add src 192.168.3.81 dst 192.168.3.11 proto esp spi 0x1981 reqid 0x1966 mode tunnel aead 'rfc4106(gcm(aes))' "0xdeadbeefdeadfacedeadcodecafebabebabadeda" 128
+sudo ip xfrm state  add src 192.168.3.81 dst 192.168.3.11 proto esp spi 0x1981 reqid 0x1966 mode tunnel auth digest_null "" enc cipher_null ""
+#sudo ip xfrm state  add src 192.168.3.81 dst 192.168.3.11 proto esp spi 0x1981 reqid 0x1966 mode tunnel aead 'rfc4106(gcm(aes))' "0xdeadbeefdeadfacedeadc0decafebabebabadeda" 128
 sudo ip xfrm policy add src 192.168.3.81/24 dst 192.168.2.9/24 dir fwd  tmpl src 192.168.3.81 dst 192.168.3.11 proto esp reqid 0x1966 mode tunnel
 
 #aead 'rfc4106(gcm(aes))' "0xdeadbeefdeadfacedeadcodecafebabebabadeda" 128
@@ -69,7 +69,6 @@ sudo ip xfrm policy
 sudo modprobe uio_pci_generic
 sudo insmod build/kmod/igb_uio.ko
 sudo ifconfig eth1 0.0.0.0 down
-
 sudo usertools/dpdk-devbind.py -u 00:06.0
 
 sed -ri 's,(LIBRTE_MLX.*=)y,\1n,' config/common_base
@@ -87,6 +86,10 @@ sudo ./examples/mwc_vnb/build/mwc_vnb -w 00:06.0 -- -T 10 --frules=
 sudo ip link add link eth1 name eth1.22 type vlan id 22
 sudo ifconfig eth1.22 192.168.22.10
 
+*******************************
+*  nps-server-2-005 (SimX)  *
+*******************************
+rpm -ihv --force /mswg/release/fpga/newton/IPsec_releases/IPsec_15_11_17/iproute2/iproute2-4.12.0rc4_ipsec_offload-1.x86_64.rpm
 ==============================
 
 yum install openvpn

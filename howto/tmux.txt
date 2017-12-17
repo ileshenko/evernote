@@ -1,11 +1,10 @@
-create session foo and attach
-tmux new -s foo
+create session foo and attach               tmux new -s foo
+create detached session foo                 tmux new -s foo -d
+list sessions                               tmux ls
+attach                                      tmux attach -t foo
 
-create detached session foo
-tmux new -s foo -d
 
-list sessions
-tmux ls
-
-attach
-tmux attach -t foo
+C-b commands:
+switch session                              s
+rename session                              $
+chose which clients to detach               D

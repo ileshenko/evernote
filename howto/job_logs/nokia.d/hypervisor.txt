@@ -25,14 +25,14 @@ virsh domrename foo bar
 ==========================
 Create bridge:
 yum install bridge-utils
- 
+
 vim /etc/sysconfig/network-scripts/ifcfg-br1
 NAME="br1"
 DEVICE="br1"
 ONBOOT=yes
 BOOTPROTO=none
 TYPE="BRIDGE"
- 
+
 vim /etc/sysconfig/network-scripts/ifcfg-eno2
 NAME="eno2"
 DEVICE="eno2"
@@ -42,10 +42,10 @@ IPV6INIT=no
 BOOTPROTO=none
 TYPE=Ethernet
 BRIDGE=br1
- 
+
 brctl addbr br1
 brctl addif br1 eno2
- 
+
 systemctl restart network
 =============================
 
@@ -58,6 +58,12 @@ TYPE="BRIDGE"
 
 
 brctl addbr br2
+/opt/simx/bin/bridge-start.sh br2 tap205
+#Same as
+#ip tuntap add tap205 mode tap
+#ip link set dev tap205 up
+#ifconfig tap205 0.0.0.0 up
+#brctl addif br2 tap205
 
 
 ==============================

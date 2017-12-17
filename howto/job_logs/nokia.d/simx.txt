@@ -188,3 +188,5 @@ edit host
 yum install scapy
 yum install python2-pip.noarch
 pip install protobuf
+pip install pycryptodome
+
