@@ -1,0 +1,33 @@
+Preparation:
+yum provides */lsb_release
+yum install redhat-lsb-core
+
+
+install Vivado Lab:
+/swgwork/fpga_lab/utils/xilinx_lab_install.sh
+ 
+Open:
+/opt/Xilinx/Vivado_Lab/2017.3/bin/vivado_lab &
+ 
+Program FPGA Flash:
+"Open Hardware Manager" -> Icon "Auto Connect" -> xlinx_tcf(open) -> xcku15p_0 -> "Add configuration memory device"
+
+Manufacturer: Micron
+Density: 512
+Width: x1_x2_x4_x8
+
+name: mt25ql512-spi-x1_x2_x4_x8
+----------
+Program:
+Nokia MWC images usually at: /swgwork/FPGA/bu/edison/exp_vlog/
+Configuration file  : *_primary.bin
+Configuration file 2: *_secondary.bin
+
+No need to verify
+
+Takes ~15 minutes
+
+====================
+how to check FPGA version:
+
+mlx_fpga -d /dev/mst/mt4119_pciconf0_fpga_i2c r 0x900000

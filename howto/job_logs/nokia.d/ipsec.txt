@@ -36,7 +36,7 @@ modinfo 8021q
 ip link add link eth2 name eth2.22 type vlan id 22
 
 
-HALF NUNNEL
+HALF TUNNEL
 -----------
 watch -d cat /proc/net/xfrm_stat
 

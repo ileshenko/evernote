@@ -22,6 +22,12 @@ git tag tag_YYMMDD
 git push --tags
 git archive
 git archive --prefix=dpdk-17.11.mwc/ -o dpdk-17.11.mwc_xxxxxx.tgz  tag_xxxxxx
+mv -v -t /swgwork/igorle/shared/ dpdk-17.11.mwc_* 
+git archive --prefix=dpdk-17.11.mwc/ -o dpdk-17.11.mwc_171218.tgz  tag_171218
+
+how to delete tag:
+git tag -d tag_yymmdd
+git push origin :refs/tags/tag_yymmdd
 
 ==============================
 Shahaf stuff:

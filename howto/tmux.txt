@@ -5,6 +5,8 @@ attach                                      tmux attach -t foo
 
 
 C-b commands:
+new vertical pane                           %
+new horizonta pane                          "
 switch session                              s
 rename session                              $
 chose which clients to detach               D
