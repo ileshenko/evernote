@@ -152,14 +152,17 @@ arping 20.0.0.11
 ping -I enp4s2f1 20.0.0.11
 
 =============================
-Slava's kernel installation (hypervisor only):
-ll ~slavar/development/rpmbuild/RPMS/x86_64/*
+OBSOLETE. See fpga.txt for new instuctios from Aviv Heller:
+#Slava's kernel installation (hypervisor only):
+#ll ~slavar/development/rpmbuild/RPMS/x86_64/*
+#
+#sudo rpm -ivh ~slavar/development/rpmbuild/RPMS/x86_64/*.rpm
+#gvim /boot/grub/menu.lst
+#see /boot for references
+#
+#edit /boot/grub/menu.lst
 
-sudo rpm -ivh ~slavar/development/rpmbuild/RPMS/x86_64/*.rpm
-gvim /boot/grub/menu.lst
-see /boot for references
 
-edit /boot/grub/menu.lst
 
 ================
 Elijah integration:

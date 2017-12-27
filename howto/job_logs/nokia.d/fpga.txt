@@ -28,6 +28,65 @@ No need to verify
 Takes ~15 minutes
 
 ====================
-how to check FPGA version:
+how to check FPGA & FW version:
 
-mlx_fpga -d /dev/mst/mt4119_pciconf0_fpga_i2c r 0x900000
+#mlx_fpga -d /dev/mst/mt4119_pciconf0_fpga_i2c r 0x900000
+sudo flint -d /dev/mst/mt4119_pciconf0 q
+sudo mlx_fpga -d /dev/mst/mt4119_pciconf0_fpga_i2c q
+
+=====================
+Kernel installation Frmo AvivH:
+1) Install kernel 4.13.0-1.el7.elrepo.x86_64:
+   sudo rpm -i /.autodirect/vmgwork/avivh/for/innova2/kernel-ml-4.13.0-1.el7.elrepo.x86_64.rpm
+ingore grubby fatal errors :(
+
+2) Install kernel dev package:
+   sudo rpm -i /.autodirect/vmgwork/avivh/for/innova2/kernel-ml-devel-4.13.0-1.el7.elrepo.x86_64.rpm
+
+3) configure grub:
+gvim /boot/grub/menu.lst
+see /boot for references
+***
+title AvivH's kernel
+root (hd0,0)
+kernel /vmlinuz-4.13.0-1.el7.elrepo.x86_64 root=/dev/sda2 console=tty0 console=ttyS0,115200n8 rhgb intel_iommu=on iommu=on
+initrd /initramfs-4.13.0-1.el7.elrepo.x86_64.img
+***
+reboot
+
+4) Install MLNX OFED user-mode packages:
+sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2 /mswg/release/MLNX_OFED/mlnx_ofed_install --add-kernel-support --dpdk --upstream-libs --user-space-only 
+
+5) Install the driver:
+sudo make -C /.autodirect/vmgwork/avivh/for/innova2/driver002 install
+
+6) Restart the driver:
+sudo /etc/init.d/openibd force-restart
+
+6a) if everything is OK - update initramfs image
+dracut -f
+
+7) Sanity:
+$ dmesg|grep XXX
+[ 2103.371190] mlx5_core 0000:8a:00.0: XXX bar sz: 2097152 phys: ca800000 virt: ffffc90009400000 map: ca800000
+[ 2105.987993] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_prepare_tx_q:689:(pid 28255): XXX preparing tx queue...
+[ 2105.990717] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_prepare_tx_q:699:(pid 28255): XXX alloc uar bfreg
+[ 2105.990789] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_create_cq:403:(pid 28255): XXX CREATE_CQ: lg_sz: 0 pas: 0xca980000
+[ 2105.991038] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_prepare_tx_q:710:(pid 28255): XXX create_tis
+[ 2105.991254] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_create_sq:554:(pid 28255): XXX CREATE_SQ: tis: 130 cqn: 1026 pdn: 17 lg_wq_sz: 11 uar_idx: 128 dbr_addr: 0xca9c0000 pas: 0xca940000
+[ 2105.992297] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_prepare_tx_q:724:(pid 28255): XXX move sq to ready state
+[ 2105.992698] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_prepare_tx_q:729:(pid 28255): XXX write sq cfg to pxb...
+[ 2105.992768] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_write_sq_cfg:638:(pid 28255): XXX write sq lkey: 0x1101
+[ 2105.995514] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_write_sq_cfg:646:(pid 28255): XXX write sq uar db addr h: 0x0
+[ 2105.998310] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_write_sq_cfg:654:(pid 28255): XXX write sq uar db addr l: 0xc8080800
+[ 2106.000987] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_write_sq_cfg:662:(pid 28255): XXX write sqn: 0x83
+[ 2106.003902] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_write_sq_cfg:670:(pid 28255): XXX write ready bit: 0x1
+[ 2106.006766] mlx5_core 0000:8b:00.0: mlx5_fpga_pci_prepare_tx_q:734:(pid 28255): XXX SQ INIT DONE!
+
+8) Reinstall MFT:
+sudo /mswg/release/mft/mft-4.9.0/mft-4.9.0-5/linux/mft-4.9.0-5-int/install.sh
+=====================================================================================================
+
+echo 1 > /sys/class/net/enp139s0/device/sriov_numvfs
+
+
