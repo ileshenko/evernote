@@ -10,6 +10,10 @@ Install it from /mswg/projects/simx/extra:
 
 sudo yum install virt-manager
 
+#Enable PCI host fowrarding for VMs:
+#Add to kernel boot command line (/boot/grub/menu.lst)
+intel_iommu=on iommu=on
+
 #Create VM
 /GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.3_x86_64_virt_guest
 /GLIT/SCRIPTS/AUTOINSTALL/VIRTUALIZATION/kvm_guest_builder -o linux -l CentOS_7.4_x86_64_virt_guest
@@ -74,6 +78,16 @@ sudo rpm -Uvh ~/rpmbuild/RPMS/x86_64/xxdiff-4.0.1-2.el7.x86_64.rpm
 sudo mkdir -p /local_home/igorle
 sudo chown igorle /local_home/igorle
 sudo chgrp mtl /local_home/igorle
+
+Disable IPv6 on the fly (not sure that it works)
+sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+sudo sysctl -p # Really need it?
+
+Disable IPv6 in grub:
+add command line parameter:
+ipv6.disable=1
+
 
 ==============================
 Message of the day

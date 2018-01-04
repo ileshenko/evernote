@@ -5,6 +5,14 @@ sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2 /mswg/release/MLNX_OFED/mlnx_ofed_insta
 For kernel 4.13
 sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2 /mswg/release/MLNX_OFED/mlnx_ofed_install --dpdk --upstream-libs --add-kernel-support
 ofed_info -s
+ibstat #??? AvivH
+
+Hyperv..:
+sudo build=MLNX_OFED_LINUX-4.2-1.2.0.0.31 /mswg/release/MLNX_OFED/mlnx_ofed_install --add-kernel-support --with-innova-ipsec
+VM:
+sudo build=MLNX_OFED_LINUX-4.2-1.2.0.0.31 /mswg/release/MLNX_OFED/mlnx_ofed_install --dpdk --upstream-libs --add-kernel-support
+ofed_info -s
+ibstat #??? AvivH
 sudo /mswg/release/mft/last_stable/install.sh
 
 edit /etc/rc.local:
@@ -67,7 +75,6 @@ show port info all
 show config fwd
 
 ===========
-
 
 
 
