@@ -27,38 +27,45 @@ No need to verify
 
 Takes ~15 minutes
 
+If Bsae GUID and Base MAC are not available
+
+flint -d /dev/mst/mt4119_pciconf0 -guid ec879a030097e816 -mac ec879a97e816 -ocr smg
+flint -d /dev/mst/mt4119_pciconf0 -guid ec879a030097e816 -mac ec879a97e816 -ocr sg
+
 ====================
 how to check FPGA & FW version:
 
 #mlx_fpga -d /dev/mst/mt4119_pciconf0_fpga_i2c r 0x900000
 sudo flint -d /dev/mst/mt4119_pciconf0 q
 sudo mlx_fpga -d /dev/mst/mt4119_pciconf0_fpga_i2c q
+
 ======================
 access to FPGA counters:
 
-mst stop
-rmmod mlx5_fpga_tools
-mst start
-mst status
-mlxfwreset -d /dev/mst/mt4119_pciconf0 reset --level 3 --mst_flags="--with_fpga" -y
-mst status
-mst stop
-modprobe mlx5_fpga_tools
-mst start --with_fpga
-mst status
+sudo mst stop
+sudo rmmod mlx5_fpga_tools
+sudo mst start
+sudo mst status
+sudo mlxfwreset -d /dev/mst/mt4119_pciconf0 reset --level 3 --mst_flags="--with_fpga" -y
+sudo mst status
+sudo mst stop
+sudo modprobe mlx5_fpga_tools
+sudo mst start --with_fpga
+sudo mst status
 
 
-devmon -a /swgwork/FPGA/bu/edison/exp_vlog/image_153__date_21122017_time_202110__inline-25g-low__ku15p-2/fpga_153.adb &
-
+devmon -a /swgwork/FPGA/bu/edison/exp_vlog/image_196__date_04012018_time_140458__inline-25g-low__ku15p-2/fpga_196.adb &
 
 =====================
 Kernel installation Frmo AvivH:
 1) Install kernel 4.13.0-1.el7.elrepo.x86_64:
-   sudo rpm -i /.autodirect/vmgwork/avivh/for/innova2/kernel-ml-4.13.0-1.el7.elrepo.x86_64.rpm
+#   sudo rpm -i /.autodirect/vmgwork/avivh/for/innova2/kernel-ml-4.13.0-1.el7.elrepo.x86_64.rpm
+   sudo rpm -i /mswg/release/innova2/kernel/kernel-4.13.0-mwc2.rpm
 ingore grubby fatal errors :(
 
 2) Install kernel dev package:
-   sudo rpm -i /.autodirect/vmgwork/avivh/for/innova2/kernel-ml-devel-4.13.0-1.el7.elrepo.x86_64.rpm
+#   sudo rpm -i /.autodirect/vmgwork/avivh/for/innova2/kernel-ml-devel-4.13.0-1.el7.elrepo.x86_64.rpm
+   sudo rpm -i /mswg/release/innova2/kernel/kernel-devel-4.13.0-mwc2.rpm
 
 3) configure grub:
 gvim /boot/grub/menu.lst
@@ -66,13 +73,16 @@ see /boot for references
 ***
 title AvivH's kernel
 root (hd0,0)
-kernel /vmlinuz-4.13.0-1.el7.elrepo.x86_64 root=/dev/sda2 console=tty0 console=ttyS0,115200n8 rhgb intel_iommu=on iommu=on
-initrd /initramfs-4.13.0-1.el7.elrepo.x86_64.img
+kernel /vmlinuz-4.13.0-mwc1 root=/dev/sda2 console=tty0 console=ttyS0,115200n8 rhgb intel_iommu=on iommu=pt
+initrd /initramfs-4.13.0-mwc1.img
 ***
 reboot
 
 4) Install MLNX OFED user-mode packages:
-sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2 /mswg/release/MLNX_OFED/mlnx_ofed_install --add-kernel-support --dpdk --upstream-libs 
+sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2  /mswg/release/MLNX_OFED/mlnx_ofed_install --add-kernel-support --dpdk --upstream-libs 
+HV:
+sudo build=MLNX_OFED_LINUX-4.2-1.2.0.0.32 /mswg/release/MLNX_OFED/mlnx_ofed_install --add-kernel-support --with-innova-ipsec
+
 
 5) Install the driver:
 sudo make -C /.autodirect/vmgwork/avivh/for/innova2/driver003 install
@@ -106,4 +116,10 @@ sudo /mswg/release/mft/mft-4.9.0/mft-4.9.0-5/linux/mft-4.9.0-5-int/install.sh
 
 echo 1 > /sys/class/net/enp139s0/device/sriov_numvfs
 
+========================================================
+ lspci -d 15b3: -vvv |less
+ setpci -s 8a:00.0 0x78.W # read
+ setpci -s 8a:00.0 0x78.W=0x0836
 
+
+setpci -s 8b:00.0 0x68.w=0x1936

@@ -13,13 +13,14 @@ echo /usr/lib > /etc/ld.so.conf.d/protobuf.conf
 $ sudo ldconfig # refresh shared library cache.
 
 git clone https://github.com/protobuf-c/protobuf-c.git
+git checkout v1.3.0
 ./autogen.sh
 PKG_CONFIG_PATH=/usr/lib/pkgconfig/ ./configure --prefix=/usr
 make -j
 sudo make install
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sudo yum install protobuf-c-devel.x86_64
+sudo yum install protobuf-c-devel.x86_64 # Does not work, because install 2.5
 
 
 ========================================

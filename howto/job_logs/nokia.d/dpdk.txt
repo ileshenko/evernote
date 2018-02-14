@@ -24,7 +24,7 @@ sudo mkdir /local_home
 sudo mkdir /local_home/igorle
 sudo chown igorle /local_home/igorle
 sudo chgrp mtl  /local_home/igorle
-cd local_home/igorle
+cd /local_home/igorle
 
 
 wget http://fast.dpdk.org/rel/dpdk-17.08.tar.xz

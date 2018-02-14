@@ -1,0 +1,10 @@
+
+make -f MellanoxInnovaDPI/src/Makefile simx_dpi_sim
+
+export PATH=${PATH}:/auto/sw_tools/Commercial/cad/Xilinx/Vivado/2017.3/bin/
+cd simul
+../MellanoxInnovaDPI/test/bin/build_vivado
+xsim -R mlnx_sb_envir.mlnx_sbu_testbench
+xsim -gui mlnx_sb_envir.mlnx_sbu_testbench
+
+
