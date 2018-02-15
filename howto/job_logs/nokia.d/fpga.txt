@@ -73,10 +73,18 @@ see /boot for references
 ***
 title AvivH's kernel
 root (hd0,0)
-kernel /vmlinuz-4.13.0-mwc1 root=/dev/sda2 console=tty0 console=ttyS0,115200n8 rhgb intel_iommu=on iommu=pt
-initrd /initramfs-4.13.0-mwc1.img
+kernel /vmlinuz-4.13.0-mwc2 root=/dev/sda2 console=tty0 console=ttyS0,115200n8 rhgb intel_iommu=on iommu=pt
+initrd /initramfs-4.13.0-mwc2.img
 ***
 reboot
+
+3') For grub2 (from Elijah)
+#Check existing entries
+grep "^menuentry" /boot/grub2/grub.cfg | cut -d "'" -f2 
+#Check current default:
+grub2-editenv list
+#senr enry 0 to be default:
+grub2-set-default 0
 
 4) Install MLNX OFED user-mode packages:
 sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2  /mswg/release/MLNX_OFED/mlnx_ofed_install --add-kernel-support --dpdk --upstream-libs 

@@ -192,4 +192,10 @@ yum install scapy
 yum install python2-pip.noarch
 pip install protobuf
 pip install pycryptodome
+===================================
+
+
+install stable SimX
+On HV
+/mswg/projects/simx/last_stable/install.sh --package=nic
 
