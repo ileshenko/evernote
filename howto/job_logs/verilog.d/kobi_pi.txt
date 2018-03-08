@@ -7,4 +7,35 @@ cd simul
 xsim -R mlnx_sb_envir.mlnx_sbu_testbench
 xsim -gui mlnx_sb_envir.mlnx_sbu_testbench
 
+========
+email from Kobi
+ Changes in code:
+•	Added SBU example code from CD under: MellanoxInnovaDPI/test/verilog/mlnxSBU/exampleSBU
+o	Checkers code from original RBV code were removed to enable compilation with Vivado
+o	Wrapped example code to meet final SBU interface (MellanoxInnovaDPI/test/verilog/mlnxSBU/mlnx_sbu_example_ver1.v)
+•	TUSER was changed to 64 bits:
+o	In Verilog code – parameter TUSER_WIDTH default was changed to 64
+o	In C code changed type of tuser variable to unsigned long
+o	In DPI changed tuser type to longint unsigned 
+•	Testbench was set according to SPEC:
+o	Implemented ref_clk (100MHz), ctrl_clk (166MHz though SPEC defines 168.75MHz) and data_clk (250MHz)
+o	Implemented all resets (ref_rst_, ctrl_rst and data_rst)
+o	Supports 2 ports and added a control port (MLX2SBU_CTRL, SBU2MLX_CTRL)
+•	Added a new test (test_examplesbu_sim.c) and a new target was added to Makefile: test_examplesbu
+•	Added new option for build_vivado:
+o	–debug : compile Verilog to debug with GUI (default is optimized compilation)
+o	–sbu <name> : Define SBU to instance. Options are:
+	forward (default) – the SBU forward model we used until now
+	example1 – the SBU provided by the CD
+•	Added verbosity to test’s printouts. Set environment variable MELLANOX_SBUTEST_VERBOSITY:
+o	0 or unset (Default) – no prints
+o	1 – print transactions metadata (e.g. size, tuser, tid)
+o	2 – print also transactions data
+
+To run:
+1.	make -f MellanoxInnovaDPI/src/Makefile test_examplesbu
+2.	MellanoxInnovaDPI/test/bin/build_vivado -sbu example1
+3.	xsim -R mlnx_sb_envir.mlnx_sbu_testbench > & /dev/null &
+
+
 

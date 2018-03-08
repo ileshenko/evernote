@@ -86,6 +86,14 @@ grub2-editenv list
 #senr enry 0 to be default:
 grub2-set-default 0
 
+3") grub2 editing:
+sudo vim /etc/default/grub
+#Add in cmdline
+ipv6.disable=1
+# make it work
+sudo update-grub
+
+
 4) Install MLNX OFED user-mode packages:
 sudo build=MLNX_OFED_LINUX-4.2-0.1.9.0.2  /mswg/release/MLNX_OFED/mlnx_ofed_install --add-kernel-support --dpdk --upstream-libs 
 HV:

@@ -5,7 +5,7 @@ git checkout v3.4.1
 protobuf compilation:
 ./autogen.sh
 ./configure --prefix=/usr
-make -j
+make
 $ make check
 $ sudo make install
 create edit /etc/ld.so.conf.d/protobuf.conf (/usr/local/lib ??? /usr/lib):

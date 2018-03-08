@@ -2,7 +2,7 @@
 
 git clone ssh://git@nps-dpdk/srv/git/dpdk-17.11.mwc
 
-git config --local user.email igorle@nps-server-2-008
+git config --global user.email igorle@mellanox.com
 git commit --amend --reset-author
 
 make config T=x86_64-native-linuxapp-gcc

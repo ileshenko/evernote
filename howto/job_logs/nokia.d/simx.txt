@@ -1,7 +1,13 @@
 install on nps-server-2
 
+rpm -U /mswg/projects/simx/extra/libfdt-1.4.6-1.fc28.x86_64.rpm
 
+On HV
+/mswg/projects/simx/last_stable/install.sh --package=nic
+or
 /mswg/projects/simx/latest/install.sh --package=nic
+
+touch /opt/simx/cfg/simx-sw-qemu.cfg # temporary workaround for bug in manage_vm_simx_support.py
 
 /opt/simx/bin/manage_virt_manager_device_support.py add
 
@@ -28,27 +34,29 @@ add this to /etc/rc.local
 /opt/simx/bin/manage_vm_simx_support.py -n <VM name> --sriov
 
 virsh edit <VM name>
-??? Suddently gvim does noe work anymore. Use EDITOR=vim virsh edit <VM name>
+??? Suddently gvim does not work anymore. Use EDITOR=vim virsh edit <VM name>
 	%s/tap99/tap105 ... 106 ..
 	%s/connectx4/connectx5
 	%s/bus=pcie_port\.1/mac=e4:11:22:33:4?:50,bus=pcie_port.1
 add "mac=e4:11:22:33:4?:50" (45 for tap105, 46 for tap106...): for example
     <qemu:arg value='connectx5,netdev=tap105,mac=e4:11:22:33:45:50,bus=pcie_port.1'/>
 
-simx from slava:
-    <emulator>/swgwork/elijahs/nokia/for_slava/simx/x86_64-softmmu/qemu-system-x86_64</emulator>
-
 
 virt-manager
- - remove IDE Disk
+ - IDE Disk - change bus from IDE to SATA
  - remove Controller IDE
- - add storage, select custom , SATA
+ - # add storage, select custom , SATA
  - cpus:8
  - memory 8192
  - boot options - disable autostart
 
 #restart libvirtd
 systemctl restart libvirtd
+
+yum install -y scapy
+yum install -y python2-pip.noarch
+pip install protobuf
+pip install pycryptodome
 
 
 ==========================
@@ -188,14 +196,4 @@ gvim /opt/simx/bin/mlx5_nokia.py
 edit host
 
 
-yum install scapy
-yum install python2-pip.noarch
-pip install protobuf
-pip install pycryptodome
-===================================
-
-
-install stable SimX
-On HV
-/mswg/projects/simx/last_stable/install.sh --package=nic
 
