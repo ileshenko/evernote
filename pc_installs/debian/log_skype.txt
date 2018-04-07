@@ -36,3 +36,4 @@ Starting November 2017
 
 Download skypeforlinux-64.deb from Skype site
 dpkg -i skypeforlinux-64.deb
+after reboot run skypeforlinux

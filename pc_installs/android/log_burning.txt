@@ -1,0 +1,25 @@
+sudo apt-get install android-tools-adb android-tools-fastboot
+
+
+Nikita's image:
+
+
+android 6.0.1
+CyanogenMod 13.0-20161221-... maguro
+Kernel 3.0.101
+
+
+
+
+Official images:
+https://developers.google.com/android/images
+
+"yakju" for Galaxy Nexus "maguro" (GSM/HSPA+)
+
+4.3 (JWR66Y)
+JWR66Y
+
+adb reboot bootloader
+fastboot oem unlock
+
+

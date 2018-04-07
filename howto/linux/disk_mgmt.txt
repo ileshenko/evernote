@@ -16,7 +16,22 @@ fusermount -u PATH
 =================
 format usb stick:
 sudo parted -l
+-------
+Model: Vodafone Storage (Huawei) (scsi)
+Disk /dev/sdb: 3890MB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+Disk Flags:
+
+Number  Start  End     Size    Type     File system  Flags
+ 1      1024B  3890MB  3890MB  primary  fat32
+-------
 sudo fdisk /dev/sdb
+------
+example from my car recorder:
+Device     Boot Start     End Sectors  Size Id Type
+/dev/sdb1           2 7598079 7598078  3.6G  b W95 FAT32
+------
 TODO: compare, understand, edit:
 or sudo mkfs.vfat /dev/sdb1 # for fat32 ???
 or sudo mkdosfs -F 32 -I /dev/sdb1
