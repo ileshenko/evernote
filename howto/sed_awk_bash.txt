@@ -4,3 +4,34 @@ sed -ri 's,(PMD_PCAP=).*,\1y,' build/.config
 
 sed -ri "s/struct priv\>/struct mlx5_cryp_priv/" *
 
+/=================================
+Modify
+pci pxb_cfg_done 0x800.0 1 0x0 RW VF top.dut.mcore.pci.pxb.pxb_crspace.pxb_cfg_done AC pci__pxb:0x8000 NU pci.pxb.pxb_cfg_done
+to
+pci__pxb__pxb_cfg_done = 0xa20000 + 0x800, /* 0:1 */
+
+cut -f 3,12 -d' ' top_crspace.hex | \
+while read col1 col2 ; \
+do \
+col1=$(sed 's|\..*||g' <<< $col1); \
+col2=$(sed 's|\.|__|g' <<< $col2); \
+echo "$col2 = 0xa20000 + $col1,";\
+done
+
+cut -f 3,4,12 -d' ' top_crspace.hex | \
+while read col1 width name ; \
+do \
+addr=$(sed 's|\..*||g' <<< $col1); \
+bit=$(sed 's|.*\.||g' <<< $col1); \
+name=$(sed 's|^pci\.||g' <<< $name); \
+name=$(sed 's|\.|__|g' <<< $name); \
+echo "$name = 0xa20000 + $addr, /* $bit:$width */ ";\
+done
+
+/===================================
+
+Cut file startitg line begins from word MAMA
+
+sed '/^MAMA/,$d'  ## $ means end of file
+sed '1,/^MAMA/d' ## Cut from first line, until first beginning from MAMA
+
