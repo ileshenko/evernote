@@ -35,3 +35,11 @@ Cut file startitg line begins from word MAMA
 sed '/^MAMA/,$d'  ## $ means end of file
 sed '1,/^MAMA/d' ## Cut from first line, until first beginning from MAMA
 
+====================================
+Nikita pull all files from knigavuhe
+
+curl https://knigavuhe.com/book/marsianin-1/ | \
+grep 'new BookPlayer' | \
+sed 's/.*new BookPlayer([0-9]*,//' | \
+jq -r .[].url | \
+wget -i
