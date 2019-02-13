@@ -43,3 +43,12 @@ grep 'new BookPlayer' | \
 sed 's/.*new BookPlayer([0-9]*,//' | \
 jq -r .[].url | \
 wget -i
+
+====================================
+look dmesg for string with text 
+... iterations (#### ticks)....
+and calculate minimum value
+
+stdbuf used to disable buffering of pipe
+
+dmesg -w | stdbuf -o0 grep iterations | stdbuf -o0 sed  -e 's/.*(\([0-9]\+\) ticks.*/\1/' | awk 'BEGIN{min=99999999}{if($1<min){min=$1;print min}}'

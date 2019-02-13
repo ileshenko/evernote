@@ -1,0 +1,2 @@
+
+export DISPLAY=10.8.0.136:0.0

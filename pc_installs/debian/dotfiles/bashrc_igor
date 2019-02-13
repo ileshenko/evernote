@@ -27,7 +27,7 @@ export XAUTHORITY=~/.Xauthority
 #fi
 
 if [[ $USER == "igorle" ]]; then
-  export DISPLAY=10.8.0.11:0.0
+  export DISPLAY=10.8.0.136:0.0
   source ~/.git-completion.bash
 fi
 
