@@ -51,3 +51,5 @@ Install:
 sudo apt-get install flashplugin-nonfree
 Update
 sudo update-flashplugin-nonfree --install
+
+sudo apt-get install exfat-fuse exfat-utils # for big files on flash driver
