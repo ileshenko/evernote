@@ -24,3 +24,7 @@ From command line:
 $> env PULSE_LATENCY_MSEC=30 audacity
 
 
+convertation from m4b to mp3
+===============================
+avconv -i fname.m4b -vn -ac 2 fname.wav # creates wav file
+lame -V0 -md fname.wav # creates fname.mp3 with newest codec
