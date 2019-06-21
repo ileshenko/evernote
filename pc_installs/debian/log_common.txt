@@ -45,6 +45,8 @@ apt-get install linux-headers-$(uname -r)
 for pdf. Instead of acroread use evince
 apt-get install evince
 
+insrall baobab - eqvivalent of windirstat
+
 flash plugin:
 -------------
 Install:
