@@ -42,7 +42,7 @@ curl https://knigavuhe.com/book/marsianin-1/ | \
 grep 'new BookPlayer' | \
 sed 's/.*new BookPlayer([0-9]*,//' | \
 jq -r .[].url | \
-wget -i
+xargs wget
 
 ====================================
 look dmesg for string with text 
