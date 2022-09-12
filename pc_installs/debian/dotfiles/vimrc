@@ -6,16 +6,18 @@
 set nobackup
 set sm
 set is
-set tabpagemax=20
+set tabpagemax=30
 set cindent autoindent smartindent
 
 let g:dont_load_funcheader = 1 
 
 au BufRead */asterisk/*.[ch] set ts=4 columns=120 nowrap
+au BufRead */*.uos2/* colorscheme peachpuff
+"au BufRead */simx/* colorscheme desert
 
 set cino=:0,(s,u0,U1,g0,t0,*100
 
-set lines=45 columns=80
+"set lines=45 columns=80
 "set guifont=Fixed\ 12
 
 map <S-Insert> <MiddleMouse>
@@ -32,7 +34,8 @@ map <silent> <s-f3> /^\s*\n\s*$<cr>
 map <f4> :execute ':!git status -s ' TokenUnderCursor(1) <cr>
 
 let g:dont_load_fuzzyfinder = 1
-map <f5> :execute ':!cvsdiff -r ugw-4_2-ga -r ugw-5_1-linux' TokenUnderCursor(1) '&' <cr><cr>
+map <f5> :execute ':!git difftool backport-mlnx_ofed_4_5 --' TokenUnderCursor(1) '&' <cr><cr>
+"map <f5> :execute ':!cvsdiff -r ugw-4_2-ga -r ugw-5_1-linux' TokenUnderCursor(1) '&' <cr><cr>
 
 noremap <f6> :execute ':!cvsdiff -r ugw-4_2-ga -r branch-5_4' TokenUnderCursor(1) '&' <cr><cr>
 "noremap <f6> :execute ':!cvsdiff -r 1.1 -r `jcvs revision ' TokenUnderCursor(1) '` ' TokenUnderCursor(1) '&' <cr><cr>

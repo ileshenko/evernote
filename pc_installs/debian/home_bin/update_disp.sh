@@ -1,2 +1,2 @@
 
-export DISPLAY=10.8.0.136:0.0
+export DISPLAY=172.27.11.57:0.0

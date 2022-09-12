@@ -13,8 +13,8 @@ alias cdrr='cdg ; cd ..; cdg'
 alias jd="notify-send -u critical -t 1000000 -i info $(pwd) 'Job is Done'"
 
 # support X11 for root
-xhost +
-export XAUTHORITY=~/.Xauthority
+#xhost +
+#export XAUTHORITY=~/.Xauthority
 
 #if ( shopt -q login_shell ); then
 #	echo Login shell
@@ -27,7 +27,7 @@ export XAUTHORITY=~/.Xauthority
 #fi
 
 if [[ $USER == "igorle" ]]; then
-  export DISPLAY=10.8.0.136:0.0
+  export DISPLAY=:10
   source ~/.git-completion.bash
 fi
 
